@@ -1,30 +1,44 @@
-mod db;
-mod routes;
-
-use actix_web::{routes, App, HttpServer};
+use actix_web::middleware::Logger;
+use actix_web::{main, App, HttpServer};
 use dotenv::dotenv;
-use actix_web::{App, HttpServer};
-use paperclip::actix::{
-    api_v2_schema, // Macro to serve the API spec
-    web::{self, Data}, // Use Paperclip's web module
-    OpenApiExt, // Extension trait
-};
+use paperclip::actix::{api_v2_definition, api_v2_operation, web::Json, OpenApiExt, Resource};
+use sqlx::postgres::PgPoolOptions;
+use std::env;
 
-#[actix_web::main]
+mod models;
+mod routes;
+mod view_models;
+
+mod db;
+
+#[main]
 async fn main() -> std::io::Result<()> {
-    // ... other configurations ...
+    dotenv().ok();
+    env_logger::init();
+
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+        .expect("Failed to create connection pool");
+
+    let host = env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_owned());
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| "8080".to_owned())
+        .parse::<u16>()
+        .unwrap();
 
     HttpServer::new(move || {
         App::new()
+            .wrap(Logger::default())
+            .data(pool.clone())
             .wrap_api()
-            .with_json_spec_at("/api/spec") // Serve the API spec at /api/spec
-            .app_data(Data::new(pool.clone())) // Use Paperclip's Data instead of Actix-web's Data
-            .service(get_categories)
-            .service(put_category)
-            // ... other services ...
+            .with_json_spec_at("/api/swagger.json")
+            .configure(routes::configure)
             .build()
     })
-    .bind("127.0.0.1:8080")?
+    .bind((host, port))?
     .run()
     .await
 }
