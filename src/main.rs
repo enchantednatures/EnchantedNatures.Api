@@ -33,8 +33,6 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .data(pool.clone())
-            .wrap_api()
-            .with_json_spec_at("/api/swagger.json")
             .configure(routes::configure)
             .build()
     })

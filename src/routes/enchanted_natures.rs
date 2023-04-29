@@ -7,37 +7,32 @@ use paperclip::actix::web::Json;
 use sqlx::{Error, PgPool};
 use uuid::Uuid;
 
+use actix_web::{web, HttpRequest, HttpResponse, Responder};
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use sqlx::{FromRow, PgPool};
+use uuid::Uuid;
 // Create a new photo
-#[api_v2_operation]
-#[post("/photos")]
-async fn create_photo(pool: Data<PgPool>, photo: Json<PhotoViewModel>) -> impl Responder {
-    let id = Uuid::new_v4();
-    let result = sqlx::query!(
-        r#"
-            INSERT INTO photos (id, description, date_taken, cdn_path)
-            VALUES ($1, $2, $3, $4)
-        "#,
-        id,
-        photo.description,
-        photo.date_taken,
-        photo.cdn_path
-    )
-    .execute(pool.get_ref())
-    .await;
 
-    match result {
-        Ok(_) => HttpResponse::Created().json(PhotoViewModel {
-            id: Some(id),
-            description: photo.description.clone(),
-            date_taken: photo.date_taken,
-            cdn_path: photo.cdn_path.clone(),
-        }),
-        Err(_) => HttpResponse::InternalServerError().finish(),
-    }
+#[post("/photos")]
+pub async fn create_photo(
+    pool: &PgPool,
+    id: Uuid,
+    description: String,
+    date_taken: chrono::NaiveDateTime,
+    cdn_path: String,
+) -> Result<Photo, sqlx::Error> {
+    let query = include_str!("../sql/create_photo.sql");
+    sqlx::query_as::<_, Photo>(query)
+        .bind(id)
+        .bind(description)
+        .bind(date_taken)
+        .bind(cdn_path)
+        .fetch_one(pool)
+        .await
 }
 
 // Get all photos
-#[api_v2_operation]
 #[get("/photos")]
 async fn get_photos(pool: Data<PgPool>) -> impl Responder {
     let result = sqlx::query_as!(
@@ -57,16 +52,12 @@ async fn get_photos(pool: Data<PgPool>) -> impl Responder {
 }
 
 // Get a specific photo by id
-#[api_v2_operation]
 #[get("/photos/{id}")]
 async fn get_photo_by_id(pool: Data<PgPool>, id: Path<Uuid>) -> impl Responder {
+    let query = include_str!("../sql/get_photo_by_id.sql");
     let result = sqlx::query_as!(
         PhotoViewModel,
-        r#"
-            SELECT id, description, date_taken, cdn_path
-            FROM photos
-            WHERE id = $1
-        "#,
+        query
         id.into_inner()
     )
     .fetch_optional(pool.get_ref())
@@ -80,7 +71,6 @@ async fn get_photo_by_id(pool: Data<PgPool>, id: Path<Uuid>) -> impl Responder {
 }
 
 // Update a specific photo by id
-#[api_v2_operation]
 #[put("/photos/{id}")]
 async fn update_photo(
     pool: Data<PgPool>,
@@ -108,7 +98,6 @@ async fn update_photo(
 }
 
 // Delete a specific photo by id
-#[api_v2_operation]
 #[delete("/photos/{id}")]
 async fn delete_photo(pool: Data<PgPool>, id: Path<Uuid>) -> impl Responder {
     let result = sqlx::query!(
@@ -127,7 +116,6 @@ async fn delete_photo(pool: Data<PgPool>, id: Path<Uuid>) -> impl Responder {
     }
 }
 
-#[api_v2_operation]
 #[post("/categories/{category_id}/photos/{photo_id}")]
 async fn add_photo_to_category(
     pool: Data<PgPool>,
@@ -175,7 +163,6 @@ async fn add_photo_to_category(
     }
 }
 // Get photos in a category
-#[api_v2_operation]
 #[get("/categories/{category_id}/photos")]
 async fn get_photos_by_category(pool: Data<PgPool>, category_id: Path<Uuid>) -> impl Responder {
     let result = sqlx::query!(
@@ -198,7 +185,6 @@ async fn get_photos_by_category(pool: Data<PgPool>, category_id: Path<Uuid>) -> 
 }
 
 // Remove a photo from a category
-#[api_v2_operation]
 #[delete("/categories/{category_id}/photos/{photo_id}")]
 async fn remove_photo_from_category(
     pool: Data<PgPool>,
@@ -223,7 +209,6 @@ async fn remove_photo_from_category(
 }
 
 // Configure the routes
-#[api_v2_operation]
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_categories);
     cfg.service(put_category);
