@@ -1,5 +1,5 @@
 # Use the official Rust image as the base
-FROM rust:1.59.0 as build
+FROM rust:1.69.0 as build
 
 # Create a new empty shell project
 RUN USER=root cargo new --bin enchanted_natures
@@ -7,7 +7,6 @@ WORKDIR /enchanted_natures
 
 # Copy your project's Cargo.toml and Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
-COPY ./Cargo.lock ./Cargo.lock
 
 # Cache dependencies
 RUN cargo build --release
