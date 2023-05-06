@@ -14,6 +14,32 @@ pub struct PhotoViewModel {
     pub date_taken: chrono::NaiveDateTime,
     pub cdn_path: String,
 }
+impl PhotoViewModel {
+    pub fn new(
+        id: Option<Uuid>,
+        description: String,
+        date_taken: chrono::NaiveDateTime,
+        cdn_path: String,
+    ) -> Self {
+        Self {
+            id,
+            description,
+            date_taken,
+            cdn_path,
+        }
+    }
+}
+
+impl From<Photo> for PhotoViewModel {
+    fn from(photo: Photo) -> Self {
+        Self::new(
+            Some(photo.id),
+            photo.description,
+            photo.date_taken,
+            photo.cdn_path,
+        )
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CategoryPhotoViewModel {
