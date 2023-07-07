@@ -23,5 +23,5 @@ jsonwebtoken = "8"
 
 
 [dependencies.sqlx]
-version = "0.6.3"
-features = ["postgres", "sqlite", "runtime-tokio-rustls", "macros", "offline", "chrono", "uuid"]
+version = "0.7.0"
+features = ["postgres",  "runtime-tokio-rustls", "macros",  "chrono", "uuid"]

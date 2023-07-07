@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 mod routes;
+mod repository;
 
 use std::net::SocketAddr;
 use std::time::Duration;
@@ -10,6 +11,7 @@ use axum::error_handling::HandleErrorLayer;
 use axum::http::StatusCode;
 use axum::routing::get;
 use axum::Router;
+use sqlx::postgres::PgPoolOptions;
 use tokio::time::error::Elapsed;
 use tower::{BoxError, ServiceBuilder};
 use tower_http::trace::TraceLayer;
@@ -21,34 +23,33 @@ use utoipa::{
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::routes::health::health_check;
+use crate::routes::health::HealthStatusEnum;
+use crate::routes::health::HealthStatus;
+
+#[derive(OpenApi)]
+#[openapi(
+paths(crate::routes::health::health_check),
+components(schemas(HealthStatusEnum), schemas(HealthStatus)),
+modifiers(& SecurityAddon),
+tags((name = "Health Checks", description = "Information about the health of the API"))
+)]
+struct ApiDoc;
+
+struct SecurityAddon;
+
+impl Modify for SecurityAddon {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        if let Some(components) = openapi.components.as_mut() {
+            components.add_security_scheme(
+                "api_key",
+                SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("todo_apikey"))),
+            )
+        }
+    }
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    #[derive(OpenApi)]
-    #[openapi(
-    paths(
-    crate::routes::health::health_check
-    ),
-    // components(schemas()),
-    modifiers(& SecurityAddon),
-    tags((name = "shitty lunch picker", description = "Shitty lunch picker management API"))
-    )]
-    struct ApiDoc;
-
-    struct SecurityAddon;
-
-    impl Modify for SecurityAddon {
-        fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
-            if let Some(components) = openapi.components.as_mut() {
-                components.add_security_scheme(
-                    "api_key",
-                    SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("todo_apikey"))),
-                )
-            }
-        }
-    }
-    let db_url =
-        std::env::var("DATABASE_URL").unwrap_or_else(|_| "./shitty_lunch_picker.db".into());
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -56,6 +57,16 @@ async fn main() -> Result<()> {
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
+
+    let db_connection_str = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+    // setup connection pool
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&db_connection_str)
+        .await
+        .expect("can't connect to database");
+    sqlx::migrate!().run(&pool).await?;
 
     // build our application with some routes
     let app = Router::new()

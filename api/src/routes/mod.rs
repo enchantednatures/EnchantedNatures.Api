@@ -1,3 +1,5 @@
 pub mod health;
+pub mod photos;
 
-pub use health::health_check;
+pub use health::*;
+pub use photos::*;
