@@ -17,10 +17,10 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 anyhow = "1.0.71"
 tower = { version = "0.4", features = ["util", "timeout"] }
 tower-http = { version = "0.4.0", features = ["add-extension", "trace"] }
-utoipa = { version = "3.3.0", features = ["axum_extras"] }
+utoipa = { version = "3.3.0", features = ["axum_extras", "chrono"] }
 utoipa-swagger-ui = { version = "3.1.3", features = ["axum"] }
 jsonwebtoken = "8"
-
+chrono = { version = "0.4.24", features = ["serde"] }
 
 [dependencies.sqlx]
 version = "0.7.0"

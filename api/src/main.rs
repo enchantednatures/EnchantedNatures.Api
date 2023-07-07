@@ -1,11 +1,13 @@
 #![allow(dead_code)]
 
-mod routes;
+mod models;
 mod repository;
+mod routes;
 
 use std::net::SocketAddr;
 use std::time::Duration;
 
+use crate::routes::get_categories;
 use anyhow::Result;
 use axum::error_handling::HandleErrorLayer;
 use axum::http::StatusCode;
@@ -22,14 +24,15 @@ use utoipa::{
 };
 use utoipa_swagger_ui::SwaggerUi;
 
+use crate::models::Category;
 use crate::routes::health::health_check;
-use crate::routes::health::HealthStatusEnum;
 use crate::routes::health::HealthStatus;
+use crate::routes::health::HealthStatusEnum;
 
 #[derive(OpenApi)]
 #[openapi(
-paths(crate::routes::health::health_check),
-components(schemas(HealthStatusEnum), schemas(HealthStatus)),
+paths(crate::routes::health::health_check, crate::routes::get_categories ),
+components(schemas(HealthStatusEnum), schemas(HealthStatus), schemas(Category)),
 modifiers(& SecurityAddon),
 tags((name = "Health Checks", description = "Information about the health of the API"))
 )]
@@ -72,6 +75,7 @@ async fn main() -> Result<()> {
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/health_check", get(health_check))
+        .route("/categories", get(get_categories))
         .layer(
             ServiceBuilder::new()
                 .layer(HandleErrorLayer::new(|error: BoxError| async move {
