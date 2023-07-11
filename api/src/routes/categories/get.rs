@@ -1,9 +1,9 @@
 use crate::models::{Category, Photo};
-use axum::extract::State;
 use axum::extract::Path;
+use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::{Json, response};
+use axum::{response, Json};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use utoipa::ToSchema;
@@ -39,9 +39,9 @@ pub async fn get_category_by_id(
             "#,
         id
     )
-        .fetch_one(&db_pool)
-        .await
-        .unwrap();
+    .fetch_one(&db_pool)
+    .await
+    .unwrap();
 
     let photos = sqlx::query_as!(
         Photo,
@@ -59,14 +59,14 @@ pub async fn get_category_by_id(
             "#,
         id
     )
-        .fetch_all(&db_pool)
-        .await
-        .unwrap();
+    .fetch_all(&db_pool)
+    .await
+    .unwrap();
 
-    Ok((StatusCode::OK, Json(CategoryGetByIdResponse {
-        category,
-        photos,
-    })))
+    Ok((
+        StatusCode::OK,
+        Json(CategoryGetByIdResponse { category, photos }),
+    ))
 }
 
 #[utoipa::path(get, path = "/api/v0/categories/",
@@ -86,8 +86,8 @@ pub async fn get_categories(
                updated_at as "updated_at!"
             FROM public.categories "#
     )
-        .fetch_all(&db_pool)
-        .await
-        .unwrap();
+    .fetch_all(&db_pool)
+    .await
+    .unwrap();
     Ok((StatusCode::OK, Json(response)))
 }

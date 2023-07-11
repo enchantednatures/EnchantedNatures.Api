@@ -1,17 +1,16 @@
-use serde::{Deserialize, Serialize};
-use axum::extract::{Path, State};
-use sqlx::PgPool;
-use axum::{Json, response};
-use axum::response::IntoResponse;
-use axum::http::StatusCode;
-use serde_json::json;
-use utoipa::ToSchema;
-use models::Photo;
 use crate::models;
+use axum::extract::{Path, State};
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
+use axum::{response, Json};
+use models::Photo;
+use serde::{Deserialize, Serialize};
+use serde_json::json;
+use sqlx::PgPool;
+use utoipa::ToSchema;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct PhotoGetAllResponse;
-
 
 #[utoipa::path(get, path = "/api/v0/photos/",
 responses(
@@ -31,9 +30,9 @@ pub async fn get_photos(
                updated_at as "updated_at!"
             FROM public.photos "#
     )
-        .fetch_all(&db_pool)
-        .await
-        .unwrap();
+    .fetch_all(&db_pool)
+    .await
+    .unwrap();
     Ok((StatusCode::OK, Json(response)))
 }
 

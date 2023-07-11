@@ -39,7 +39,7 @@ impl Category {
     }
 }
 
-#[derive(Debug,Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct PhotoCategory {
     pub id: i32,
     pub display_order: i32,

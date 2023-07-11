@@ -1,7 +1,7 @@
-mod put;
 mod get;
 mod patch;
+mod put;
 
 pub use get::*;
-pub use put::*;
 pub use patch::*;
+pub use put::*;

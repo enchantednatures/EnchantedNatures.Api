@@ -7,6 +7,9 @@ mod routes;
 use std::net::SocketAddr;
 use std::time::Duration;
 
+use crate::routes::categories::{
+    get::get_categories, get::get_category_by_id, patch::patch_category,
+};
 use anyhow::Result;
 use axum::error_handling::HandleErrorLayer;
 use axum::http::StatusCode;
@@ -25,10 +28,6 @@ use utoipa::openapi::security::SecurityScheme;
 use utoipa::Modify;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-use crate::routes::categories::{
-    get::get_categories, get::get_category_by_id,
-    patch::patch_category,
-};
 
 use crate::routes::health::health_check;
 use crate::routes::put::put_category;
@@ -98,7 +97,10 @@ async fn main() -> Result<()> {
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/health_check", get(health_check))
         .route("/api/v0/categories", get(get_categories).put(put_category))
-        .route("/api/v0/categories/:id", get(get_category_by_id).patch(patch_category))
+        .route(
+            "/api/v0/categories/:id",
+            get(get_category_by_id).patch(patch_category),
+        )
         .route("/api/v0/photos", get(get_photos).put(put_photo))
         // .route("/categories/:id",
         //        get(get_category_by_id))

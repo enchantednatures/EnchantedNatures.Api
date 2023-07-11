@@ -1,11 +1,11 @@
-use serde::{Deserialize, Serialize};
-use axum::extract::State;
-use sqlx::PgPool;
-use axum::{Json, response};
-use axum::response::IntoResponse;
-use axum::http::StatusCode;
-use utoipa::ToSchema;
 use crate::models::Category;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
+use axum::{response, Json};
+use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
+use utoipa::ToSchema;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CreateCategoryRequest {
@@ -44,9 +44,9 @@ pub async fn put_category(
         payload.name,
         payload.description
     )
-        .fetch_one(&db_pool)
-        .await
-        .unwrap();
+    .fetch_one(&db_pool)
+    .await
+    .unwrap();
 
     Ok((StatusCode::CREATED, Json(category)))
 }

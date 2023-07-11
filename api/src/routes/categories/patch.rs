@@ -1,12 +1,12 @@
+use crate::routes::PatchCategoryRequestBody::AddPhotoToCategory;
 use axum::extract::{Path, State};
-use sqlx::PgPool;
-use axum::{Json, response};
-use axum::response::IntoResponse;
 use axum::http::StatusCode;
+use axum::response::IntoResponse;
+use axum::{response, Json};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use sqlx::PgPool;
 use utoipa::ToSchema;
-use crate::routes::PatchCategoryRequestBody::AddPhotoToCategory;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct UpdatePhotoCategoryRequest {
@@ -46,9 +46,9 @@ VALUES (
                 p.photo_id,
                 id
             )
-                .execute(&db_pool)
-                .await
-                .unwrap();
+            .execute(&db_pool)
+            .await
+            .unwrap();
         }
     };
     Ok((StatusCode::OK, Json(json!({"status": "not implemented"}))))

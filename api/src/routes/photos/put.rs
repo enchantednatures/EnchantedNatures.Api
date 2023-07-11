@@ -1,11 +1,11 @@
+use crate::models::Photo;
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::Json;
 use axum::response::IntoResponse;
+use axum::Json;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use utoipa::ToSchema;
-use crate::models::Photo;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct PhotoCreateRequest {
@@ -34,7 +34,7 @@ pub async fn put_photo(
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let photo = sqlx::query_as!(
         Photo,
-    r#"
+        r#"
         INSERT INTO public.photos (name, description, url)
         VALUES ($1, $2, $3) RETURNING id as "id!",
                name as "name!",
@@ -43,13 +43,13 @@ pub async fn put_photo(
                created_at as "created_at!",
                updated_at as "updated_at!"
         "#,
-    payload.name,
-    payload.description,
+        payload.name,
+        payload.description,
         payload.url
     )
-        .fetch_one(&db_pool)
-        .await
-        .unwrap();
+    .fetch_one(&db_pool)
+    .await
+    .unwrap();
 
     Ok((StatusCode::CREATED, Json(photo)))
 }
