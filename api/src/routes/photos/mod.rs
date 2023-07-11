@@ -1,4 +1,7 @@
-mod photo_routes;
-mod put_photo;
+mod put;
+mod get;
+mod patch;
 
-pub use photo_routes::*;
+pub use get::*;
+pub use put::*;
+pub use patch::*;

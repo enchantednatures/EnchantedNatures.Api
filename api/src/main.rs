@@ -25,26 +25,35 @@ use utoipa::openapi::security::SecurityScheme;
 use utoipa::Modify;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-use crate::routes::{get_categories, patch_category};
-use crate::routes::get_category::get_category_by_id;
-use crate::routes::health::health_check;
-use crate::routes::put_category::put_category;
+use crate::routes::categories::{
+    get::get_categories, get::get_category_by_id,
+    patch::patch_category,
+};
 
+use crate::routes::health::health_check;
+use crate::routes::put::put_category;
+use routes::categories;
+use routes::photos;
+
+use routes::health;
+use routes::photos::{get_photos, put_photo};
 
 #[derive(OpenApi)]
 #[openapi(
 paths(
-crate::routes::health::health_check,
-crate::routes::get_category::get_category_by_id,
+health::health_check,
+categories::get_category_by_id,
+categories::get_categories,
+categories::put_category,
+categories::patch_category,
+photos::put_photo
+
 ),
 components(
-// schemas(Category),
-// schemas(CategoryError),
-// schemas(CategoryGetByIdRequest),
-// schemas(CreateCategoryRequest),
-// schemas(CategoryGetByIdResponse),
-// schemas(HealthStatus),
-// schemas(HealthStatusEnum),
+schemas(models::Category),
+schemas(
+categories::CategoryError, categories::CategoryGetByIdRequest, categories::CreateCategoryRequest, categories::CategoryGetByIdResponse),
+schemas(health::HealthStatus, health::HealthStatusEnum),
 ),
 modifiers(& SecurityAddon),
 tags((name = "Health Checks", description = "Information about the health of the API"))
@@ -90,6 +99,7 @@ async fn main() -> Result<()> {
         .route("/health_check", get(health_check))
         .route("/api/v0/categories", get(get_categories).put(put_category))
         .route("/api/v0/categories/:id", get(get_category_by_id).patch(patch_category))
+        .route("/api/v0/photos", get(get_photos).put(put_photo))
         // .route("/categories/:id",
         //        get(get_category_by_id))
         .layer(

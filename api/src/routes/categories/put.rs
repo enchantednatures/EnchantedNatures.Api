@@ -5,9 +5,7 @@ use axum::{Json, response};
 use axum::response::IntoResponse;
 use axum::http::StatusCode;
 use utoipa::ToSchema;
-
 use crate::models::Category;
-use crate::models::Photo;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CreateCategoryRequest {

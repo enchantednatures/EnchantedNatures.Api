@@ -68,3 +68,26 @@ pub async fn get_category_by_id(
         photos,
     })))
 }
+
+#[utoipa::path(get, path = "/api/v0/categories/",
+responses(
+(status = StatusCode::OK, description = "Get all categories", body = [Category]),))]
+pub async fn get_categories(
+    State(db_pool): State<PgPool>,
+) -> response::Result<impl IntoResponse, (StatusCode, String)> {
+    // let mut response: Vec<Category> = vec![];
+    let response = sqlx::query_as!(
+        Category,
+        r#"
+            SELECT id as "id!",
+               name as "name!",
+               description as "description!",
+               created_at as "created_at!",
+               updated_at as "updated_at!"
+            FROM public.categories "#
+    )
+        .fetch_all(&db_pool)
+        .await
+        .unwrap();
+    Ok((StatusCode::OK, Json(response)))
+}
