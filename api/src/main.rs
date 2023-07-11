@@ -7,7 +7,6 @@ mod routes;
 use std::net::SocketAddr;
 use std::time::Duration;
 
-use crate::routes::get_categories;
 use anyhow::Result;
 use axum::error_handling::HandleErrorLayer;
 use axum::http::StatusCode;
@@ -15,24 +14,38 @@ use axum::routing::get;
 use axum::Router;
 use sqlx::postgres::PgPoolOptions;
 use tokio::time::error::Elapsed;
-use tower::{BoxError, ServiceBuilder};
+use tower::BoxError;
+use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use utoipa::{
-    openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
-    Modify, OpenApi,
-};
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+use utoipa::openapi::security::ApiKey;
+use utoipa::openapi::security::ApiKeyValue;
+use utoipa::openapi::security::SecurityScheme;
+use utoipa::Modify;
+use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-
-use crate::models::Category;
+use crate::routes::{get_categories, patch_category};
+use crate::routes::get_category::get_category_by_id;
 use crate::routes::health::health_check;
-use crate::routes::health::HealthStatus;
-use crate::routes::health::HealthStatusEnum;
+use crate::routes::put_category::put_category;
+
 
 #[derive(OpenApi)]
 #[openapi(
-paths(crate::routes::health::health_check, crate::routes::get_categories ),
-components(schemas(HealthStatusEnum), schemas(HealthStatus), schemas(Category)),
+paths(
+crate::routes::health::health_check,
+crate::routes::get_category::get_category_by_id,
+),
+components(
+// schemas(Category),
+// schemas(CategoryError),
+// schemas(CategoryGetByIdRequest),
+// schemas(CreateCategoryRequest),
+// schemas(CategoryGetByIdResponse),
+// schemas(HealthStatus),
+// schemas(HealthStatusEnum),
+),
 modifiers(& SecurityAddon),
 tags((name = "Health Checks", description = "Information about the health of the API"))
 )]
@@ -75,7 +88,10 @@ async fn main() -> Result<()> {
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/health_check", get(health_check))
-        .route("/categories", get(get_categories))
+        .route("/api/v0/categories", get(get_categories).put(put_category))
+        .route("/api/v0/categories/:id", get(get_category_by_id).patch(patch_category))
+        // .route("/categories/:id",
+        //        get(get_category_by_id))
         .layer(
             ServiceBuilder::new()
                 .layer(HandleErrorLayer::new(|error: BoxError| async move {
@@ -91,8 +107,8 @@ async fn main() -> Result<()> {
                 .timeout(Duration::from_secs(10))
                 .layer(TraceLayer::new_for_http())
                 .into_inner(),
-        );
-    // .with_state(pool);
+        )
+        .with_state(pool);
 
     // run it with hyper
     let addr = SocketAddr::from(([127, 0, 0, 1], 6969));

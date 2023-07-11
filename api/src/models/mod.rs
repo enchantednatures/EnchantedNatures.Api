@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::{DateTime, Utc};
 use utoipa::ToSchema;
 
-#[derive(Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct Photo {
     pub id: i32,
     pub name: String,
@@ -12,7 +12,7 @@ pub struct Photo {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct Category {
     pub id: i32,
     pub name: String,
@@ -39,7 +39,7 @@ impl Category {
     }
 }
 
-#[derive(Deserialize, Serialize, ToSchema)]
+#[derive(Debug,Deserialize, Serialize, ToSchema)]
 pub struct PhotoCategory {
     pub id: i32,
     pub display_order: i32,

@@ -1,6 +1,5 @@
 use crate::models::Photo;
 use anyhow::Result;
-use sqlx::types::chrono::{DateTime, Utc};
 use sqlx::PgPool;
 
 pub struct Repository {

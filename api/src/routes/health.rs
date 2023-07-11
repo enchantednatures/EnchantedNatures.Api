@@ -16,7 +16,7 @@ pub struct HealthStatus {
 }
 
 impl HealthStatus {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         HealthStatus {
             status: HealthStatusEnum::Ok,
         }
