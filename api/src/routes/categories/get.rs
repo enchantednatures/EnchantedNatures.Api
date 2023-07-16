@@ -1,12 +1,13 @@
-use crate::models::{Category, Photo};
 use axum::extract::Path;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::{response, Json};
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::{query_as, PgPool};
 use utoipa::ToSchema;
+
+use crate::models::{Category, CategoryDisplayModel, Photo, PhotoViewModel};
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CategoryGetByIdRequest {
@@ -19,59 +20,13 @@ pub struct CategoryGetByIdResponse {
     pub photos: Vec<Photo>,
 }
 
-#[utoipa::path(get, path = "/categories/{id}",
-responses(
-(status = StatusCode::OK, description = " health", body = CategoryGetByIdResponse),))]
-pub async fn get_category_by_id(
-    State(db_pool): State<PgPool>,
-    Path(id): Path<i32>,
-) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    let category = sqlx::query_as!(
-        Category,
-        r#"
-            SELECT id as "id!",
-               name as "name!",
-               description as "description!",
-               created_at as "created_at!",
-               updated_at as "updated_at!"
-            FROM public.categories
-            WHERE id = $1
-            "#,
-        id
+#[utoipa::path(
+    get,
+    path = "/api/v0/categories/",
+    responses(
+        (status = StatusCode::OK, description = "Get all categories", body = [Category]),
     )
-    .fetch_one(&db_pool)
-    .await
-    .unwrap();
-
-    let photos = sqlx::query_as!(
-        Photo,
-        r#"
-            SELECT id as "id!",
-               name as "name!",
-               description as "description!",
-               url as "url!",
-               created_at as "created_at!",
-               updated_at as "updated_at!"
-            FROM public.photos
-            JOIN public.photo_categories ON photos.id = photo_categories.photo_id
-            WHERE photo_categories.category_id = $1
-            ORDER BY photo_categories.display_order DESC
-            "#,
-        id
-    )
-    .fetch_all(&db_pool)
-    .await
-    .unwrap();
-
-    Ok((
-        StatusCode::OK,
-        Json(CategoryGetByIdResponse { category, photos }),
-    ))
-}
-
-#[utoipa::path(get, path = "/api/v0/categories/",
-responses(
-(status = StatusCode::OK, description = "Get all categories", body = [Category]),))]
+)]
 pub async fn get_categories(
     State(db_pool): State<PgPool>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
@@ -90,4 +45,63 @@ pub async fn get_categories(
     .await
     .unwrap();
     Ok((StatusCode::OK, Json(response)))
+}
+
+#[utoipa::path(
+    get,
+    path = "/api/v0/categories/{id}",
+    params(
+        ("id"= i32, Path, description = "Id of category to get photos for")  
+    ),
+    responses(
+        (status = StatusCode::OK, description = "Check health", body = CategoryDisplayModel),
+    )
+)]
+pub async fn categories_by_id(
+    State(db_pool): State<PgPool>,
+    Path(id): Path<i32>,
+) -> response::Result<impl IntoResponse, (StatusCode, String)> {
+    let category = query_as!(
+        Category,
+        r#"
+           SELECT id as "id!",
+               name as "name!",
+               description as "description!",
+               created_at as "created_at!",
+               updated_at as "updated_at!"
+            FROM public.categories
+            WHERE id = $1
+            "#,
+        &id
+    )
+    .fetch_one(&db_pool)
+    .await
+    .unwrap();
+
+    let photos: Vec<PhotoViewModel> = query_as!(
+        PhotoViewModel,
+        r#"
+SELECT id as "id!",
+       name as "name!",
+       description as "description!",
+       url as "url!"
+FROM photos
+WHERE photos.id in (SELECT DISTINCT photo_id
+                    FROM photo_categories
+                    WHERE category_id = $1);
+        "#,
+        &category.id
+    )
+    .fetch_all(&db_pool)
+    .await
+    .unwrap();
+
+    let display = CategoryDisplayModel {
+        id: category.id,
+        name: category.name,
+        description: category.description,
+        photos,
+    };
+
+    Ok((StatusCode::OK, Json(display)))
 }

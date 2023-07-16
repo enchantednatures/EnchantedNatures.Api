@@ -2,6 +2,10 @@ use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::{DateTime, Utc};
 use utoipa::ToSchema;
 
+pub use view_models::*;
+
+mod view_models;
+
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct Photo {
     pub id: i32,

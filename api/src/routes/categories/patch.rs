@@ -1,4 +1,3 @@
-use crate::routes::PatchCategoryRequestBody::AddPhotoToCategory;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -19,20 +18,36 @@ pub enum PatchCategoryRequestBody {
     AddPhotoToCategory(UpdatePhotoCategoryRequest),
 }
 
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PhotoAddedToCategory;
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PhotoRemovedFromCategory;
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub enum UpdatePhotoCategoryResponse {
+    PhotoAddedToCategory,
+    PhotoRemovedFromCategory,
+}
+
 #[utoipa::path(
-patch,
-path = "/categories/{id}/",
-responses(
-(status = StatusCode::OK, description = "Check health", body = HealthStatus),)
-)
-]
+    patch,
+    path = "/api/v0/categories/{id}/",
+    params(
+        ("id"=i32, Path, description = "Update category")
+    ),
+    responses(
+        (status = StatusCode::OK, description = "PhotoCategory successfully updated", body = UpdatePhotoCategoryResponse),
+        (status = StatusCode::NOT_FOUND, description = "PhotoCategory not found")
+    )
+)]
 pub async fn patch_category(
     State(db_pool): State<PgPool>,
     Path(id): Path<i32>,
     Json(payload): Json<PatchCategoryRequestBody>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     match payload {
-        AddPhotoToCategory(p) => {
+        PatchCategoryRequestBody::AddPhotoToCategory(p) => {
             sqlx::query!(
                 r#"
 INSERT INTO public.photo_categories (photo_id, category_id, display_order)

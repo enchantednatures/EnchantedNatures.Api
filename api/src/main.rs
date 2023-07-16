@@ -1,21 +1,15 @@
 #![allow(dead_code)]
 
-mod models;
-mod repository;
-mod routes;
-
 use std::net::SocketAddr;
 use std::time::Duration;
 
-use crate::routes::categories::{
-    get::get_categories, get::get_category_by_id, patch::patch_category,
-};
 use anyhow::Result;
 use axum::error_handling::HandleErrorLayer;
 use axum::http::StatusCode;
 use axum::routing::get;
 use axum::Router;
 use sqlx::postgres::PgPoolOptions;
+use sqlx::PgPool;
 use tokio::time::error::Elapsed;
 use tower::BoxError;
 use tower::ServiceBuilder;
@@ -29,33 +23,50 @@ use utoipa::Modify;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::routes::health::health_check;
-use crate::routes::put::put_category;
 use routes::categories;
-use routes::photos;
-
 use routes::health;
+use routes::photos;
 use routes::photos::{get_photos, put_photo};
+
+use crate::routes::categories::{
+    add_photo_to_category, categories_by_id, get::get_categories, patch::patch_category,
+    put::put_category,
+};
+use crate::routes::health::health_check;
+
+mod database;
+mod models;
+mod routes;
 
 #[derive(OpenApi)]
 #[openapi(
-paths(
-health::health_check,
-categories::get_category_by_id,
-categories::get_categories,
-categories::put_category,
-categories::patch_category,
-photos::put_photo
-
-),
-components(
-schemas(models::Category),
-schemas(
-categories::CategoryError, categories::CategoryGetByIdRequest, categories::CreateCategoryRequest, categories::CategoryGetByIdResponse),
-schemas(health::HealthStatus, health::HealthStatusEnum),
-),
-modifiers(& SecurityAddon),
-tags((name = "Health Checks", description = "Information about the health of the API"))
+    paths(
+        health::health_check,
+        categories::categories_by_id,
+        categories::get_categories,
+        categories::put_category,
+        categories::patch_category,
+        categories::add_photo_to_category,
+        photos::put_photo
+    ),
+    components(
+        schemas(
+            models::CategoryViewModel,
+            models::CategoryDisplayModel,
+            models::PhotoViewModel,
+            models::PhotoDisplayModel,
+            categories::CategoryError,
+            categories::AddPhotoToCategoryRequest,
+            categories::CategoryGetByIdRequest,
+            categories::CreateCategoryRequest,
+            categories::CategoryGetByIdResponse,
+            health::HealthStatus, health::HealthStatusEnum
+        ),
+    ),
+    modifiers(& SecurityAddon),
+    tags(
+        (name = "Health Checks", description = "Information about the health of the API")
+    )
 )]
 struct ApiDoc;
 
@@ -85,25 +96,26 @@ async fn main() -> Result<()> {
     let db_connection_str = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
     // setup connection pool
-    let pool = PgPoolOptions::new()
+    let pool: PgPool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&db_connection_str)
         .await
         .expect("can't connect to database");
     sqlx::migrate!().run(&pool).await?;
 
+    let swagger_ui = SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi());
     // build our application with some routes
     let app = Router::new()
-        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .merge(swagger_ui)
         .route("/health_check", get(health_check))
+        .route("/api/v0/photos", get(get_photos).put(put_photo))
         .route("/api/v0/categories", get(get_categories).put(put_category))
         .route(
             "/api/v0/categories/:id",
-            get(get_category_by_id).patch(patch_category),
+            get(categories_by_id)
+                .post(add_photo_to_category)
+                .patch(patch_category),
         )
-        .route("/api/v0/photos", get(get_photos).put(put_photo))
-        // .route("/categories/:id",
-        //        get(get_category_by_id))
         .layer(
             ServiceBuilder::new()
                 .layer(HandleErrorLayer::new(|error: BoxError| async move {

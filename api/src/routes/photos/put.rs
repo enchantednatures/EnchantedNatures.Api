@@ -1,4 +1,3 @@
-use crate::models::Photo;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -6,6 +5,8 @@ use axum::Json;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use utoipa::ToSchema;
+
+use crate::models::Photo;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct PhotoCreateRequest {
@@ -20,13 +21,13 @@ pub struct PhotoCreatedResponse {
 }
 
 #[utoipa::path(
-put,
-path = "/api/v0/photos/",
-request_body = PhotoCreateRequest,
-responses(
-(status = 201, description = "photo created successfully", body = Photo),
-(status = 409, description = "photo already exists", body = PhotoError),
-)
+    put,
+    path = "/api/v0/photos/",
+    request_body = PhotoCreateRequest,
+    responses(
+        (status = 201, description = "photo created successfully", body = Photo),
+        (status = 409, description = "photo already exists", body = PhotoError),
+    )
 )]
 pub async fn put_photo(
     State(db_pool): State<PgPool>,

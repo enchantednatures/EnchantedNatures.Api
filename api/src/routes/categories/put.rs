@@ -1,4 +1,3 @@
-use crate::models::Category;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -19,27 +18,25 @@ pub enum CategoryError {
 }
 
 #[utoipa::path(
-put,
-path = "/api/v0/categories/",
-request_body = CreateCategoryRequest,
-responses(
-(status = 201, description = "Category created successfully", body = Category),
-(status = 409, description = "Category already exists", body = CategoryError),
-)
+    put,
+    path = "/api/v0/categories/",
+    request_body = CreateCategoryRequest,
+    responses(
+        (status = 201, description = "Category created successfully", body = CategoryViewModel),
+        (status = 409, description = "Category already exists", body = CategoryError),
+    )
 )]
 pub async fn put_category(
     State(db_pool): State<PgPool>,
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     let category = sqlx::query_as!(
-        Category,
+        CategoryViewModel,
         r#"
         INSERT INTO public.categories (name, description)
         VALUES ($1, $2) RETURNING id as "id!",
                name as "name!",
-               description as "description!",
-               created_at as "created_at!",
-               updated_at as "updated_at!"
+               description as "description!"
         "#,
         payload.name,
         payload.description
