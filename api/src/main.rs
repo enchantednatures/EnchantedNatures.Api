@@ -14,12 +14,17 @@ use tokio::time::error::Elapsed;
 use tower::BoxError;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
+use tracing::instrument;
+use tracing::{info, subscriber};
+use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::Registry;
 use utoipa::openapi::security::ApiKey;
 use utoipa::openapi::security::ApiKeyValue;
 use utoipa::openapi::security::SecurityScheme;
 use utoipa::Modify;
+
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -86,13 +91,13 @@ impl Modify for SecurityAddon {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "shitty_lunch_picker=debug".into()),
-        )
-        .with(tracing_subscriber::fmt::layer())
-        .init();
+    let formatting_layer = BunyanFormattingLayer::new("de".into(), std::io::stdout);
+
+    let subscriber = Registry::default()
+        .with(JsonStorageLayer)
+        .with(formatting_layer);
+
+    tracing::subscriber::set_global_default(subscriber).unwrap();
 
     let db_connection_str = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
@@ -102,9 +107,12 @@ async fn main() -> Result<()> {
         .connect(&db_connection_str)
         .await
         .expect("can't connect to database");
+
     sqlx::migrate!().run(&pool).await?;
 
     let swagger_ui = SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi());
+
+    info!("Orphan event without a parent span");
     // build our application with some routes
     let app = Router::new()
         .merge(swagger_ui)

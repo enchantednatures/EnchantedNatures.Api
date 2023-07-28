@@ -1,3 +1,4 @@
+use crate::models::CategoryViewModel;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;

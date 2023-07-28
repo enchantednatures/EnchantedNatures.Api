@@ -1,0 +1,15 @@
+### name=Create Landscape Category
+POST {{url}}/api/v0/photos
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/json
+
+{
+  "name": "Landscape",
+  "description": "Landscape",
+  "url": "test"
+}
+
+###
+GET {{url}}/api/v0/photos
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/json

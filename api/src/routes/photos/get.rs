@@ -1,3 +1,4 @@
+use crate::models::Photo;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -16,6 +17,7 @@ pub struct PhotoGetAllResponse;
         (status = StatusCode::OK, description = "Get all photos", body = [Photo]),
     )
 )]
+#[tracing::instrument(name = "Get photos", skip(db_pool))]
 pub async fn get_photos(
     State(db_pool): State<PgPool>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
