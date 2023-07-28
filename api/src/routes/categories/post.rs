@@ -62,7 +62,10 @@ pub async fn add_photo_to_category(
            "#,
                 &category_id,
                 &display
-            );
+            )
+            .execute(&mut *transaction)
+            .await
+            .unwrap();
         }
     }
 

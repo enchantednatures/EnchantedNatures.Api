@@ -1,5 +1,5 @@
 pub use get::*;
-pub use put::*;
+pub use post::*;
 
 pub mod delete;
 pub mod get;

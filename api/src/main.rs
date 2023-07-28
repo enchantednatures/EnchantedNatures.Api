@@ -26,7 +26,8 @@ use utoipa_swagger_ui::SwaggerUi;
 use routes::categories;
 use routes::health;
 use routes::photos;
-use routes::photos::{get_photos, put_photo};
+use routes::photos::get_photos;
+use routes::photos::post_photo;
 
 use crate::routes::categories::{
     add_photo_to_category, categories_by_id, get::get_categories, patch::patch_category,
@@ -47,7 +48,7 @@ mod routes;
         categories::put_category,
         categories::patch_category,
         categories::add_photo_to_category,
-        photos::put_photo
+        photos::post_photo
     ),
     components(
         schemas(
@@ -108,7 +109,7 @@ async fn main() -> Result<()> {
     let app = Router::new()
         .merge(swagger_ui)
         .route("/health_check", get(health_check))
-        .route("/api/v0/photos", get(get_photos).put(put_photo))
+        .route("/api/v0/photos", get(get_photos).post(post_photo))
         .route("/api/v0/categories", get(get_categories).put(put_category))
         .route(
             "/api/v0/categories/:id",

@@ -1,7 +1,7 @@
 SELECT id as "id!",
        name as "name!",
-       description as "description!",
        url as "url!",
-       created_at,
-       updated_at
-FROM public.photos
+       description as "description!",
+       created_at as "created_at!",
+       updated_at as "updated_at!"
+FROM photos

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE photo_categories\n                SET display_order = display_order + 1\n                WHERE category_id = $1\n                AND display_order > $2\n           ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "63245904695b98b8b3e7da308a05d8174c0cf2a7015ccfe62101190a658056ed"
+}

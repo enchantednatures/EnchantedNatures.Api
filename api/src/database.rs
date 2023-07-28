@@ -51,10 +51,10 @@ impl PhotoRepo for PhotoRepository {
         .unwrap();
         Ok(response)
     }
-    async fn get_photo(&self, id: i32) -> Result<Photo> {
+    async fn get_photo(&self, _id: i32) -> Result<Photo> {
         todo!()
     }
-    async fn get_photos_in_category(&self, id: i32) -> Result<Vec<Photo>> {
+    async fn get_photos_in_category(&self, _id: i32) -> Result<Vec<Photo>> {
         todo!()
     }
 
@@ -76,7 +76,7 @@ impl PhotoRepo for PhotoRepository {
         Ok(response)
     }
 
-    async fn add_category(&self, name: String, description: String) -> Result<i32> {
+    async fn add_category(&self, _name: String, _description: String) -> Result<i32> {
         todo!()
     }
 }

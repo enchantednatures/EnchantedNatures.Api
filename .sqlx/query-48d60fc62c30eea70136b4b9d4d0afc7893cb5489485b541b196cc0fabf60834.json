@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nSELECT id as \"id!\",\n       name as \"name!\",\n       description as \"description!\",\n       url as \"url!\"\nFROM photos\nWHERE photos.id in (SELECT DISTINCT photo_id\n                    FROM photo_categories\n                    WHERE category_id = $1);\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "description!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "url!",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "48d60fc62c30eea70136b4b9d4d0afc7893cb5489485b541b196cc0fabf60834"
+}
