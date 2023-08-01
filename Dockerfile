@@ -19,7 +19,6 @@ COPY ./.sqlx ./.sqlx
 COPY ./src ./src
 COPY ./sql ./sql
 COPY ./migrations ./migrations
-COPY ./.env ./
 
 # Build the release binary
 RUN rm ./target/release/deps/api*
