@@ -13,3 +13,12 @@ Content-Type: application/json
 GET {{url}}/api/v0/photos
 Accept-Encoding: gzip, deflate, br
 Content-Type: application/json
+
+###
+#@name Get Photo By Id
+< {%
+    request.variables.set("id", "3")
+%}
+GET {{url}}/api/v0/photos/{{id}}
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/json

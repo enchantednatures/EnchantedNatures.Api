@@ -1,3 +1,4 @@
+use crate::models::Photo;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -7,6 +8,17 @@ pub struct PhotoViewModel {
     pub name: String,
     pub description: String,
     pub url: String,
+}
+
+impl From<Photo> for PhotoViewModel {
+    fn from(value: Photo) -> Self {
+        Self {
+            id: value.id,
+            name: value.name,
+            description: value.description,
+            url: value.url,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]

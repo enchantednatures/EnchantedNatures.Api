@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO public.photos (name, description, url)\n        VALUES ($1, $2, $3) RETURNING id as \"id!\",\n               name as \"name!\",\n               description as \"description!\",\n               url as \"url!\",\n               created_at as \"created_at!\",\n               updated_at as \"updated_at!\"\n        ",
+  "query": "INSERT INTO categories (name, description)\nVALUES ($1, $2)\nRETURNING id as \"id!\",\n        name as \"name!\",\n        description as \"description!\",\n        created_at as \"created_at!\",\n        updated_at as \"updated_at!\"\n;",
   "describe": {
     "columns": [
       {
@@ -20,16 +20,11 @@
       },
       {
         "ordinal": 3,
-        "name": "url!",
-        "type_info": "Varchar"
-      },
-      {
-        "ordinal": 4,
         "name": "created_at!",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 5,
+        "ordinal": 4,
         "name": "updated_at!",
         "type_info": "Timestamptz"
       }
@@ -37,8 +32,7 @@
     "parameters": {
       "Left": [
         "Varchar",
-        "Text",
-        "Varchar"
+        "Text"
       ]
     },
     "nullable": [
@@ -46,9 +40,8 @@
       false,
       true,
       false,
-      false,
       false
     ]
   },
-  "hash": "956566d60894464c4363ac2a6dc5968110d848da1cf08a2698bd7736281517c6"
+  "hash": "44da60235fc66076e670498ad1b003275d142cd298b2ce6792e2df072d3d4ae0"
 }

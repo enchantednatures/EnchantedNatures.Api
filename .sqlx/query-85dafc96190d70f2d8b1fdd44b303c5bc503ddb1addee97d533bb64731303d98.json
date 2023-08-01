@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id as \"id!\",\n               name as \"name!\",\n               url as \"url!\",\n               description as \"description!\",\n               created_at as \"created_at!\",\n               updated_at as \"updated_at!\"\n            FROM public.photos ",
+  "query": "INSERT INTO photos (name, description, url)\nVALUES ($1, $2, $3) RETURNING id as \"id!\",\n               name as \"name!\",\n               description as \"description!\",\n               url as \"url!\",\n               created_at as \"created_at!\",\n               updated_at as \"updated_at!\"",
   "describe": {
     "columns": [
       {
@@ -15,13 +15,13 @@
       },
       {
         "ordinal": 2,
-        "name": "url!",
-        "type_info": "Varchar"
+        "name": "description!",
+        "type_info": "Text"
       },
       {
         "ordinal": 3,
-        "name": "description!",
-        "type_info": "Text"
+        "name": "url!",
+        "type_info": "Varchar"
       },
       {
         "ordinal": 4,
@@ -35,16 +35,20 @@
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Varchar",
+        "Text",
+        "Varchar"
+      ]
     },
     "nullable": [
       false,
       false,
-      false,
       true,
+      false,
       false,
       false
     ]
   },
-  "hash": "d60c7a7d43cb4868dda8b1d8833bb4cf9c21f5c29ea9d2e2d1b78412d8bc12db"
+  "hash": "85dafc96190d70f2d8b1fdd44b303c5bc503ddb1addee97d533bb64731303d98"
 }

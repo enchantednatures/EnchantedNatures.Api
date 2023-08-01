@@ -32,7 +32,7 @@ pub enum UpdatePhotoCategoryResponse {
 
 #[utoipa::path(
     patch,
-    path = "/api/v0/categories/{id}/",
+    path = "/api/v0/categories/{id}",
     params(
         ("id"=i32, Path, description = "Update category")
     ),

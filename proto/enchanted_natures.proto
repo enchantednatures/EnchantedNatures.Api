@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+message CreatePhotoRequest {
+  string name = 1;
+  string description = 2;
+  string url = 3;
+}
+
+message Photo {
+  string version = 1;
+  string id = 2;
+  string name = 3;
+  string description = 4;
+  string url = 5;
+}
+
+message Error {
+  int32 code = 1;
+  string message = 2;
+}
+
+message CreatePhotoResponse {
+  string version = 1;
+  oneof Response{
+    Photo photo = 2;
+    Error error = 3;
+  }
+}
+
+message GetPhotoRequest {
+  int32 id = 1;
+}
+message GetPhotoResponse {
+  string version = 1;
+  oneof Response{
+    Photo photo = 2;
+    Error error = 3;
+  }
+}
+
+message GetPhotosRequest {
+
+}
+message GetPhotosResponse {
+  string version = 1;
+  repeated Photo photo = 2;
+}
+
+message UpdatePhotoRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string url = 4;
+}
+message UpdatePhotoResponse {
+  string version = 1;
+  oneof Response{
+    Photo photo = 2;
+    Error error = 3;
+  }
+}
+
+message DeletePhotoRequest {
+  string id = 1;
+}
+message DeletePhotoResponse {
+  string version = 1;
+  bool success = 2;
+}
+
+message Category {
+  string version = 1;
+  string id = 2;
+  string name = 3;
+  string description = 4;
+}
+
+message CreateCategoryRequest {
+  string name = 1;
+  string description = 2;
+}
+message CreateCategoryResponse {
+  string version = 1;
+  oneof Response{
+    Category category = 2;
+    Error error = 3;
+  }
+}
+
+message GetCategoryRequest {}
+message GetCategoryResponse {}
+
+message GetCategoriesRequest {}
+message GetCategoriesResponse {}
+
+message UpdateCategoryRequest {}
+message UpdateCategoryResponse {}
+
+message DeleteCategoryRequest {}
+message DeleteCategoryResponse {}

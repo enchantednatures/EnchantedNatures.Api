@@ -4,11 +4,34 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use utoipa::ToSchema;
+use utoipa::{IntoResponses, ToSchema};
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
-struct DeleteCategoryResponse {
+struct DeleteCategoryResponses {
     status: String,
+}
+enum DeleteCategoryStatus {
+    Success,
+    NotFound,
+    ServerError,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+struct BadRequest {
+    message: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, IntoResponses)]
+#[response(description = "Delete a category", content_type = "application/json")]
+enum DeleteCategoryResponse {
+    #[response(status = 200, description = "Category Deleted")]
+    Success,
+
+    #[response(status = StatusCode::NOT_FOUND, description = "Category Not Found")]
+    NotFound,
+
+    #[response(status = StatusCode::INTERNAL_SERVER_ERROR, description = "Server Error")]
+    BadRequest(BadRequest),
 }
 
 #[utoipa::path(
@@ -18,9 +41,7 @@ struct DeleteCategoryResponse {
         ("id" = i32, Path, description = "Id of category to delete" ),
     ),
     responses(
-        (status = StatusCode::NO_CONTENT, description = "Category Deleted"),
-        (status = StatusCode::NOT_FOUND, description = "Category Not Found"),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, description = "Server Error"),
+        DeleteCategoryResponse,
     )
 )]
 async fn delete(

@@ -15,10 +15,6 @@ pub struct AddPhotoToCategoryRequest {
     pub display_order: Option<i32>,
 }
 
-#[derive(sqlx::Type)]
-#[sqlx(transparent)]
-struct Id(i32);
-
 #[utoipa::path(
     post,
     path = "/api/v0/categories/{id}",

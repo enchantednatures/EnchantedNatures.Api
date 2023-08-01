@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id as \"id!\",\n       name as \"name!\",\n       url as \"url!\",\n       description as \"description!\",\n       created_at as \"created_at!\",\n       updated_at as \"updated_at!\"\nFROM photos\nWHERE id = $1;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "url!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "description!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at!",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "202cbb58a5feb29f39a8140f9358c656fcc306e841e9cabf3c30e34327cc20bc"
+}
