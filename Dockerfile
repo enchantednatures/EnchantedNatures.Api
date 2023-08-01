@@ -17,17 +17,21 @@ RUN rm src/*.rs
 
 COPY ./.sqlx ./.sqlx
 COPY ./src ./src
+COPY ./sql ./sql
+COPY ./migrations ./migrations
+COPY ./.env ./
 
 # Build the release binary
 RUN rm ./target/release/deps/api*
+ENV SQLX_OFFLINE true
 RUN cargo build --release
 
 # Start a new stage for the runtime image
-FROM debian:buster-slim as runtime
+FROM debian:bullseye-slim as runtime
 
 # Install necessary runtime libraries for PostgreSQL
 RUN apt-get update && \
-    apt-get install -y libpq-dev ca-certificates && \
+    apt-get install -y libpq-dev ca-certificates postgresql-client  && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the release binary from the build stage
