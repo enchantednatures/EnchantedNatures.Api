@@ -1,4 +1,4 @@
-use crate::models::Photo;
+use crate::models::{Category, Photo};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -26,6 +26,16 @@ pub struct CategoryViewModel {
     pub id: i32,
     pub name: String,
     pub description: String,
+}
+
+impl From<Category> for CategoryViewModel {
+    fn from(value: Category) -> Self {
+        Self {
+            id: value.id,
+            name: value.name,
+            description: value.description,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]

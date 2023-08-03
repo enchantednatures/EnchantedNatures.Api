@@ -1,8 +1,10 @@
+use crate::database::PhotoRepo;
+use crate::Database;
 use axum::extract::Path;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::{response, Json};
+use axum::{response, Extension, Json};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{query_as, PgPool};
@@ -200,18 +202,14 @@ pub enum CategoryError {
     )
 )]
 pub async fn put_category(
-    State(db_pool): State<PgPool>,
+    Extension(repo): Extension<Database>,
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    let category = sqlx::query_file_as!(
-        CategoryViewModel,
-        "sql/categories/insert.sql",
-        payload.name,
-        payload.description
-    )
-    .fetch_one(&db_pool)
-    .await
-    .unwrap();
+    let category: CategoryViewModel = repo
+        .add_category(payload.name, payload.description)
+        .await
+        .unwrap()
+        .into();
 
     Ok((StatusCode::CREATED, Json(category)))
 }
