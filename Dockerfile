@@ -1,7 +1,7 @@
 # Use the official Rust image as the base
 FROM rust:1.69.0 as build
 
-ENV DATABASE_URL = ""
+
 # Create a new empty shell project
 RUN USER=root cargo new --bin api
 WORKDIR /api
@@ -23,22 +23,22 @@ COPY ./migrations ./migrations
 # Build the release binary
 RUN rm ./target/release/deps/api*
 ENV SQLX_OFFLINE true
-RUN cargo build --release
+RUN cargo install --path .
 
 # Start a new stage for the runtime image
 FROM debian:bullseye-slim as runtime
 
 # Install necessary runtime libraries for PostgreSQL
 RUN apt-get update && \
-    apt-get install -y libpq-dev ca-certificates postgresql-client  && \
+    apt-get install -y libpq-dev ca-certificates  && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the release binary from the build stage
-COPY --from=build /api/target/release/api /usr/local/bin
+COPY --from=build /usr/local/cargo/bin/api /usr/local/bin/api
 
 # Expose the port the API will run on
+ENV DATABASE_URL = ""
 EXPOSE 6969
-
 # Run the API
-CMD ["/usr/local/bin/api"]
+CMD ["api"]
 

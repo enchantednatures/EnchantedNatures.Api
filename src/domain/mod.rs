@@ -1,1 +1,0 @@
-mod photo_service;

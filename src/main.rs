@@ -31,16 +31,13 @@ use routes::photos::post_photo;
 
 use crate::database::PhotoRepository;
 use crate::routes::categories::{
-    add_photo_to_category, categories_by_id, get::get_categories, patch::patch_category,
-    put::put_category,
+    add_photo_to_category, categories_by_id, get_categories, patch_category, put_category,
 };
 use crate::routes::health::health_check;
-use crate::routes::photos::get_photo;
+use crate::routes::photos::*;
 
 mod database;
-mod domain;
 mod models;
-mod requests;
 mod routes;
 
 #[derive(OpenApi)]
@@ -54,7 +51,8 @@ mod routes;
         categories::add_photo_to_category,
         photos::post_photo,
         photos::get_photo,
-        photos::get_photos
+        photos::get_photos,
+        photos::delete_photo
     ),
     components(
         schemas(
@@ -62,8 +60,14 @@ mod routes;
             models::CategoryDisplayModel,
             models::PhotoViewModel,
             models::PhotoDisplayModel,
+            models::Photo,
+            models::Category,
+            photos::PhotoCreateRequest,
             categories::CategoryError,
             categories::AddPhotoToCategoryRequest,
+            categories::PatchCategoryRequestBody,
+            categories::UpdatePhotoCategoryRequest,
+            categories::UpdatePhotoCategoryResponse,
             categories::CategoryGetByIdRequest,
             categories::CreateCategoryRequest,
             categories::CategoryGetByIdResponse,
@@ -109,7 +113,7 @@ async fn main() -> Result<()> {
         .merge(swagger_ui)
         .route("/health_check", get(health_check))
         .route("/api/v0/photos", get(get_photos).post(post_photo))
-        .route("/api/v0/photos/:id", get(get_photo))
+        .route("/api/v0/photos/:id", get(get_photo).delete(delete_photo))
         .route("/api/v0/categories", get(get_categories).put(put_category))
         .route(
             "/api/v0/categories/:id",
@@ -137,7 +141,7 @@ async fn main() -> Result<()> {
         .with_state(pool);
 
     // run it with hyper
-    let addr = SocketAddr::from(([127, 0, 0, 1], 6969));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 6969));
 
     let msg = format!("Starting server at http://{}/{}", addr, swagger_path);
     info!(msg);

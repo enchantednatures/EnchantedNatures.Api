@@ -1,0 +1,6 @@
+services:
+  enchanted_natures_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: https://ghcr.io/enchantednatures/api
