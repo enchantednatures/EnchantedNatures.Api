@@ -1,5 +1,5 @@
-use crate::App;
 use crate::database::PhotoRepo;
+use crate::App;
 
 use crate::Database;
 use axum::extract::Path;
@@ -36,7 +36,8 @@ pub async fn add_photo_to_category(
     Path(category_id): Path<i32>,
     Json(request): Json<AddPhotoToCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    match app.repo
+    match app
+        .repo
         .add_photo_to_category(request.photo_id, category_id, request.display_order)
         .await
     {
@@ -98,7 +99,7 @@ pub async fn categories_by_id(
     State(app): State<App>,
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-   match app.repo.get_category(id).await {
+    match app.repo.get_category(id).await {
         Ok(resp) => Ok((StatusCode::OK, Json(resp))),
         Err(e) => {
             tracing::error!("Failed to get category: {:?}", e);
@@ -107,7 +108,7 @@ pub async fn categories_by_id(
                 format!("Failed to get category: {}", e),
             ))
         }
-    } 
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]

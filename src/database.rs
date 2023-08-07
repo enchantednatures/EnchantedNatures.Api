@@ -19,7 +19,12 @@ pub trait PhotoRepo {
     async fn get_photos(&self) -> Result<Vec<Photo>>;
     async fn delete_photo(&self, id: i32) -> Result<()>;
 
-    async fn add_photo_to_category(&self, photo_id: i32, category_id: i32, display_order: Option<i32>) -> Result<()>;
+    async fn add_photo_to_category(
+        &self,
+        photo_id: i32,
+        category_id: i32,
+        display_order: Option<i32>,
+    ) -> Result<()>;
 
     async fn add_category(&self, name: String, description: String) -> Result<Category>;
     async fn get_category(&self, id: i32) -> Result<Category>;
@@ -75,8 +80,13 @@ impl PhotoRepo for PhotoRepository {
         Ok(())
     }
 
-    async fn add_photo_to_category(&self, photo_id: i32, category_id: i32, display_order: Option<i32>) -> Result<()> {
-        let mut transaction  = self.db_pool.begin().await?;
+    async fn add_photo_to_category(
+        &self,
+        photo_id: i32,
+        category_id: i32,
+        display_order: Option<i32>,
+    ) -> Result<()> {
+        let mut transaction = self.db_pool.begin().await?;
 
         let row = sqlx::query!(
         r#"SELECT MAX(display_order) as max_display_order FROM photo_categories WHERE category_id = $1"#,
