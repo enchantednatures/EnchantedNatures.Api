@@ -1,10 +1,10 @@
 use crate::database::{PhotoRepo, PhotoRepository};
 use crate::models::{Photo, PhotoViewModel};
-use crate::{Database, App};
+use crate::{App};
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::{response, Extension, Json};
+use axum::{response, Json};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use utoipa::{IntoParams, IntoResponses, ToSchema};

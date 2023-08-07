@@ -1,6 +1,6 @@
 use crate::App;
 use crate::database::PhotoRepo;
-use crate::domain::AppState;
+
 use crate::Database;
 use axum::extract::Path;
 use axum::extract::State;
@@ -9,10 +9,10 @@ use axum::response::IntoResponse;
 use axum::{response, Extension, Json};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::{query_as, PgPool};
+
 use utoipa::{IntoResponses, ToSchema};
 
-use crate::models::{Category, CategoryDisplayModel, CategoryViewModel, Photo, PhotoViewModel};
+use crate::models::{Category, CategoryViewModel, Photo};
 
 #[derive(Deserialize, Serialize, Debug, ToSchema)]
 pub struct AddPhotoToCategoryRequest {

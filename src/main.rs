@@ -5,8 +5,8 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
-use aws_config::imds::credentials;
-use aws_config::meta::region::RegionProviderChain;
+
+
 use aws_sdk_s3::config::Region;
 use aws_sdk_s3::Client;
 use axum::error_handling::HandleErrorLayer;
@@ -19,7 +19,7 @@ use sqlx::PgPool;
 use tokio::time::error::Elapsed;
 use tower::BoxError;
 use tower::ServiceBuilder;
-use tower_http::add_extension::AddExtensionLayer;
+
 use tower_http::trace::TraceLayer;
 use tracing::info;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
@@ -102,11 +102,11 @@ async fn main() -> Result<()> {
     let db_connection_str = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
     let aws_endpoint_url = std::env::var("AWS_ENDPOINT_URL").expect("AWS_ENDPOINT_URL must be set");
-    let aws_access_key = std::env::var("AWS_ACCESS_KEY_ID").expect("AWS_ACCESS_KEY_ID must be set");
-    let aws_secret_key =
+    let _aws_access_key = std::env::var("AWS_ACCESS_KEY_ID").expect("AWS_ACCESS_KEY_ID must be set");
+    let _aws_secret_key =
         std::env::var("AWS_SECRET_ACCESS_KEY").expect("AWS_SECRET_ACCESS_KEY must be set");
-    let aws_bucket_name = std::env::var("AWS_BUCKET_NAME").expect("AWS_BUCKET_NAME must be set");
-    let aws_region = std::env::var("AWS_REGION").expect("AWS_REGION must be set");
+    let _aws_bucket_name = std::env::var("AWS_BUCKET_NAME").expect("AWS_BUCKET_NAME must be set");
+    let _aws_region = std::env::var("AWS_REGION").expect("AWS_REGION must be set");
 
     // let credentials_provider = C
     let config = aws_config::from_env()
@@ -130,7 +130,7 @@ async fn main() -> Result<()> {
 
     let photo_repo = PhotoRepository::new(pool.clone());
 
-    let repo = Database::new(PhotoRepository::new(pool.clone()));
+    let _repo = Database::new(PhotoRepository::new(pool.clone()));
 
     let app_state = App::new(AppState::new(photo_repo, client));
 
