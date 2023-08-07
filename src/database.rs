@@ -19,13 +19,15 @@ pub trait PhotoRepo {
     async fn get_photos(&self) -> Result<Vec<Photo>>;
     async fn delete_photo(&self, id: i32) -> Result<()>;
 
+    async fn add_photo_to_category(&self, photo_id: i32, category_id: i32, display_order: Option<i32>) -> Result<()>;
+
     async fn add_category(&self, name: String, description: String) -> Result<Category>;
     async fn get_category(&self, id: i32) -> Result<Category>;
     async fn get_categories(&self) -> Result<Vec<Category>>;
 }
 
 pub struct PhotoRepository {
-    db_pool: Arc<PgPool>,
+    pub db_pool: Arc<PgPool>,
 }
 
 impl PhotoRepository {
@@ -70,6 +72,53 @@ impl PhotoRepo for PhotoRepository {
         query_file!("sql/photos/delete.sql", id)
             .execute(&*self.db_pool)
             .await?;
+        Ok(())
+    }
+
+    async fn add_photo_to_category(&self, photo_id: i32, category_id: i32, display_order: Option<i32>) -> Result<()> {
+        let mut transaction  = self.db_pool.begin().await?;
+
+        let row = sqlx::query!(
+        r#"SELECT MAX(display_order) as max_display_order FROM photo_categories WHERE category_id = $1"#,
+        &category_id
+    )
+        .fetch_one(&mut *transaction)
+        .await
+        .unwrap();
+
+        let max_value = row.max_display_order.unwrap_or(0); // Use 0 if there are no rows
+
+        if let Some(display) = display_order {
+            if display <= max_value {
+                sqlx::query!(
+                    r#"
+                UPDATE photo_categories
+                SET display_order = display_order + 1
+                WHERE category_id = $1
+                AND display_order > $2
+           "#,
+                    &category_id,
+                    &display
+                )
+                .execute(&mut *transaction)
+                .await
+                .unwrap();
+            }
+        }
+
+        // Now insert a new row with `max_value + 1` as the value for `your_field`
+        // Replace "your_values" with the values for the other fields in your table
+        sqlx::query!(
+        "INSERT INTO photo_categories (category_id, photo_id, display_order) VALUES ($1, $2, $3)",
+        &category_id,
+        &photo_id,
+        &max_value + 1
+    )
+        .execute(&mut *transaction)
+        .await
+        .unwrap();
+
+        transaction.commit().await.unwrap();
         Ok(())
     }
 

@@ -1,4 +1,6 @@
+use crate::App;
 use crate::database::PhotoRepo;
+use crate::domain::AppState;
 use crate::Database;
 use axum::extract::Path;
 use axum::extract::State;
@@ -20,68 +22,33 @@ pub struct AddPhotoToCategoryRequest {
 
 #[utoipa::path(
     post,
-    path = "/api/v0/categories/{id}",
+    path = "/api/v0/categories/{id}/photos",
     request_body = AddPhotoToCategoryRequest,
     params(
-        ("id"= i32, Path, description = "Id of category to get photos for")
+        ("id"= i32, Path, description = "Category to add photo to")
     ),
     responses(
-        (status = StatusCode::ACCEPTED, description = "Check health"),
+        (status = StatusCode::ACCEPTED, description = "Photo added to category"),
     )
 )]
 pub async fn add_photo_to_category(
-    State(db_pool): State<PgPool>,
+    State(app): State<App>,
     Path(category_id): Path<i32>,
     Json(request): Json<AddPhotoToCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    println!("{}", &category_id);
-    println!("{:?}", &request);
-    let mut transaction = db_pool.begin().await.unwrap();
-
-    // Replace "your_table" and "your_field" with your actual table and field names
-    // Also replace "your_condition" with your actual condition
-    let row = sqlx::query!(
-        r#"SELECT MAX(display_order) as max_display_order FROM photo_categories WHERE category_id = $1"#,
-        &category_id
-    )
-        .fetch_one(&mut *transaction)
+    match app.repo
+        .add_photo_to_category(request.photo_id, category_id, request.display_order)
         .await
-        .unwrap();
-
-    let max_value = row.max_display_order.unwrap_or(0); // Use 0 if there are no rows
-
-    if let Some(display) = request.display_order {
-        if display <= max_value {
-            sqlx::query!(
-                r#"
-                UPDATE photo_categories
-                SET display_order = display_order + 1
-                WHERE category_id = $1
-                AND display_order > $2
-           "#,
-                &category_id,
-                &display
-            )
-            .execute(&mut *transaction)
-            .await
-            .unwrap();
+    {
+        Ok(response) => Ok((StatusCode::OK, Json(response))),
+        Err(e) => {
+            tracing::error!("Failed to add photo to category: {:?}", e);
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to add photo to category: {}", e),
+            ))
         }
     }
-
-    // Now insert a new row with `max_value + 1` as the value for `your_field`
-    // Replace "your_values" with the values for the other fields in your table
-    sqlx::query!(
-        "INSERT INTO photo_categories (category_id, photo_id, display_order) VALUES ($1, $2, $3)",
-        &category_id,
-        &request.photo_id,
-        &max_value + 1
-    )
-    .execute(&mut *transaction)
-    .await
-    .unwrap();
-
-    transaction.commit().await.unwrap();
-    Ok(StatusCode::NOT_IMPLEMENTED)
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -103,23 +70,18 @@ pub struct CategoryGetByIdResponse {
     )
 )]
 pub async fn get_categories(
-    State(db_pool): State<PgPool>,
+    State(app): State<App>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    // let mut response: Vec<Category> = vec![];
-    let response = sqlx::query_as!(
-        Category,
-        r#"
-            SELECT id as "id!",
-               name as "name!",
-               description as "description!",
-               created_at as "created_at!",
-               updated_at as "updated_at!"
-            FROM public.categories "#
-    )
-    .fetch_all(&db_pool)
-    .await
-    .unwrap();
-    Ok((StatusCode::OK, Json(response)))
+    match app.repo.get_categories().await {
+        Ok(resp) => Ok((StatusCode::OK, Json(resp))),
+        Err(e) => {
+            tracing::error!("Failed to get categories: {:?}", e);
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to get categories: {}", e),
+            ))
+        }
+    }
 }
 
 #[utoipa::path(
@@ -133,52 +95,19 @@ pub async fn get_categories(
     )
 )]
 pub async fn categories_by_id(
-    State(db_pool): State<PgPool>,
+    State(app): State<App>,
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    let category = query_as!(
-        Category,
-        r#"
-           SELECT id as "id!",
-               name as "name!",
-               description as "description!",
-               created_at as "created_at!",
-               updated_at as "updated_at!"
-            FROM public.categories
-            WHERE id = $1
-            "#,
-        &id
-    )
-    .fetch_one(&db_pool)
-    .await
-    .unwrap();
-
-    let photos: Vec<PhotoViewModel> = query_as!(
-        PhotoViewModel,
-        r#"
-SELECT id as "id!",
-       name as "name!",
-       description as "description!",
-       url as "url!"
-FROM photos
-WHERE photos.id in (SELECT DISTINCT photo_id
-                    FROM photo_categories
-                    WHERE category_id = $1);
-        "#,
-        &category.id
-    )
-    .fetch_all(&db_pool)
-    .await
-    .unwrap();
-
-    let display = CategoryDisplayModel {
-        id: category.id,
-        name: category.name,
-        description: category.description,
-        photos,
-    };
-
-    Ok((StatusCode::OK, Json(display)))
+   match app.repo.get_category(id).await {
+        Ok(resp) => Ok((StatusCode::OK, Json(resp))),
+        Err(e) => {
+            tracing::error!("Failed to get category: {:?}", e);
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to get category: {}", e),
+            ))
+        }
+    } 
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -238,7 +167,7 @@ pub enum UpdatePhotoCategoryResponse {
 }
 
 #[utoipa::path(
-    patch,
+    post,
     path = "/api/v0/categories/{id}",
     params(
         ("id"=i32, Path, description = "Update category")
@@ -248,8 +177,8 @@ pub enum UpdatePhotoCategoryResponse {
         (status = StatusCode::NOT_FOUND, description = "PhotoCategory not found")
     )
 )]
-pub async fn patch_category(
-    State(db_pool): State<PgPool>,
+pub async fn post_category(
+    State(app): State<App>,
     Path(id): Path<i32>,
     Json(payload): Json<PatchCategoryRequestBody>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
@@ -268,7 +197,7 @@ VALUES (
                 p.photo_id,
                 id
             )
-            .execute(&db_pool)
+            .execute(&*app.repo.db_pool)
             .await
             .unwrap();
         }
@@ -306,7 +235,7 @@ enum DeleteCategoryResponse {
 
 #[utoipa::path(
     delete,
-    path = "/api/v0/categories/{id}",
+    path = "/api/v0/categories/{id}/photos",
     params(
         ("id" = i32, Path, description = "Id of category to delete" ),
     ),
@@ -315,7 +244,7 @@ enum DeleteCategoryResponse {
     )
 )]
 async fn delete(
-    State(db_pool): State<PgPool>,
+    State(app): State<App>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, StatusCode> {
     // TODO: verify a row was deleted
@@ -326,7 +255,7 @@ async fn delete(
     "#,
         id
     )
-    .execute(&db_pool)
+    .execute(&*app.repo.db_pool)
     .await
     .unwrap();
 
