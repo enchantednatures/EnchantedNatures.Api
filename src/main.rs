@@ -27,9 +27,6 @@ use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::Registry;
 use utoipa::OpenApi;
-use utoipa_redoc::FileConfig;
-use utoipa_redoc::Redoc;
-use utoipa_redoc::Servable;
 use utoipa_swagger_ui::SwaggerUi;
 
 use routes::photos::get_photos;

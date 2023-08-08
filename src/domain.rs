@@ -32,7 +32,6 @@ impl AppState {
             .send()
             .await?;
 
-
         Ok(())
     }
 }
