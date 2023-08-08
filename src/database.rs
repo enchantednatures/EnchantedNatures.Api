@@ -4,7 +4,7 @@ use anyhow::Result;
 use axum::async_trait;
 use sqlx::{query_file, query_file_as, PgPool};
 
-use crate::models::{Category, Photo, CategoryPhotos};
+use crate::models::{Category, CategoryPhotos, Photo};
 
 #[derive(sqlx::Type)]
 #[sqlx(transparent)]

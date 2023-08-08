@@ -1,4 +1,4 @@
-use crate::database::{PhotoRepo};
+use crate::database::PhotoRepo;
 use crate::models::{Photo, PhotoViewModel};
 use crate::App;
 use axum::extract::{Path, State};
@@ -130,7 +130,7 @@ pub enum GetPhotoResponses {
     ),
     responses(GetPhotoResponses)
 )]
-#[tracing::instrument(name="Get photos", skip(app))]
+#[tracing::instrument(name = "Get photos", skip(app))]
 pub async fn get_photo(
     State(app): State<App>,
     Path(id): Path<i32>,
@@ -146,4 +146,3 @@ pub async fn get_photo(
         )),
     }
 }
-

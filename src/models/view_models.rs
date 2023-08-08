@@ -77,14 +77,7 @@ impl From<CategoryPhotos> for CategoryDisplayModel {
             photos: value
                 .1
                 .into_iter()
-                .map(|x| {
-                    PhotoViewModel::new(
-                        x.id,
-                        x.name,
-                        x.description,
-                        x.url,
-                    )
-                })
+                .map(|x| PhotoViewModel::new(x.id, x.name, x.description, x.url))
                 .collect(),
         }
     }

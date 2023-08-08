@@ -25,25 +25,25 @@ use tracing::info;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::Registry;
-use utoipa_swagger_ui::SwaggerUi;
 use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 use routes::photos::get_photos;
 use routes::photos::post_photo;
 
+use crate::api_doc::ApiDoc;
 use crate::database::PhotoRepository;
 use crate::routes::categories::{
     add_photo_to_category, categories_by_id, get_categories, post_category, put_category,
 };
 use crate::routes::health::health_check;
-use crate::api_doc::ApiDoc;
 use crate::routes::photos::*;
 
+mod api_doc;
 mod database;
 mod domain;
 mod models;
 mod routes;
-mod api_doc;
 
 type App = Arc<AppState>;
 

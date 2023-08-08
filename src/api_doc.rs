@@ -1,6 +1,5 @@
 use utoipa::OpenApi;
 
-
 use crate::routes::categories;
 use crate::routes::health;
 use crate::routes::photos;

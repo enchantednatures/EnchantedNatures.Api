@@ -26,8 +26,7 @@ impl AppState {
         body: ByteStream,
         key: &str,
     ) -> Result<PutObjectOutput, SdkError<PutObjectError>> {
-        self
-            .client
+        self.client
             .put_object()
             .bucket(&self.bucket_name)
             .key(key)
