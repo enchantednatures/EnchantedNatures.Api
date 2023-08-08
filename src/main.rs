@@ -27,6 +27,9 @@ use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::Registry;
 use utoipa::OpenApi;
+use utoipa_redoc::FileConfig;
+use utoipa_redoc::Redoc;
+use utoipa_redoc::Servable;
 use utoipa_swagger_ui::SwaggerUi;
 
 use routes::photos::get_photos;
@@ -43,6 +46,7 @@ use crate::routes::photos::*;
 mod api_doc;
 mod database;
 mod domain;
+mod error_handling;
 mod models;
 mod routes;
 
@@ -56,7 +60,7 @@ async fn main() -> Result<()> {
         .with(JsonStorageLayer)
         .with(formatting_layer);
 
-    // tracing::subscriber::set_global_default(subscriber).unwrap();
+    tracing::subscriber::set_global_default(subscriber).unwrap();
 
     let db_connection_str = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 

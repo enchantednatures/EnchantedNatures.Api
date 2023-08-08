@@ -1,11 +1,40 @@
+use hyper::{HeaderMap, StatusCode};
 use std::io;
 use tokio::io::AsyncReadExt;
+use tracing::error;
 
-use axum::extract::{BodyStream, Path, State};
+use axum::{
+    extract::{BodyStream, Path, State},
+    response::{self, IntoResponse, Response},
+    Json,
+};
 use futures::TryStreamExt;
 use tokio_util::io::StreamReader;
 
 use crate::App;
+use serde::{Deserialize, Serialize};
+
+use utoipa::{openapi::ResponseBuilder, IntoResponses, ToResponse, ToSchema};
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, ToResponse)]
+pub struct UploadedPhotoViewModel {
+    file_size: usize,
+}
+
+impl UploadedPhotoViewModel {
+    pub fn new(file_size: usize) -> Self {
+        Self { file_size }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, IntoResponses)]
+pub enum UploadPhotoResponses {
+    #[response(status = StatusCode::CREATED, description = "Get photo by id")]
+    Success(UploadedPhotoViewModel),
+
+    #[response(status = StatusCode::INTERNAL_SERVER_ERROR, description = "Unable to upload Photo")]
+    UploadError,
+}
 
 #[utoipa::path(
     post,
@@ -15,11 +44,12 @@ use crate::App;
     ),
     request_body(content = [u8], description = "File contents", content_type = "image/jpeg")
 )]
+#[tracing::instrument(name = "Save file", skip(app, body))]
 pub async fn save_request_body(
     State(app): State<App>,
     Path(file_name): Path<String>,
     body: BodyStream,
-) {
+) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     let body_with_io_error = body.map_err(|err| io::Error::new(io::ErrorKind::Other, err));
     let mut body_reader = StreamReader::new(body_with_io_error);
 
@@ -29,14 +59,11 @@ pub async fn save_request_body(
         .await
         .expect("Failed to read body");
 
-    // let mut body = body.into_stream().into_inner();
-    // while let Some(chunk) = body.next().await {
-    //     let chunk = chunk.expect("Body chunk must be okay");
-    //     bytes.extend_from_slice(&chunk);
-    // }
-    println!("{:?}", buffer);
-    match app.upload_photo(buffer, &file_name).await {
-        Ok(output) => println!("File uploaded successfully: {:?}", output),
-        Err(err) => eprintln!("Failed to upload file: {:?}", err), // Handle error as needed
-    }
+    // let headers = HeaderMap::new();
+    // headers.insert("content-length", buffer.len());
+    let buffer_len = buffer.len();
+
+    let result = app.upload_photo(buffer, &file_name).await.unwrap();
+
+    Ok((StatusCode::OK, Json(result)))
 }

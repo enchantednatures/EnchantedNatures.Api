@@ -1,10 +1,11 @@
+use anyhow::{Ok, Result};
 use aws_sdk_s3::{
     error::SdkError,
     operation::put_object::{PutObjectError, PutObjectOutput},
     primitives::ByteStream,
 };
 
-use crate::database::PhotoRepository;
+use crate::{database::PhotoRepository, error_handling::AppError};
 
 pub struct AppState {
     pub repo: PhotoRepository,
@@ -21,17 +22,17 @@ impl AppState {
         }
     }
 
-    pub async fn upload_photo(
-        &self,
-        body: Vec<u8>,
-        key: &str,
-    ) -> Result<PutObjectOutput, SdkError<PutObjectError>> {
-        self.client
+    pub async fn upload_photo(&self, body: Vec<u8>, key: &str) -> Result<(), anyhow::Error> {
+        let result = self
+            .client
             .put_object()
             .bucket(&self.bucket_name)
             .key(key)
             .body(ByteStream::from(body))
             .send()
-            .await
+            .await?;
+
+
+        Ok(())
     }
 }

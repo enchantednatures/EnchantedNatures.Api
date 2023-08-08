@@ -16,6 +16,7 @@ use crate::models;
         categories::put_category,
         categories::post_category,
         categories::add_photo_to_category,
+        categories::delete,
         photos::post_photo,
         photos::get_photo,
         photos::get_photos,
@@ -39,7 +40,9 @@ use crate::models;
             categories::CategoryGetByIdRequest,
             categories::CreateCategoryRequest,
             categories::CategoryGetByIdResponse,
-            health::HealthStatus, health::HealthStatusEnum
+            health::HealthStatus,
+            health::HealthStatusEnum,
+            upload::UploadedPhotoViewModel
         ),
     ),
     tags(
