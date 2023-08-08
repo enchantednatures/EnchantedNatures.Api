@@ -13,6 +13,7 @@ use axum::http::StatusCode;
 use axum::routing::get;
 use axum::routing::post;
 use axum::Router;
+use domain::AppState;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use tokio::time::error::Elapsed;
@@ -24,12 +25,9 @@ use tracing::info;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::Registry;
-use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+use utoipa::OpenApi;
 
-use routes::categories;
-use routes::health;
-use routes::photos;
 use routes::photos::get_photos;
 use routes::photos::post_photo;
 
@@ -38,52 +36,14 @@ use crate::routes::categories::{
     add_photo_to_category, categories_by_id, get_categories, post_category, put_category,
 };
 use crate::routes::health::health_check;
+use crate::api_doc::ApiDoc;
 use crate::routes::photos::*;
 
 mod database;
 mod domain;
 mod models;
 mod routes;
-
-#[derive(OpenApi)]
-#[openapi(
-    paths(
-        health::health_check,
-        categories::categories_by_id,
-        categories::get_categories,
-        categories::put_category,
-        categories::post_category,
-        categories::add_photo_to_category,
-        photos::post_photo,
-        photos::get_photo,
-        photos::get_photos,
-        photos::delete_photo
-    ),
-    components(
-        schemas(
-            models::CategoryViewModel,
-            models::CategoryDisplayModel,
-            models::PhotoViewModel,
-            models::PhotoDisplayModel,
-            models::Photo,
-            models::Category,
-            photos::PhotoCreateRequest,
-            categories::CategoryError,
-            categories::AddPhotoToCategoryRequest,
-            categories::PatchCategoryRequestBody,
-            categories::UpdatePhotoCategoryRequest,
-            categories::UpdatePhotoCategoryResponse,
-            categories::CategoryGetByIdRequest,
-            categories::CreateCategoryRequest,
-            categories::CategoryGetByIdResponse,
-            health::HealthStatus, health::HealthStatusEnum
-        ),
-    ),
-    tags(
-        (name = "Health Checks", description = "Information about the health of the API")
-    )
-)]
-struct ApiDoc;
+mod api_doc;
 
 type App = Arc<AppState>;
 
@@ -105,12 +65,12 @@ async fn main() -> Result<()> {
     let _aws_secret_key =
         std::env::var("AWS_SECRET_ACCESS_KEY").expect("AWS_SECRET_ACCESS_KEY must be set");
     let _aws_bucket_name = std::env::var("AWS_BUCKET_NAME").expect("AWS_BUCKET_NAME must be set");
-    let _aws_region = std::env::var("AWS_REGION").expect("AWS_REGION must be set");
+    let aws_region = std::env::var("AWS_REGION").expect("AWS_REGION must be set");
 
     // let credentials_provider = C
     let config = aws_config::from_env()
         .endpoint_url(aws_endpoint_url)
-        .region(Region::new("us-east-rack-01"))
+        .region(Region::new(aws_region))
         .load()
         .await;
     let client = Client::new(&config);

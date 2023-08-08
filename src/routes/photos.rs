@@ -130,7 +130,7 @@ pub enum GetPhotoResponses {
     ),
     responses(GetPhotoResponses)
 )]
-#[tracing::instrument(name = "Get photos", skip(app))]
+#[tracing::instrument(name="Get photos", skip(app))]
 pub async fn get_photo(
     State(app): State<App>,
     Path(id): Path<i32>,
@@ -147,42 +147,3 @@ pub async fn get_photo(
     }
 }
 
-// async fn stream_to_file<S, E>(path: &str, stream: S) -> Result<(), (StatusCode, String)>
-// where
-//     S: Stream<Item = Result<Bytes, E>>,
-//     E: Into<BoxError>,
-// {
-//     if !path_is_valid(path) {
-//         return Err((StatusCode::BAD_REQUEST, "Invalid path".to_owned()));
-//     }
-
-//     async {
-//         // Convert the stream into an `AsyncRead`.
-//         let body_with_io_error = stream.map_err(|err| io::Error::new(io::ErrorKind::Other, err));
-//         let body_reader = StreamReader::new(body_with_io_error);
-//         futures::pin_mut!(body_reader);
-
-//         // Create the file. `File` implements `AsyncWrite`.
-//         let path = std::path::Path::new(UPLOADS_DIRECTORY).join(path);
-//         let mut file = BufWriter::new(File::create(path).await?);
-
-//         // Copy the body into the file.
-//         tokio::io::copy(&mut body_reader, &mut file).await?;
-
-//         Ok::<_, io::Error>(())
-//     }
-//     .await
-//     .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))
-// }
-
-pub struct AppState {
-    pub repo: PhotoRepository,
-    pub client: aws_sdk_s3::Client,
-}
-
-impl AppState {
-    pub fn new(repo: PhotoRepository, client: aws_sdk_s3::Client) -> Self {
-        Self { repo, client }
-    }
-}
-// pub async fn upload_photo(State(app): State(AppState)) {}
