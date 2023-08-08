@@ -1,4 +1,4 @@
-use crate::database::{PhotoRepo, PhotoRepository};
+use crate::database::{PhotoRepo};
 use crate::models::{Photo, PhotoViewModel};
 use crate::App;
 use axum::extract::{Path, State};
