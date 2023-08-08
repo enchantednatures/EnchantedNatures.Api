@@ -76,13 +76,13 @@ impl From<CategoryPhotos> for CategoryDisplayModel {
             description: value.0.description,
             photos: value
                 .1
-                .iter()
+                .into_iter()
                 .map(|x| {
                     PhotoViewModel::new(
-                        x.id.clone(),
-                        x.name.clone(),
-                        x.description.clone(),
-                        x.url.clone(),
+                        x.id,
+                        x.name,
+                        x.description,
+                        x.url,
                     )
                 })
                 .collect(),
