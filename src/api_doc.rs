@@ -3,6 +3,7 @@ use utoipa::OpenApi;
 use crate::routes::categories;
 use crate::routes::health;
 use crate::routes::photos;
+use crate::routes::upload;
 
 use crate::models;
 
@@ -18,7 +19,8 @@ use crate::models;
         photos::post_photo,
         photos::get_photo,
         photos::get_photos,
-        photos::delete_photo
+        photos::delete_photo,
+        upload::save_request_body
     ),
     components(
         schemas(

@@ -21,16 +21,16 @@ impl AppState {
         }
     }
 
-    async fn upload_photo(
+    pub async fn upload_photo(
         &self,
-        body: ByteStream,
+        body: Vec<u8>,
         key: &str,
     ) -> Result<PutObjectOutput, SdkError<PutObjectError>> {
         self.client
             .put_object()
             .bucket(&self.bucket_name)
             .key(key)
-            .body(body)
+            .body(ByteStream::from(body))
             .send()
             .await
     }

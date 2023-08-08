@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use crate::routes::upload::save_request_body;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
@@ -55,7 +56,7 @@ async fn main() -> Result<()> {
         .with(JsonStorageLayer)
         .with(formatting_layer);
 
-    tracing::subscriber::set_global_default(subscriber).unwrap();
+    // tracing::subscriber::set_global_default(subscriber).unwrap();
 
     let db_connection_str = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
@@ -107,6 +108,7 @@ async fn main() -> Result<()> {
             get(categories_by_id).post(post_category),
         )
         .route("/api/v0/categories/:id/photos", post(add_photo_to_category))
+        .route("/api/v0/upload/:file_name", post(save_request_body))
         .layer(
             ServiceBuilder::new()
                 .layer(HandleErrorLayer::new(|error: BoxError| async move {
