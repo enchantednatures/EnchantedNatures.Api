@@ -85,7 +85,6 @@ mod routes;
 )]
 struct ApiDoc;
 
-type Database = Arc<PhotoRepository>;
 type App = Arc<AppState>;
 
 #[tokio::main]
@@ -129,8 +128,6 @@ async fn main() -> Result<()> {
     sqlx::migrate!().run(&pool).await?;
 
     let photo_repo = PhotoRepository::new(pool.clone());
-
-    let _repo = Database::new(PhotoRepository::new(pool.clone()));
 
     let app_state = App::new(AppState::new(photo_repo, client));
 

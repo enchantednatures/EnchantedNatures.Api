@@ -10,6 +10,17 @@ pub struct PhotoViewModel {
     pub url: String,
 }
 
+impl PhotoViewModel {
+    pub fn new(id: i32, name: String, description: String, url: String) -> Self {
+        Self {
+            id,
+            name,
+            description,
+            url,
+        }
+    }
+}
+
 impl From<Photo> for PhotoViewModel {
     fn from(value: Photo) -> Self {
         Self {
@@ -53,4 +64,28 @@ pub struct CategoryDisplayModel {
     pub name: String,
     pub description: String,
     pub photos: Vec<PhotoViewModel>,
+}
+
+pub type CategoryPhotos = (Category, Vec<Photo>);
+
+impl From<CategoryPhotos> for CategoryDisplayModel {
+    fn from(value: CategoryPhotos) -> Self {
+        CategoryDisplayModel {
+            id: value.0.id,
+            name: value.0.name,
+            description: value.0.description,
+            photos: value
+                .1
+                .iter()
+                .map(|x| {
+                    PhotoViewModel::new(
+                        x.id.clone(),
+                        x.name.clone(),
+                        x.description.clone(),
+                        x.url.clone(),
+                    )
+                })
+                .collect(),
+        }
+    }
 }

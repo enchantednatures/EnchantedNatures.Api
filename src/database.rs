@@ -4,7 +4,7 @@ use anyhow::Result;
 use axum::async_trait;
 use sqlx::{query_file, query_file_as, PgPool};
 
-use crate::models::{Category, Photo};
+use crate::models::{Category, Photo, CategoryPhotos};
 
 #[derive(sqlx::Type)]
 #[sqlx(transparent)]
@@ -27,7 +27,7 @@ pub trait PhotoRepo {
     ) -> Result<()>;
 
     async fn add_category(&self, name: String, description: String) -> Result<Category>;
-    async fn get_category(&self, id: i32) -> Result<Category>;
+    async fn get_category(&self, id: i32) -> Result<CategoryPhotos>;
     async fn get_categories(&self) -> Result<Vec<Category>>;
 }
 
@@ -139,11 +139,14 @@ impl PhotoRepo for PhotoRepository {
         Ok(response)
     }
 
-    async fn get_category(&self, id: i32) -> Result<Category> {
+    async fn get_category(&self, id: i32) -> Result<CategoryPhotos> {
         let response = query_file_as!(Category, "sql/categories/get.sql", id)
             .fetch_one(&*self.db_pool)
             .await?;
-        Ok(response)
+        let photos_in_category = query_file_as!(Photo, "sql/photo_categories/get.sql", id)
+            .fetch_all(&*self.db_pool)
+            .await?;
+        Ok((response, photos_in_category))
     }
 
     async fn get_categories(&self) -> Result<Vec<Category>> {

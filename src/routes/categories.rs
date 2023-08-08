@@ -1,18 +1,19 @@
 use crate::database::PhotoRepo;
+use crate::models::Category;
+use crate::models::CategoryDisplayModel;
+use crate::models::CategoryViewModel;
+use crate::models::Photo;
 use crate::App;
 
-use crate::Database;
 use axum::extract::Path;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::{response, Extension, Json};
+use axum::{response, Json};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use utoipa::{IntoResponses, ToSchema};
-
-use crate::models::{Category, CategoryViewModel, Photo};
 
 #[derive(Deserialize, Serialize, Debug, ToSchema)]
 pub struct AddPhotoToCategoryRequest {
@@ -100,7 +101,7 @@ pub async fn categories_by_id(
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     match app.repo.get_category(id).await {
-        Ok(resp) => Ok((StatusCode::OK, Json(resp))),
+        Ok(resp) => Ok((StatusCode::OK, Json(CategoryDisplayModel::from(resp)))),
         Err(e) => {
             tracing::error!("Failed to get category: {:?}", e);
             Err((
@@ -132,10 +133,11 @@ pub enum CategoryError {
     )
 )]
 pub async fn put_category(
-    Extension(repo): Extension<Database>,
+    State(app): State<App>,
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    let category: CategoryViewModel = repo
+    let category: CategoryViewModel = app
+        .repo
         .add_category(payload.name, payload.description)
         .await
         .unwrap()
