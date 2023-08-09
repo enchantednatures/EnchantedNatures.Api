@@ -22,7 +22,7 @@ impl AppState {
         }
     }
 
-    pub async fn upload_photo(&self, body: Vec<u8>, key: &str) -> Result<(), anyhow::Error> {
+    pub async fn upload_photo(&self, body: Vec<u8>, key: &str) -> Result<PutObjectOutput, anyhow::Error> {
         let result = self
             .client
             .put_object()
@@ -32,6 +32,6 @@ impl AppState {
             .send()
             .await?;
 
-        Ok(())
+        Ok(result)
     }
 }

@@ -1,4 +1,6 @@
+use aws_sdk_s3::operation::put_object::PutObjectOutput;
 use hyper::{HeaderMap, StatusCode};
+use serde_json::json;
 use std::io;
 use tokio::io::AsyncReadExt;
 use tracing::error;
@@ -59,11 +61,7 @@ pub async fn save_request_body(
         .await
         .expect("Failed to read body");
 
-    // let headers = HeaderMap::new();
-    // headers.insert("content-length", buffer.len());
-    let buffer_len = buffer.len();
-
     let result = app.upload_photo(buffer, &file_name).await.unwrap();
 
-    Ok((StatusCode::OK, Json(result)))
+    Ok((StatusCode::OK, Json(json!({"key": result.checksum_crc32}))))
 }
