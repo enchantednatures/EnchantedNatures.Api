@@ -5,8 +5,10 @@ use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::{response, Json};
+use chrono::{DateTime, Utc, NaiveDate};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use tracing::info;
 use utoipa::{IntoParams, IntoResponses, ToSchema};
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -14,9 +16,11 @@ pub struct PhotoGetAllResponse;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct PhotoCreateRequest {
-    pub name: String,
+    pub title: String,
+    pub location_taken: String,
+    pub date_taken: NaiveDate,
     pub description: String,
-    pub url: String,
+    pub filename: String,
 }
 
 #[utoipa::path(
@@ -70,18 +74,85 @@ pub enum CreatePhotoResponses {
         CreatePhotoResponses
     )
 )]
+#[tracing::instrument(name = "add photo", skip(app))]
 pub async fn post_photo(
     State(app): State<App>,
     Json(payload): Json<PhotoCreateRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
+    info!("creating photo");
+    println!("{:?}", payload);
+    info!("{}", payload.title);
     let photo = app
         .repo
-        .add_photo(payload.name, payload.description, payload.url)
+        .add_photo(
+            payload.title,
+            payload.description,
+            payload.filename,
+            payload.location_taken,
+            payload.date_taken,
+        )
         .await
         .unwrap();
 
+    info!("photo created");
     Ok((StatusCode::CREATED, Json(photo)))
 }
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PhotoUpdateRequest { 
+    pub title: Option<String>,
+    pub location_taken: Option<String>,
+    pub date_taken: Option<NaiveDate>,
+    pub description: Option<String>,
+    pub filename: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, IntoResponses)]
+#[response(description = "Update a photo", content_type = "application/json")]
+pub enum UpdatePhotoResponses {
+    #[response(status = StatusCode::OK, description = "Photo Updated")]
+    Updated(Photo),
+
+    #[response(status = StatusCode::NOT_FOUND, description = "Photo does not exist")]
+    DoesNotExist,
+
+    #[response(status = StatusCode::INTERNAL_SERVER_ERROR, description = "Server Error")]
+    BadRequest,
+}
+
+#[utoipa::path(
+    put,
+    path = "/api/v0/photos/{id}",
+    request_body = PhotoUpdateRequest,
+    responses(
+        UpdatePhotoResponses
+    )
+)]
+#[tracing::instrument(name = "update photo", skip(app))]
+pub async fn put_photo(
+    State(app): State<App>,
+    Path(id): Path<i32>,
+    Json(payload): Json<PhotoUpdateRequest>,
+) -> Result<impl IntoResponse, (StatusCode, String)> {
+    info!("creating photo");
+    println!("{:?}", payload);
+    let photo = app
+        .repo
+        .update_photo(
+            id,
+            payload.title,
+            payload.description,
+            payload.filename,
+            payload.location_taken,
+            payload.date_taken,
+        )
+        .await
+        .unwrap();
+    info!("photo Updated");
+    Ok((StatusCode::OK, Json(photo)))
+}
+
+
 
 #[derive(Debug, Serialize, Deserialize, IntoResponses)]
 pub enum GetPhotosResponses {
@@ -94,8 +165,13 @@ pub enum GetPhotosResponses {
 pub async fn get_photos(
     State(app): State<App>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
+    info!("getting all photos");
     match app.repo.get_photos().await {
-        Ok(response) => Ok((StatusCode::OK, Json(response))),
+        Ok(response) => {
+            info!("retrieved {} photos", response.len());
+
+            Ok((StatusCode::OK, Json(response)))
+        },
         Err(e) => {
             tracing::error!("Failed to get photos: {:?}", e);
             Err((

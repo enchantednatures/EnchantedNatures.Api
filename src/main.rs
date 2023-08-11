@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use crate::routes::categories::post_category_id;
 use crate::routes::upload::save_request_body;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -22,8 +23,10 @@ use tower::BoxError;
 use tower::ServiceBuilder;
 
 use tower_http::trace::TraceLayer;
-use tracing::info;
+
+
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
+use tracing_subscriber::EnvFilter;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::Registry;
 use utoipa::OpenApi;
@@ -35,7 +38,7 @@ use routes::photos::post_photo;
 use crate::api_doc::ApiDoc;
 use crate::database::PhotoRepository;
 use crate::routes::categories::{
-    add_photo_to_category, categories_by_id, get_categories, post_category, put_category,
+    add_photo_to_category, categories_by_id, get_categories, post_category,
 };
 use crate::routes::health::health_check;
 use crate::routes::photos::*;
@@ -55,6 +58,7 @@ async fn main() -> Result<()> {
 
     let subscriber = Registry::default()
         .with(JsonStorageLayer)
+        .with(EnvFilter::new("info"))
         .with(formatting_layer);
 
     tracing::subscriber::set_global_default(subscriber).unwrap();
@@ -102,11 +106,14 @@ async fn main() -> Result<()> {
         .merge(swagger_ui)
         .route("/health_check", get(health_check))
         .route("/api/v0/photos", get(get_photos).post(post_photo))
-        .route("/api/v0/photos/:id", get(get_photo).delete(delete_photo))
-        .route("/api/v0/categories", get(get_categories).put(put_category))
+        .route("/api/v0/photos/:id", get(get_photo).delete(delete_photo).put(put_photo))
+        .route(
+            "/api/v0/categories",
+            get(get_categories).post(post_category),
+        )
         .route(
             "/api/v0/categories/:id",
-            get(categories_by_id).post(post_category),
+            get(categories_by_id).post(post_category_id),
         )
         .route("/api/v0/categories/:id/photos", post(add_photo_to_category))
         .route("/api/v0/upload/:file_name", post(save_request_body))
@@ -130,9 +137,6 @@ async fn main() -> Result<()> {
 
     // run it with hyper
     let addr = SocketAddr::from(([0, 0, 0, 0], 6969));
-
-    let msg = format!("Starting server at http://{}/{}", addr, swagger_path);
-    info!(msg);
 
     axum::Server::bind(&addr)
         .serve(app.into_make_service())

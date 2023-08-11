@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::{DateTime, Utc};
 use utoipa::ToSchema;
@@ -9,9 +10,11 @@ mod view_models;
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct Photo {
     pub id: i32,
-    pub name: String,
+    pub title: String,
+    pub location_taken :String,
     pub description: String,
-    pub url: String,
+    pub filename: String,
+    pub date_taken: NaiveDate,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

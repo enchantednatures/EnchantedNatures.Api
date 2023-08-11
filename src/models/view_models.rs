@@ -1,22 +1,34 @@
 use crate::models::{Category, Photo};
+use chrono::{DateTime, Utc, NaiveDate};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct PhotoViewModel {
     pub id: i32,
-    pub name: String,
+    pub title: String,
     pub description: String,
-    pub url: String,
+    pub filename: String,
+    pub location_taken: String,
+    pub date_taken: NaiveDate,
 }
 
 impl PhotoViewModel {
-    pub fn new(id: i32, name: String, description: String, url: String) -> Self {
+    pub fn new(
+        id: i32,
+        title: String,
+        description: String,
+        filename: String,
+        location_taken: String,
+        date_taken: NaiveDate,
+    ) -> Self {
         Self {
             id,
-            name,
+            title,
             description,
-            url,
+            filename,
+            location_taken,
+            date_taken,
         }
     }
 }
@@ -25,9 +37,11 @@ impl From<Photo> for PhotoViewModel {
     fn from(value: Photo) -> Self {
         Self {
             id: value.id,
-            name: value.name,
+            title: value.title,
             description: value.description,
-            url: value.url,
+            filename: value.filename,
+            location_taken: value.location_taken,
+            date_taken: value.date_taken
         }
     }
 }
@@ -52,7 +66,9 @@ impl From<Category> for CategoryViewModel {
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct PhotoDisplayModel {
     pub id: i32,
+    pub title: String,
     pub name: String,
+    pub filename: String,
     pub description: String,
     pub url: String,
     pub categories: Vec<CategoryViewModel>,
@@ -77,7 +93,16 @@ impl From<CategoryPhotos> for CategoryDisplayModel {
             photos: value
                 .1
                 .into_iter()
-                .map(|x| PhotoViewModel::new(x.id, x.name, x.description, x.url))
+                .map(|x| {
+                    PhotoViewModel::new(
+                        x.id,
+                        x.title,
+                        x.description,
+                        x.filename,
+                        x.location_taken,
+                        x.date_taken,
+                    )
+                })
                 .collect(),
         }
     }

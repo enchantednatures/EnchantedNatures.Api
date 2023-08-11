@@ -13,6 +13,7 @@ use axum::{response, Json};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
+use tracing::info;
 use utoipa::{IntoResponses, ToSchema};
 
 #[derive(Deserialize, Serialize, Debug, ToSchema)]
@@ -71,11 +72,16 @@ pub struct CategoryGetByIdResponse {
         (status = StatusCode::OK, description = "Get all categories", body = [Category]),
     )
 )]
+#[tracing::instrument(name = "Get Categories", skip(app))]
 pub async fn get_categories(
     State(app): State<App>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     match app.repo.get_categories().await {
-        Ok(resp) => Ok((StatusCode::OK, Json(resp))),
+        Ok(resp) => {
+            info!("got {} categories", resp.len());
+            info!("{:?}", resp);
+            Ok((StatusCode::OK, Json(resp)))
+        },
         Err(e) => {
             tracing::error!("Failed to get categories: {:?}", e);
             Err((
@@ -96,12 +102,16 @@ pub async fn get_categories(
         (status = StatusCode::OK, description = "Check health", body = CategoryDisplayModel),
     )
 )]
+#[tracing::instrument(name = "Get Category", skip(app))]
 pub async fn categories_by_id(
     State(app): State<App>,
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     match app.repo.get_category(id).await {
-        Ok(resp) => Ok((StatusCode::OK, Json(CategoryDisplayModel::from(resp)))),
+        Ok(resp) => {
+            info!("Category retrieved successfully");
+            Ok((StatusCode::OK, Json(CategoryDisplayModel::from(resp))))
+        },
         Err(e) => {
             tracing::error!("Failed to get category: {:?}", e);
             Err((
@@ -124,7 +134,7 @@ pub enum CategoryError {
 }
 
 #[utoipa::path(
-    put,
+    post,
     path = "/api/v0/categories",
     request_body = CreateCategoryRequest,
     responses(
@@ -132,7 +142,7 @@ pub enum CategoryError {
         (status = 409, description = "Category already exists", body = CategoryError),
     )
 )]
-pub async fn put_category(
+pub async fn post_category(
     State(app): State<App>,
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
@@ -180,7 +190,7 @@ pub enum UpdatePhotoCategoryResponse {
         (status = StatusCode::NOT_FOUND, description = "PhotoCategory not found")
     )
 )]
-pub async fn post_category(
+pub async fn post_category_id(
     State(app): State<App>,
     Path(id): Path<i32>,
     Json(payload): Json<PatchCategoryRequestBody>,

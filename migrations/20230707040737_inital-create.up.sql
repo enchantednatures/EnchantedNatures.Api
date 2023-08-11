@@ -1,17 +1,19 @@
 -- Add up migration script here
-create table public.photos
+create table photos
 (
     id          serial                                 not null
         constraint photos_pk
             primary key,
-    name        varchar(255)                           not null,
+    title        varchar(255)                           not null,
+    filename    varchar(255)                           not null,
+    location_taken        varchar(255)                           not null,
+    date_taken        date not null,   
     description text,
-    url         varchar(255)                           not null,
     created_at  timestamp with time zone default now() not null,
     updated_at  timestamp with time zone default now() not null
 );
 
-create table public.categories
+create table categories
 (
     id          serial                                 not null
         constraint categories_pk

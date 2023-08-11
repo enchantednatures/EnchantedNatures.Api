@@ -1,13 +1,11 @@
-use aws_sdk_s3::operation::put_object::PutObjectOutput;
-use hyper::{HeaderMap, StatusCode};
+use hyper::StatusCode;
 use serde_json::json;
 use std::io;
 use tokio::io::AsyncReadExt;
-use tracing::error;
 
 use axum::{
     extract::{BodyStream, Path, State},
-    response::{self, IntoResponse, Response},
+    response::{self, IntoResponse },
     Json,
 };
 use futures::TryStreamExt;
@@ -16,7 +14,7 @@ use tokio_util::io::StreamReader;
 use crate::App;
 use serde::{Deserialize, Serialize};
 
-use utoipa::{openapi::ResponseBuilder, IntoResponses, ToResponse, ToSchema};
+use utoipa::{IntoResponses, ToResponse, ToSchema};
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, ToResponse)]
 pub struct UploadedPhotoViewModel {

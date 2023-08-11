@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use axum::async_trait;
+use chrono::{DateTime, Utc, NaiveDate};
 use sqlx::{query_file, query_file_as, PgPool};
 
 use crate::models::{Category, CategoryPhotos, Photo};
@@ -13,8 +14,24 @@ struct Id(i32);
 #[mockall::automock]
 #[async_trait]
 pub trait PhotoRepo {
-    async fn add_photo(&self, name: String, description: String, url: String) -> Result<Photo>;
+    async fn add_photo(
+        &self,
+        title: String,
+        description: String,
+        filename: String,
+        location_taken: String,
+        date_taken: NaiveDate,
+    ) -> Result<Photo>;
     async fn get_photo(&self, id: i32) -> Result<Photo>;
+    async fn update_photo(
+        &self,
+        id: i32,
+        title: Option<String>,
+        description: Option<String>,
+        filename: Option<String>,
+        location_taken: Option<String>,
+        date_taken: Option<NaiveDate>,
+    ) -> Result<Photo>;
     async fn get_photos_in_category(&self, id: i32) -> Result<Vec<Photo>>;
     async fn get_photos(&self) -> Result<Vec<Photo>>;
     async fn delete_photo(&self, id: i32) -> Result<()>;
@@ -45,11 +62,73 @@ impl PhotoRepository {
 
 #[async_trait]
 impl PhotoRepo for PhotoRepository {
-    async fn add_photo(&self, name: String, description: String, url: String) -> Result<Photo> {
-        let response = sqlx::query_file_as!(Photo, "sql/photos/insert.sql", name, description, url)
-            .fetch_one(&*self.db_pool)
-            .await?;
+    async fn add_photo(
+        &self,
+        title: String,
+        description: String,
+        filename: String,
+        location_taken: String,
+        date_taken: NaiveDate,
+    ) -> Result<Photo> {
+        let response = sqlx::query_file_as!(
+            Photo,
+            "sql/photos/insert.sql",
+            title,
+            filename,
+            description,
+            location_taken,
+            date_taken
+        )
+        .fetch_one(&*self.db_pool)
+        .await?;
         Ok(response)
+    }
+
+    async fn update_photo(
+        &self,
+        id: i32,
+        title: Option<String>,
+        description: Option<String>,
+        filename: Option<String>,
+        location_taken: Option<String>,
+        date_taken: Option<NaiveDate>,
+    ) -> Result<Photo> {
+        match self.get_photo(id).await {
+            Ok(photo) => {
+                let response = sqlx::query_as!(
+                    Photo,
+                    r#"
+                    UPDATE photos
+                    SET title = $2,
+                        description = $3,
+                        filename = $4,
+                        location_taken = $5,
+                        date_taken = $6
+                    WHERE 
+                        id = $1
+                    RETURNING 
+                        id as "id!",
+                        title as "title!",
+                        filename as "filename!",
+                        description as "description!",
+                        location_taken as "location_taken!",
+                        date_taken as "date_taken!",
+                        created_at as "created_at!",
+                        updated_at as "updated_at!"
+                    "#,
+                    id,
+                    title.unwrap_or(photo.title),
+                    description.unwrap_or(photo.description),
+                    filename.unwrap_or(photo.filename),
+                    location_taken.unwrap_or(photo.location_taken),
+                    date_taken.unwrap_or(photo.date_taken)
+                )
+                .fetch_one(&*self.db_pool)
+                .await?;
+                Ok(response)
+            }
+            Err(e) => Err(e),
+        }
     }
 
     async fn get_photo(&self, id: i32) -> Result<Photo> {

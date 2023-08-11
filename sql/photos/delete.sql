@@ -1,3 +1,3 @@
 DELETE
-FROM public.photos
+FROM photos
 WHERE id = $1
