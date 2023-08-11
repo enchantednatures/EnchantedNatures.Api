@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use axum::async_trait;
-use chrono::{DateTime, Utc, NaiveDate};
+use chrono::{NaiveDate};
 use sqlx::{query_file, query_file_as, PgPool};
 
 use crate::models::{Category, CategoryPhotos, Photo};

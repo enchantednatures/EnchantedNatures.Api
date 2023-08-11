@@ -1,5 +1,5 @@
 use crate::models::{Category, Photo};
-use chrono::{DateTime, Utc, NaiveDate};
+use chrono::{NaiveDate};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
