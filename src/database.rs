@@ -11,13 +11,11 @@ use crate::models::{Category, CategoryPhotos, Photo};
 #[sqlx(transparent)]
 struct Id(i32);
 
-#[mockall::automock]
 #[async_trait]
 pub trait PhotoRepo {
     async fn add_photo(
         &self,
         title: String,
-        description: String,
         filename: String,
         location_taken: String,
         date_taken: NaiveDate,
@@ -27,7 +25,6 @@ pub trait PhotoRepo {
         &self,
         id: i32,
         title: Option<String>,
-        description: Option<String>,
         filename: Option<String>,
         location_taken: Option<String>,
         date_taken: Option<NaiveDate>,
@@ -43,7 +40,7 @@ pub trait PhotoRepo {
         display_order: Option<i32>,
     ) -> Result<()>;
 
-    async fn add_category(&self, name: String, description: String) -> Result<Category>;
+    async fn add_category(&self, name: String) -> Result<Category>;
     async fn get_category(&self, id: i32) -> Result<CategoryPhotos>;
     async fn get_categories(&self) -> Result<Vec<Category>>;
 }
@@ -65,7 +62,6 @@ impl PhotoRepo for PhotoRepository {
     async fn add_photo(
         &self,
         title: String,
-        description: String,
         filename: String,
         location_taken: String,
         date_taken: NaiveDate,
@@ -75,7 +71,6 @@ impl PhotoRepo for PhotoRepository {
             "sql/photos/insert.sql",
             title,
             filename,
-            description,
             location_taken,
             date_taken
         )
@@ -88,7 +83,6 @@ impl PhotoRepo for PhotoRepository {
         &self,
         id: i32,
         title: Option<String>,
-        description: Option<String>,
         filename: Option<String>,
         location_taken: Option<String>,
         date_taken: Option<NaiveDate>,
@@ -100,17 +94,15 @@ impl PhotoRepo for PhotoRepository {
                     r#"
                     UPDATE photos
                     SET title = $2,
-                        description = $3,
-                        filename = $4,
-                        location_taken = $5,
-                        date_taken = $6
+                        filename = $3,
+                        location_taken = $4,
+                        date_taken = $5
                     WHERE 
                         id = $1
                     RETURNING 
                         id as "id!",
                         title as "title!",
                         filename as "filename!",
-                        description as "description!",
                         location_taken as "location_taken!",
                         date_taken as "date_taken!",
                         created_at as "created_at!",
@@ -118,7 +110,6 @@ impl PhotoRepo for PhotoRepository {
                     "#,
                     id,
                     title.unwrap_or(photo.title),
-                    description.unwrap_or(photo.description),
                     filename.unwrap_or(photo.filename),
                     location_taken.unwrap_or(photo.location_taken),
                     date_taken.unwrap_or(photo.date_taken)
@@ -211,8 +202,8 @@ impl PhotoRepo for PhotoRepository {
         Ok(())
     }
 
-    async fn add_category(&self, name: String, description: String) -> Result<Category> {
-        let response = query_file_as!(Category, "sql/categories/insert.sql", name, description)
+    async fn add_category(&self, name: String) -> Result<Category> {
+        let response = query_file_as!(Category, "sql/categories/insert.sql", name)
             .fetch_one(&*self.db_pool)
             .await?;
         Ok(response)

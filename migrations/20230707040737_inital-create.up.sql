@@ -8,7 +8,6 @@ create table photos
     filename    varchar(255)                           not null,
     location_taken        varchar(255)                           not null,
     date_taken        date not null,   
-    description text,
     created_at  timestamp with time zone default now() not null,
     updated_at  timestamp with time zone default now() not null
 );
@@ -19,7 +18,6 @@ create table categories
         constraint categories_pk
             primary key,
     name        varchar(255)                           not null,
-    description text,
     created_at  timestamp with time zone default now() not null,
     updated_at  timestamp with time zone default now() not null
 );

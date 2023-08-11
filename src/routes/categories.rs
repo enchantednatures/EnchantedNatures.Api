@@ -33,6 +33,7 @@ pub struct AddPhotoToCategoryRequest {
         (status = StatusCode::ACCEPTED, description = "Photo added to category"),
     )
 )]
+#[tracing::instrument(name = "add photo to category", skip(app))]
 pub async fn add_photo_to_category(
     State(app): State<App>,
     Path(category_id): Path<i32>,
@@ -81,7 +82,7 @@ pub async fn get_categories(
             info!("got {} categories", resp.len());
             info!("{:?}", resp);
             Ok((StatusCode::OK, Json(resp)))
-        },
+        }
         Err(e) => {
             tracing::error!("Failed to get categories: {:?}", e);
             Err((
@@ -111,7 +112,7 @@ pub async fn categories_by_id(
         Ok(resp) => {
             info!("Category retrieved successfully");
             Ok((StatusCode::OK, Json(CategoryDisplayModel::from(resp))))
-        },
+        }
         Err(e) => {
             tracing::error!("Failed to get category: {:?}", e);
             Err((
@@ -125,7 +126,6 @@ pub async fn categories_by_id(
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct CreateCategoryRequest {
     pub name: String,
-    pub description: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -142,29 +142,14 @@ pub enum CategoryError {
         (status = 409, description = "Category already exists", body = CategoryError),
     )
 )]
+#[tracing::instrument(name = "add category", skip(app))]
 pub async fn post_category(
     State(app): State<App>,
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    let category: CategoryViewModel = app
-        .repo
-        .add_category(payload.name, payload.description)
-        .await
-        .unwrap()
-        .into();
+    let category: CategoryViewModel = app.repo.add_category(payload.name).await.unwrap().into();
 
     Ok((StatusCode::CREATED, Json(category)))
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
-pub struct UpdatePhotoCategoryRequest {
-    pub photo_id: i32,
-    // pub display_order: Option<i32>,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
-pub enum PatchCategoryRequestBody {
-    AddPhotoToCategory(UpdatePhotoCategoryRequest),
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -177,45 +162,6 @@ pub struct PhotoRemovedFromCategory;
 pub enum UpdatePhotoCategoryResponse {
     PhotoAddedToCategory,
     PhotoRemovedFromCategory,
-}
-
-#[utoipa::path(
-    post,
-    path = "/api/v0/categories/{id}",
-    params(
-        ("id"=i32, Path, description = "Update category")
-    ),
-    responses(
-        (status = StatusCode::OK, description = "PhotoCategory successfully updated", body = UpdatePhotoCategoryResponse),
-        (status = StatusCode::NOT_FOUND, description = "PhotoCategory not found")
-    )
-)]
-pub async fn post_category_id(
-    State(app): State<App>,
-    Path(id): Path<i32>,
-    Json(payload): Json<PatchCategoryRequestBody>,
-) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    match payload {
-        PatchCategoryRequestBody::AddPhotoToCategory(p) => {
-            sqlx::query!(
-                r#"
-INSERT INTO public.photo_categories (photo_id, category_id, display_order)
-VALUES (
-        $1, $2, ((SELECT coalesce(max(display_order), 0) as max_display_order
-          FROM photo_categories
-          WHERE category_id = 1
-          GROUP BY category_id) + 1
-            ))
-                "#,
-                p.photo_id,
-                id
-            )
-            .execute(&*app.repo.db_pool)
-            .await
-            .unwrap();
-        }
-    };
-    Ok((StatusCode::OK, Json(json!({"status": "not implemented"}))))
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]

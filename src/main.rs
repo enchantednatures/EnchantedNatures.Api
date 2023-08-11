@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-use crate::routes::categories::post_category_id;
 use crate::routes::upload::save_request_body;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -15,6 +14,7 @@ use axum::http::StatusCode;
 use axum::routing::get;
 use axum::routing::post;
 use axum::Router;
+
 use domain::AppState;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
@@ -113,7 +113,7 @@ async fn main() -> Result<()> {
         )
         .route(
             "/api/v0/categories/:id",
-            get(categories_by_id).post(post_category_id),
+            get(categories_by_id),
         )
         .route("/api/v0/categories/:id/photos", post(add_photo_to_category))
         .route("/api/v0/upload/:file_name", post(save_request_body))

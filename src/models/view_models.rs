@@ -7,7 +7,6 @@ use utoipa::ToSchema;
 pub struct PhotoViewModel {
     pub id: i32,
     pub title: String,
-    pub description: String,
     pub filename: String,
     pub location_taken: String,
     pub date_taken: NaiveDate,
@@ -17,7 +16,6 @@ impl PhotoViewModel {
     pub fn new(
         id: i32,
         title: String,
-        description: String,
         filename: String,
         location_taken: String,
         date_taken: NaiveDate,
@@ -25,7 +23,6 @@ impl PhotoViewModel {
         Self {
             id,
             title,
-            description,
             filename,
             location_taken,
             date_taken,
@@ -38,7 +35,6 @@ impl From<Photo> for PhotoViewModel {
         Self {
             id: value.id,
             title: value.title,
-            description: value.description,
             filename: value.filename,
             location_taken: value.location_taken,
             date_taken: value.date_taken
@@ -50,15 +46,13 @@ impl From<Photo> for PhotoViewModel {
 pub struct CategoryViewModel {
     pub id: i32,
     pub name: String,
-    pub description: String,
 }
 
 impl From<Category> for CategoryViewModel {
     fn from(value: Category) -> Self {
         Self {
             id: value.id,
-            name: value.name,
-            description: value.description,
+            name: value.name
         }
     }
 }
@@ -69,7 +63,6 @@ pub struct PhotoDisplayModel {
     pub title: String,
     pub name: String,
     pub filename: String,
-    pub description: String,
     pub url: String,
     pub categories: Vec<CategoryViewModel>,
 }
@@ -78,7 +71,6 @@ pub struct PhotoDisplayModel {
 pub struct CategoryDisplayModel {
     pub id: i32,
     pub name: String,
-    pub description: String,
     pub photos: Vec<PhotoViewModel>,
 }
 
@@ -89,7 +81,6 @@ impl From<CategoryPhotos> for CategoryDisplayModel {
         CategoryDisplayModel {
             id: value.0.id,
             name: value.0.name,
-            description: value.0.description,
             photos: value
                 .1
                 .into_iter()
@@ -97,7 +88,6 @@ impl From<CategoryPhotos> for CategoryDisplayModel {
                     PhotoViewModel::new(
                         x.id,
                         x.title,
-                        x.description,
                         x.filename,
                         x.location_taken,
                         x.date_taken,

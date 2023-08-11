@@ -1,7 +1,6 @@
 SELECT p.id          as "id!",
      p.title as "title!",
      p.filename as "filename!",
-     p.description as "description!",
      p.location_taken as "location_taken!",
      p.date_taken as "date_taken!",
      p.created_at as "created_at!",

@@ -19,7 +19,6 @@ pub struct PhotoCreateRequest {
     pub title: String,
     pub location_taken: String,
     pub date_taken: NaiveDate,
-    pub description: String,
     pub filename: String,
 }
 
@@ -33,6 +32,7 @@ pub struct PhotoCreateRequest {
         (status = StatusCode::NO_CONTENT, description = "Delete photo with Id"),
     )
 )]
+#[tracing::instrument(name="Delete photo", skip(app))]
 pub async fn delete_photo(
     State(app): State<App>,
     Path(id): Path<i32>,
@@ -86,7 +86,6 @@ pub async fn post_photo(
         .repo
         .add_photo(
             payload.title,
-            payload.description,
             payload.filename,
             payload.location_taken,
             payload.date_taken,
@@ -103,7 +102,6 @@ pub struct PhotoUpdateRequest {
     pub title: Option<String>,
     pub location_taken: Option<String>,
     pub date_taken: Option<NaiveDate>,
-    pub description: Option<String>,
     pub filename: Option<String>,
 }
 
@@ -141,7 +139,6 @@ pub async fn put_photo(
         .update_photo(
             id,
             payload.title,
-            payload.description,
             payload.filename,
             payload.location_taken,
             payload.date_taken,
@@ -206,7 +203,7 @@ pub enum GetPhotoResponses {
     ),
     responses(GetPhotoResponses)
 )]
-#[tracing::instrument(name = "Get photos", skip(app))]
+#[tracing::instrument(name = "Get photo", skip(app))]
 pub async fn get_photo(
     State(app): State<App>,
     Path(id): Path<i32>,

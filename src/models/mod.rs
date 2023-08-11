@@ -12,7 +12,6 @@ pub struct Photo {
     pub id: i32,
     pub title: String,
     pub location_taken :String,
-    pub description: String,
     pub filename: String,
     pub date_taken: NaiveDate,
     pub created_at: DateTime<Utc>,
@@ -23,7 +22,6 @@ pub struct Photo {
 pub struct Category {
     pub id: i32,
     pub name: String,
-    pub description: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -32,14 +30,12 @@ impl Category {
     pub fn new(
         id: i32,
         name: String,
-        description: String,
         created_at: DateTime<Utc>,
         updated_at: DateTime<Utc>,
     ) -> Self {
         Self {
             id,
             name,
-            description,
             created_at,
             updated_at,
         }
