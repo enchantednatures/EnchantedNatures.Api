@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id as \"id!\",\n       name as \"name!\",\n       url as \"url!\",\n       description as \"description!\",\n       created_at as \"created_at!\",\n       updated_at as \"updated_at!\"\nFROM photos\nWHERE id = $1;",
+  "query": "SELECT id as \"id!\",\n       title as \"title!\",\n       filename as \"filename!\",\n       description as \"description!\",\n       location_taken as \"location_taken!\",\n       date_taken as \"date_taken!\",\n       created_at as \"created_at!\",\n       updated_at as \"updated_at!\"\nFROM photos\nWHERE id = $1;\n",
   "describe": {
     "columns": [
       {
@@ -10,12 +10,12 @@
       },
       {
         "ordinal": 1,
-        "name": "name!",
+        "name": "title!",
         "type_info": "Varchar"
       },
       {
         "ordinal": 2,
-        "name": "url!",
+        "name": "filename!",
         "type_info": "Varchar"
       },
       {
@@ -25,11 +25,21 @@
       },
       {
         "ordinal": 4,
+        "name": "location_taken!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "date_taken!",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
         "name": "created_at!",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 5,
+        "ordinal": 7,
         "name": "updated_at!",
         "type_info": "Timestamptz"
       }
@@ -45,8 +55,10 @@
       false,
       true,
       false,
+      false,
+      false,
       false
     ]
   },
-  "hash": "202cbb58a5feb29f39a8140f9358c656fcc306e841e9cabf3c30e34327cc20bc"
+  "hash": "d4c0c9ba82c0173ec5911edf396613dd2c7122577f75a286a9aa795b3a989bfd"
 }
