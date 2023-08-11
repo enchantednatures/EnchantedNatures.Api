@@ -8,7 +8,7 @@ use crate::routes::categories::{
 use crate::routes::health::health_check;
 use crate::routes::photos::*;
 use crate::routes::upload::save_request_body;
-use anyhow::Result;
+
 use aws_sdk_s3::config::Region;
 use aws_sdk_s3::Client;
 use axum::error_handling::HandleErrorLayer;
@@ -21,7 +21,7 @@ use routes::photos::get_photos;
 use routes::photos::post_photo;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
-use std::net::{Ipv4Addr, SocketAddr};
+use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::error::Elapsed;
@@ -45,14 +45,6 @@ mod models;
 mod routes;
 
 type App = Arc<AppState>;
-
-fn using_serve_dir_with_assets_fallback() -> Router {
-    let serve_dir = ServeDir::new("dist").not_found_service(ServeFile::new("dist/index.html"));
-
-    Router::new()
-        .nest_service("/assets", serve_dir.clone())
-        .fallback_service(serve_dir)
-}
 
 async fn serve(app: Router, addr: SocketAddr) {
     axum::Server::bind(&addr)
@@ -110,7 +102,6 @@ async fn main() {
 
     let swagger_ui = SwaggerUi::new(swagger_path).url("/api-docs/openapi.json", ApiDoc::openapi());
 
-    // build our application with some routes
     let app = Router::new()
         .merge(swagger_ui)
         .route("/health_check", get(health_check))
@@ -144,21 +135,5 @@ async fn main() {
         )
         .with_state(app_state);
 
-    // run it with hyper
-    tokio::join!(
-        serve(
-            using_serve_dir_with_assets_fallback(),
-            SocketAddr::from(([0, 0, 0, 0], 4200))
-        ),
-        serve(app, 
-            SocketAddr::from(([0, 0, 0, 0], 6969))
-        ) // s(addr, app)
-    );
-}
-
-async fn s(addr: SocketAddr, app: Router) {
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    serve(app, SocketAddr::from(([0, 0, 0, 0], 6969))).await; // s(addr, app)
 }
