@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT display_order as \"display_order!\"\n            FROM photo_categories\n            WHERE \n                category_id = $1\n                AND\n                display_order = $2\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "display_order!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b17953cd9e39336ed6fa67333165506c1e2d2952a6ca2b14a0229ee16d421ced"
+}

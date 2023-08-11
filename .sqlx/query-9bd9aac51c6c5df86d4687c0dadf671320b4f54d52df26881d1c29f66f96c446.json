@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id as \"id!\",\n       title as \"title!\",\n       filename as \"filename!\",\n       description as \"description!\",\n       location_taken as \"location_taken!\",\n       date_taken as \"date_taken!\",\n       created_at as \"created_at!\",\n       updated_at as \"updated_at!\"\nFROM photos\n",
+  "query": "INSERT INTO photos (title, filename, location_taken, date_taken)\nVALUES ($1, $2, $3, $4) RETURNING id as \"id!\",\n       title as \"title!\",\n       filename as \"filename!\",\n       location_taken as \"location_taken!\",\n       date_taken as \"date_taken!\",\n       created_at as \"created_at!\",\n       updated_at as \"updated_at!\"\n               \n",
   "describe": {
     "columns": [
       {
@@ -20,43 +20,42 @@
       },
       {
         "ordinal": 3,
-        "name": "description!",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 4,
         "name": "location_taken!",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 5,
+        "ordinal": 4,
         "name": "date_taken!",
         "type_info": "Date"
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "created_at!",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 7,
+        "ordinal": 6,
         "name": "updated_at!",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Date"
+      ]
     },
     "nullable": [
       false,
       false,
       false,
-      true,
       false,
       false,
       false,
       false
     ]
   },
-  "hash": "139a38a28e26689c225f8b6fb753d353f222461e630b0cfed322bb49c5c67a3c"
+  "hash": "9bd9aac51c6c5df86d4687c0dadf671320b4f54d52df26881d1c29f66f96c446"
 }

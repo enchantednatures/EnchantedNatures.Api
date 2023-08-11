@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO photo_categories \n                (category_id, photo_id, display_order) \n                VALUES ($1, $2, $3)\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7a44d02c1aafe59524a418b8aa075e2a4d3937e901445da0e1611cb379f8d2c2"
+}

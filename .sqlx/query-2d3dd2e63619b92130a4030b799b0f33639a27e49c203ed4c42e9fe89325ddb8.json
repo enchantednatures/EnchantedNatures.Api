@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT \n                    MAX(display_order) as \"max_display_order!\"\n               FROM photo_categories \n               WHERE \n                    category_id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "max_display_order!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "2d3dd2e63619b92130a4030b799b0f33639a27e49c203ed4c42e9fe89325ddb8"
+}

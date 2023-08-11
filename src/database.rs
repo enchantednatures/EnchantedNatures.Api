@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use axum::async_trait;
-use chrono::{NaiveDate};
+use chrono::NaiveDate;
 use sqlx::{query_file, query_file_as, PgPool};
 
 use crate::models::{Category, CategoryPhotos, Photo};
@@ -158,45 +158,84 @@ impl PhotoRepo for PhotoRepository {
     ) -> Result<()> {
         let mut transaction = self.db_pool.begin().await?;
 
-        let row = sqlx::query!(
-        r#"SELECT MAX(display_order) as max_display_order FROM photo_categories WHERE category_id = $1"#,
-        &category_id
-    )
-        .fetch_one(&mut *transaction)
-        .await
-        .unwrap();
+        if let Some(display_order) = display_order {
+            let category_has = sqlx::query_scalar!(
+                r#"SELECT display_order as "display_order!"
+            FROM photo_categories
+            WHERE 
+                category_id = $1
+                AND
+                display_order = $2
+                "#,
+                category_id,
+                display_order
+            )
+            .fetch_optional(&mut *transaction)
+            .await
+            .unwrap();
 
-        let max_value = row.max_display_order.unwrap_or(0); // Use 0 if there are no rows
+            match category_has {
+                Some(_) => todo!(),
+                None => {
+                    sqlx::query!(
+                        r#"INSERT INTO photo_categories 
+                    (category_id, photo_id, display_order) 
+                    VALUES ($1, $2, $3)"#,
+                        &category_id,
+                        &photo_id,
+                        &display_order
+                    )
+                    .execute(&mut *transaction)
+                    .await
+                    .unwrap();
+                }
+            };
+        } else {
+            let row = sqlx::query_scalar!(
+                r#"SELECT 
+                    MAX(display_order) as "max_display_order!"
+               FROM photo_categories 
+               WHERE 
+                    category_id = $1
+            "#,
+                &category_id
+            )
+            .fetch_optional(&mut *transaction)
+            .await
+            .unwrap();
+            let next_display_value = row.unwrap_or(0) + 1;
 
-        if let Some(display) = display_order {
-            if display <= max_value {
-                sqlx::query!(
-                    r#"
-                UPDATE photo_categories
-                SET display_order = display_order + 1
-                WHERE category_id = $1
-                AND display_order > $2
-           "#,
-                    &category_id,
-                    &display
-                )
-                .execute(&mut *transaction)
-                .await
-                .unwrap();
-            }
+            sqlx::query!(
+                "INSERT INTO photo_categories 
+                (category_id, photo_id, display_order) 
+                VALUES ($1, $2, $3)
+",
+                &category_id,
+                &photo_id,
+                &next_display_value
+            )
+            .execute(&mut *transaction)
+            .await
+            .unwrap();
         }
 
-        // Now insert a new row with `max_value + 1` as the value for `your_field`
-        // Replace "your_values" with the values for the other fields in your table
-        sqlx::query!(
-        "INSERT INTO photo_categories (category_id, photo_id, display_order) VALUES ($1, $2, $3)",
-        &category_id,
-        &photo_id,
-        &max_value + 1
-    )
-        .execute(&mut *transaction)
-        .await
-        .unwrap();
+        // if let Some(display) = display_order {
+        //     if display <= max_value {
+        //         sqlx::query!(
+        //             r#"
+        //         UPDATE photo_categories
+        //         SET display_order = display_order + 1
+        //         WHERE category_id = $1
+        //         AND display_order > $2
+        //    "#,
+        //             &category_id,
+        //             &display
+        //         )
+        //         .execute(&mut *transaction)
+        //         .await
+        //         .unwrap();
+        //     }
+        // }
 
         transaction.commit().await.unwrap();
         Ok(())

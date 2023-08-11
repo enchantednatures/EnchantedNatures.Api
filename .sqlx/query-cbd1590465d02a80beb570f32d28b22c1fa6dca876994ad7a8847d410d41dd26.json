@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT p.id          as \"id!\",\n     p.title as \"title!\",\n     p.filename as \"filename!\",\n     p.description as \"description!\",\n     p.location_taken as \"location_taken!\",\n     p.date_taken as \"date_taken!\",\n     p.created_at as \"created_at!\",\n     p.updated_at as \"updated_at!\"\nFROM categories\n         JOIN photo_categories pc on categories.id = pc.category_id\n         JOIN photos p on p.id = pc.photo_id\nWHERE category_id = $1\n",
+  "query": "SELECT p.id          as \"id!\",\n     p.title as \"title!\",\n     p.filename as \"filename!\",\n     p.location_taken as \"location_taken!\",\n     p.date_taken as \"date_taken!\",\n     p.created_at as \"created_at!\",\n     p.updated_at as \"updated_at!\"\nFROM categories\n         JOIN photo_categories pc on categories.id = pc.category_id\n         JOIN photos p on p.id = pc.photo_id\nWHERE category_id = $1\n",
   "describe": {
     "columns": [
       {
@@ -20,26 +20,21 @@
       },
       {
         "ordinal": 3,
-        "name": "description!",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 4,
         "name": "location_taken!",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 5,
+        "ordinal": 4,
         "name": "date_taken!",
         "type_info": "Date"
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "created_at!",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 7,
+        "ordinal": 6,
         "name": "updated_at!",
         "type_info": "Timestamptz"
       }
@@ -53,12 +48,11 @@
       false,
       false,
       false,
-      true,
       false,
       false,
       false,
       false
     ]
   },
-  "hash": "ba62d18a8d956102243b359b37008eb69af732db2f251750835d9a8263158865"
+  "hash": "cbd1590465d02a80beb570f32d28b22c1fa6dca876994ad7a8847d410d41dd26"
 }
