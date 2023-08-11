@@ -5,7 +5,7 @@ use tokio::io::AsyncReadExt;
 
 use axum::{
     extract::{BodyStream, Path, State},
-    response::{self, IntoResponse },
+    response::{self, IntoResponse},
     Json,
 };
 use futures::TryStreamExt;

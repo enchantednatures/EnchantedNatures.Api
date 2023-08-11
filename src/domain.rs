@@ -1,8 +1,5 @@
 use anyhow::{Ok, Result};
-use aws_sdk_s3::{
-    operation::put_object::PutObjectOutput,
-    primitives::ByteStream,
-};
+use aws_sdk_s3::{operation::put_object::PutObjectOutput, primitives::ByteStream};
 
 use crate::database::PhotoRepository;
 

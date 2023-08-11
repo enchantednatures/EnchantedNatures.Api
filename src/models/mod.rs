@@ -11,7 +11,7 @@ mod view_models;
 pub struct Photo {
     pub id: i32,
     pub title: String,
-    pub location_taken :String,
+    pub location_taken: String,
     pub filename: String,
     pub date_taken: NaiveDate,
     pub created_at: DateTime<Utc>,

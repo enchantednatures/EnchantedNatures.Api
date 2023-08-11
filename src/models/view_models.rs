@@ -1,5 +1,5 @@
 use crate::models::{Category, Photo};
-use chrono::{NaiveDate};
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -37,7 +37,7 @@ impl From<Photo> for PhotoViewModel {
             title: value.title,
             filename: value.filename,
             location_taken: value.location_taken,
-            date_taken: value.date_taken
+            date_taken: value.date_taken,
         }
     }
 }
@@ -52,7 +52,7 @@ impl From<Category> for CategoryViewModel {
     fn from(value: Category) -> Self {
         Self {
             id: value.id,
-            name: value.name
+            name: value.name,
         }
     }
 }
@@ -85,13 +85,7 @@ impl From<CategoryPhotos> for CategoryDisplayModel {
                 .1
                 .into_iter()
                 .map(|x| {
-                    PhotoViewModel::new(
-                        x.id,
-                        x.title,
-                        x.filename,
-                        x.location_taken,
-                        x.date_taken,
-                    )
+                    PhotoViewModel::new(x.id, x.title, x.filename, x.location_taken, x.date_taken)
                 })
                 .collect(),
         }

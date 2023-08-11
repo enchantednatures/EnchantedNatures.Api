@@ -5,7 +5,7 @@ use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::{response, Json};
-use chrono::{NaiveDate};
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tracing::info;
@@ -32,7 +32,7 @@ pub struct PhotoCreateRequest {
         (status = StatusCode::NO_CONTENT, description = "Delete photo with Id"),
     )
 )]
-#[tracing::instrument(name="Delete photo", skip(app))]
+#[tracing::instrument(name = "Delete photo", skip(app))]
 pub async fn delete_photo(
     State(app): State<App>,
     Path(id): Path<i32>,
@@ -98,7 +98,7 @@ pub async fn post_photo(
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
-pub struct PhotoUpdateRequest { 
+pub struct PhotoUpdateRequest {
     pub title: Option<String>,
     pub location_taken: Option<String>,
     pub date_taken: Option<NaiveDate>,
@@ -149,8 +149,6 @@ pub async fn put_photo(
     Ok((StatusCode::OK, Json(photo)))
 }
 
-
-
 #[derive(Debug, Serialize, Deserialize, IntoResponses)]
 pub enum GetPhotosResponses {
     #[response(status = StatusCode::OK, description = "Get all photos")]
@@ -168,7 +166,7 @@ pub async fn get_photos(
             info!("retrieved {} photos", response.len());
 
             Ok((StatusCode::OK, Json(response)))
-        },
+        }
         Err(e) => {
             tracing::error!("Failed to get photos: {:?}", e);
             Err((
