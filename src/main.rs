@@ -27,8 +27,6 @@ use std::time::Duration;
 use tokio::time::error::Elapsed;
 use tower::BoxError;
 use tower::ServiceBuilder;
-use tower_http::services::ServeDir;
-use tower_http::services::ServeFile;
 use tower_http::trace::TraceLayer;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
