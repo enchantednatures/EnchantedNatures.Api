@@ -33,28 +33,10 @@ Content-Type: application/json
   "description": "Landscape"
 }
 
-### name=Get Category
-GET {{url}}/api/v0/categories/1
+### name=Get Categories
+GET {{url}}/api/v0/categories
 Accept-Encoding: gzip, deflate, br
 Content-Type: application/json
 
+>> categories.json
 
-### name=Delete Category
-DELETE {{url}}/api/v0/categories
-Accept-Encoding: gzip, deflate, br
-Content-Type: application/json
-
-{
-  "id": 1
-}
-
-###
-# @name Add Photo To Category
-POST {{url}}/api/v0/categories/1
-Accept-Encoding: gzip, deflate, br
-Content-Type: application/json
-
-{
-  "photoId" : 1,
-  "displayOrder": 1
-}

@@ -1,0 +1,27 @@
+###
+POST {{url}}/api/v0/photos
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/json
+
+{ 
+    "date_taken": "2015-12-28", 
+    "location_taken" : "Jackson, Wyoming", 
+    "title": "moose and tetons", 
+    "filename": "america_moose.jpg"
+}
+
+> {% 
+    client.global.set("photo_id", response.body.id)
+%}
+
+###
+### @name add photo to category
+POST {{url}}/api/v0/categories/1/photos
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/json
+
+{
+    "photo_id": {{photo_id}},    
+    "display_order": 8
+}
+
