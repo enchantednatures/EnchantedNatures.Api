@@ -23,6 +23,7 @@ COPY ./migrations ./migrations
 # Build the release binary
 RUN rm ./target/release/deps/api*
 ENV SQLX_OFFLINE true
+ENV RUST_LOG=info,axum::rejection=trace 
 RUN cargo install --path .
 
 # Start a new stage for the runtime image
@@ -40,5 +41,7 @@ COPY --from=build /usr/local/cargo/bin/api /usr/local/bin/api
 ENV DATABASE_URL = ""
 EXPOSE 6969
 # Run the API
+
+ENV RUST_LOG=info,axum::rejection=trace 
 CMD ["api"]
 

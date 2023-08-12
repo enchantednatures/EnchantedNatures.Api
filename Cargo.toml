@@ -30,7 +30,7 @@ utoipa-swagger-ui = { version = "3.1.4", features = ["axum"] }
 
 [dependencies.axum]
 version = "0.6.20"
-features = ["headers", "json", "multipart" ]
+features = ["headers", "json", "multipart", "tracing" ]
 
 [dependencies.sqlx]
 version = "0.7.1"
