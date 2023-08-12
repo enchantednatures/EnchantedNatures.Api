@@ -114,7 +114,6 @@ async fn main() {
         )
         .route("/api/v0/categories/:id", get(categories_by_id))
         .route("/api/v0/categories/:id/photos", post(add_photo_to_category))
-        // .route("/api/v0/upload/:file_name", post(save_request_body))
         .layer(
             ServiceBuilder::new()
                 .layer(HandleErrorLayer::new(|error: BoxError| async move {

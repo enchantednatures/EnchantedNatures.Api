@@ -19,8 +19,7 @@ use crate::models;
         photos::post_photo,
         photos::get_photo,
         photos::get_photos,
-        photos::delete_photo,
-        upload::save_request_body
+        photos::delete_photo
     ),
     components(
         schemas(
@@ -38,8 +37,7 @@ use crate::models;
             categories::CreateCategoryRequest,
             categories::CategoryGetByIdResponse,
             health::HealthStatus,
-            health::HealthStatusEnum,
-            upload::UploadedPhotoViewModel
+            health::HealthStatusEnum
         ),
     ),
     tags(
