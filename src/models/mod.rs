@@ -3,8 +3,10 @@ use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::{DateTime, Utc};
 use utoipa::ToSchema;
 
+pub use auth::*;
 pub use view_models::*;
 
+mod auth;
 mod view_models;
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]

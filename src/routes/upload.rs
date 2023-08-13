@@ -11,15 +11,12 @@ use axum::{
 use futures::TryStreamExt;
 use tokio_util::io::StreamReader;
 
-use crate::App;
+use crate::{models::UserInfo, App};
 use serde::{Deserialize, Serialize};
 
 use utoipa::{IntoResponses, ToResponse, ToSchema};
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
-pub struct UserInfo {
-    pub user_id: String,
-}
+use super::auth;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, ToResponse)]
 pub struct UploadedPhotoViewModel {

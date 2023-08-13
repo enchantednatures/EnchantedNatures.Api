@@ -3,6 +3,7 @@ use aws_sdk_s3::{operation::put_object::PutObjectOutput, primitives::ByteStream}
 
 use crate::database::PhotoRepository;
 
+#[derive(Debug, Clone)]
 pub struct AppState {
     pub repo: PhotoRepository,
     pub client: aws_sdk_s3::Client,

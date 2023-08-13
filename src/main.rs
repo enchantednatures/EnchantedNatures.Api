@@ -28,6 +28,7 @@ mod error_handling;
 mod models;
 mod router;
 mod routes;
+mod middleware;
 
 #[tokio::main]
 async fn main() {

@@ -45,6 +45,7 @@ pub trait PhotoRepo {
     async fn get_categories(&self) -> Result<Vec<Category>>;
 }
 
+#[derive(Debug, Clone)]
 pub struct PhotoRepository {
     pub db_pool: Arc<PgPool>,
 }
