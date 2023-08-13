@@ -4,7 +4,6 @@ use crate::routes::categories;
 use crate::routes::health;
 use crate::routes::photos;
 
-
 use crate::models;
 
 #[derive(OpenApi)]
