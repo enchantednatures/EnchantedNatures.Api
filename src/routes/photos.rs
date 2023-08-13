@@ -1,4 +1,5 @@
 use crate::database::PhotoRepo;
+use crate::error_handling::AppError;
 use crate::models::{Photo, PhotoViewModel};
 use crate::App;
 use axum::extract::{Path, State};
@@ -36,16 +37,9 @@ pub struct PhotoCreateRequest {
 pub async fn delete_photo(
     State(app): State<App>,
     Path(id): Path<i32>,
-) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    let result = app.repo.delete_photo(id).await;
-
-    match result {
-        Ok(_) => Ok((StatusCode::NO_CONTENT, Json(json!({ "deleted": &id })))),
-        Err(err) => Err((
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Failed to delete photo: {}", err),
-        )),
-    }
+) -> Result<impl IntoResponse, AppError> {
+    app.repo.delete_photo(id).await?;
+    Ok((StatusCode::NO_CONTENT, Json(json!({ "deleted": &id }))))
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
