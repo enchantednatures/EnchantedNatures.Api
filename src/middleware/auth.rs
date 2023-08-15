@@ -1,7 +1,15 @@
+use axum::http::Request;
+use hyper::http;
+use serde::{Deserialize, Serialize};
 use std::task::{Context, Poll};
-use tower::{Service, Layer};
+use tower::{Layer, Service};
+use utoipa::ToSchema;
 
-use crate::domain::AppState;
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+pub struct LoginCredentials {
+    pub email: String,
+    pub password: String,
+}
 
 #[derive(Debug, Clone)]
 struct AuthClient;
@@ -18,6 +26,32 @@ impl<S> Auth<S> {
             inner,
             state: AuthClient,
         }
+    }
+}
+
+impl<S, B> Service<Request<B>> for Auth<S>
+where
+    S: Service<Request<B>>,
+{
+    type Response = S::Response;
+    type Error = S::Error;
+    type Future = S::Future;
+
+    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.inner.poll_ready(cx)
+    }
+
+    fn call(&mut self, req: Request<B>) -> Self::Future {
+        // Do something with `self.state`.
+        //
+        // See `axum::RequestExt` for how to run extractors directly from
+        // a `Request`.
+        let auth_header = req
+            .headers()
+            .get(http::header::AUTHORIZATION)
+            .and_then(|header| header.to_str().ok());
+
+        self.inner.call(req)
     }
 }
 
