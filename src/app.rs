@@ -10,6 +10,10 @@ use crate::routes::photos::get_photo;
 use crate::routes::photos::put_photo;
 use axum::error_handling::HandleErrorLayer;
 use axum::http::StatusCode;
+use axum::http::{
+    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+    HeaderValue, Method,
+};
 use axum::routing::get;
 use axum::routing::post;
 use axum::Router;
@@ -20,12 +24,23 @@ use std::time::Duration;
 use tokio::time::error::Elapsed;
 use tower::BoxError;
 use tower::ServiceBuilder;
+use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use utoipa_swagger_ui::SwaggerUi;
 
 pub type App = Arc<AppState>;
 
 pub(crate) fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
+    let cors = CorsLayer::new()
+        .allow_origin(
+            "https://enchantednatures.com"
+                .parse::<HeaderValue>()
+                .unwrap(),
+        )
+        .allow_methods([Method::GET, Method::POST, Method::PATCH, Method::DELETE])
+        .allow_credentials(true)
+        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
+
     Router::new()
         .merge(swagger_ui)
         .route("/health_check", get(health_check))
@@ -56,5 +71,6 @@ pub(crate) fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
                 .layer(TraceLayer::new_for_http())
                 .into_inner(),
         )
+        .layer(cors)
         .with_state(app_state)
 }
