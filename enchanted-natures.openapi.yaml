@@ -2,10 +2,15 @@
 openapi: "3.0.3"
 info:
   title: "Enchanted Natures Api"
-  description: "Enchanted Natures Photography"
+  description: |
+    "Enchanted Natures Photography api backend for the https://enchantednatures.com website ............"
   version: "0.1.0"
+  contact:
+    name: Hunter Casten
+    email: huntercasten@gmail.com
+    url: https://github.com/enchantednatures
 servers:
-  - url: "https://api.enchantednatures.com/"
+  - url: "https://api.enchantednatures.com"
     description: "Prod"
 paths:
   /api/v0/upload/{file_name}:
@@ -13,6 +18,8 @@ paths:
       tags:
         - "upload"
       operationId: "save_request_body"
+      security:
+        - authentik: [ upload_photos ]
       parameters:
         - name: "file_name"
           in: "path"
@@ -28,7 +35,9 @@ paths:
               type: "string"
               format: "binary"
         required: true
-      responses: {}
+      responses:
+        "200":
+          description: "upload successful"
   /v0/categories:
     get:
       tags:
@@ -48,7 +57,7 @@ paths:
         - "Categories"
       operationId: "post_category"
       security:
-        - bearerAuth: []
+        - authentik: [ read_photos ]
       requestBody:
         content:
           application/json:
@@ -221,10 +230,15 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   securitySchemes:
-    jwtAuth:
-      type: "http"
-      scheme: "bearer"
-      bearerFormat: "JWT"
+    authentik:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://auth.enchantednatures.com/oauth2/authorize
+          scopes:
+            read_photos: read photos in your account
+            write_photos: modify photos in your account
+            upload_photos: upload photos in your account
   schemas:
     AddPhotoToCategoryRequest:
       type: "object"
@@ -424,6 +438,8 @@ components:
       enum:
         - "PhotoAddedToCategory"
         - "PhotoRemovedFromCategory"
+    BadRequest:
+      type: "string"
 tags:
   - name: "Health Checks"
     description: "Information about the health of the API"
