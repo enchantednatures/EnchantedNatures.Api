@@ -6,36 +6,29 @@ info:
   version: "0.1.0"
 servers:
   - url: "https://api.enchantednatures.com/"
-    description: Prod
+    description: "Prod"
 paths:
-  "/api/v0/upload/{file_name}":
-    {
-      "post":
-        {
-          "tags": [ "upload" ],
-          "operationId": "save_request_body",
-          "parameters":
-            [
-              {
-                  "name": "file_name",
-                  "in": "path",
-                  "description": "Filename",
-                  "required": true,
-                  "schema": { "type": "string" }
-                }
-            ],
-          "requestBody":
-            {
-              "description": "File contents",
-              "content":
-                {
-                  "image/jpeg": { "schema": { "type": "string", "format": "binary" } }
-                },
-              "required": true
-            },
-          "responses": {}
-        }
-    }
+  /api/v0/upload/{file_name}:
+    post:
+      tags:
+        - "upload"
+      operationId: "save_request_body"
+      parameters:
+        - name: "file_name"
+          in: "path"
+          description: "Filename"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        description: "File contents"
+        content:
+          image/jpeg:
+            schema:
+              type: "string"
+              format: "binary"
+        required: true
+      responses: {}
   /v0/categories:
     get:
       tags:
@@ -75,7 +68,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CategoryError"
-  "/v0/categories/{id}":
+  /v0/categories/{id}:
     get:
       tags:
         - "Categories"
@@ -95,7 +88,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CategoryDisplayModel"
-  "/v0/categories/{id}/photos":
+  /v0/categories/{id}/photos:
     post:
       tags:
         - "Categories"
@@ -177,7 +170,7 @@ paths:
           description: "Server Error"
         "500":
           description: "Server Error"
-  "/v0/photos/{id}":
+  /v0/photos/{id}:
     get:
       tags:
         - "Photos"
@@ -229,9 +222,9 @@ paths:
 components:
   securitySchemes:
     jwtAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
   schemas:
     AddPhotoToCategoryRequest:
       type: "object"
@@ -434,10 +427,7 @@ components:
 tags:
   - name: "Health Checks"
     description: "Information about the health of the API"
-
   - name: "Categories"
     description: "Categories"
-
   - name: "Photos"
     description: "Photos"
-
