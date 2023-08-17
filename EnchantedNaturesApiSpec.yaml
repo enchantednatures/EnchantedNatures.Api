@@ -1,0 +1,443 @@
+---
+openapi: "3.0.3"
+info:
+  title: "Enchanted Natures Api"
+  description: "Enchanted Natures Photography"
+  version: "0.1.0"
+servers:
+  - url: "https://api.enchantednatures.com/"
+    description: Prod
+paths:
+  "/api/v0/upload/{file_name}":
+    {
+      "post":
+        {
+          "tags": [ "upload" ],
+          "operationId": "save_request_body",
+          "parameters":
+            [
+              {
+                  "name": "file_name",
+                  "in": "path",
+                  "description": "Filename",
+                  "required": true,
+                  "schema": { "type": "string" }
+                }
+            ],
+          "requestBody":
+            {
+              "description": "File contents",
+              "content":
+                {
+                  "image/jpeg": { "schema": { "type": "string", "format": "binary" } }
+                },
+              "required": true
+            },
+          "responses": {}
+        }
+    }
+  /v0/categories:
+    get:
+      tags:
+        - "Categories"
+      operationId: "get_categories"
+      responses:
+        "200":
+          description: "Get all categories"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      tags:
+        - "Categories"
+      operationId: "post_category"
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequest"
+        required: true
+      responses:
+        "201":
+          description: "Category created successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryViewModel"
+        "409":
+          description: "Category already exists"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryError"
+  "/v0/categories/{id}":
+    get:
+      tags:
+        - "Categories"
+      operationId: "categories_by_id"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Id of category to get photos for"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "Check health"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryDisplayModel"
+  "/v0/categories/{id}/photos":
+    post:
+      tags:
+        - "Categories"
+        - "Photos"
+      operationId: "add_photo_to_category"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Category to add photo to"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddPhotoToCategoryRequest"
+        required: true
+      responses:
+        "202":
+          description: "Photo added to category"
+    delete:
+      tags:
+        - "Categories"
+        - "Photos"
+      operationId: "delete"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Id of category to delete"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "Category Deleted"
+        "404":
+          description: "Category Not Found"
+        "500":
+          description: "Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequest"
+  /v0/photos:
+    get:
+      tags:
+        - "Photos"
+      operationId: "get_photos"
+      responses:
+        "200":
+          description: "Get all photos"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Photo"
+    post:
+      tags:
+        - "Photos"
+      operationId: "post_photo"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhotoCreateRequest"
+        required: true
+      responses:
+        "201":
+          description: "Photo Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Photo"
+        "409":
+          description: "Server Error"
+        "500":
+          description: "Server Error"
+  "/v0/photos/{id}":
+    get:
+      tags:
+        - "Photos"
+      operationId: "get_photo"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Photo Id"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "Get photo by id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhotoViewModel"
+        "404":
+          description: "Unable to find Photo"
+    delete:
+      tags:
+        - "Photos"
+      operationId: "delete_photo"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Id of the Photo"
+          required: true
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "204":
+          description: "Delete photo with Id"
+  /health_check:
+    get:
+      tags:
+        - "Health Checks"
+      operationId: "health_check"
+      responses:
+        "200":
+          description: "Check health"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+components:
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AddPhotoToCategoryRequest:
+      type: "object"
+      required:
+        - "photo_id"
+      properties:
+        display_order:
+          type: "integer"
+          format: "int32"
+          nullable: true
+        photo_id:
+          type: "integer"
+          format: "int32"
+    Category:
+      type: "object"
+      required:
+        - "id"
+        - "name"
+        - "created_at"
+        - "updated_at"
+      properties:
+        created_at:
+          type: "string"
+          format: "date-time"
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        updated_at:
+          type: "string"
+          format: "date-time"
+    CategoryDisplayModel:
+      type: "object"
+      required:
+        - "id"
+        - "name"
+        - "photos"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        photos:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/PhotoViewModel"
+    CategoryError:
+      type: "string"
+      enum:
+        - "CategoryAlreadyExists"
+    CategoryGetByIdRequest:
+      type: "object"
+      required:
+        - "id"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+    CategoryGetByIdResponse:
+      type: "object"
+      required:
+        - "category"
+        - "photos"
+      properties:
+        category:
+          $ref: "#/components/schemas/Category"
+        photos:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Photo"
+    CategoryViewModel:
+      type: "object"
+      required:
+        - "id"
+        - "name"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+    CreateCategoryRequest:
+      type: "object"
+      required:
+        - "name"
+      properties:
+        name:
+          type: "string"
+    HealthStatus:
+      type: "object"
+      required:
+        - "status"
+      properties:
+        status:
+          $ref: "#/components/schemas/HealthStatusEnum"
+    HealthStatusEnum:
+      type: "string"
+      enum:
+        - "Ok"
+        - "Error"
+    Photo:
+      type: "object"
+      required:
+        - "id"
+        - "title"
+        - "location_taken"
+        - "filename"
+        - "date_taken"
+        - "created_at"
+        - "updated_at"
+      properties:
+        created_at:
+          type: "string"
+          format: "date-time"
+        date_taken:
+          type: "string"
+          format: "date"
+        filename:
+          type: "string"
+        id:
+          type: "integer"
+          format: "int32"
+        location_taken:
+          type: "string"
+        title:
+          type: "string"
+        updated_at:
+          type: "string"
+          format: "date-time"
+    PhotoCreateRequest:
+      type: "object"
+      required:
+        - "title"
+        - "location_taken"
+        - "date_taken"
+        - "filename"
+      properties:
+        date_taken:
+          type: "string"
+          format: "date"
+        filename:
+          type: "string"
+        location_taken:
+          type: "string"
+        title:
+          type: "string"
+    PhotoDisplayModel:
+      type: "object"
+      required:
+        - "id"
+        - "title"
+        - "name"
+        - "filename"
+        - "url"
+        - "categories"
+      properties:
+        categories:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/CategoryViewModel"
+        filename:
+          type: "string"
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        title:
+          type: "string"
+        url:
+          type: "string"
+    PhotoViewModel:
+      type: "object"
+      required:
+        - "id"
+        - "title"
+        - "filename"
+        - "location_taken"
+        - "date_taken"
+      properties:
+        date_taken:
+          type: "string"
+          format: "date"
+        filename:
+          type: "string"
+        id:
+          type: "integer"
+          format: "int32"
+        location_taken:
+          type: "string"
+        title:
+          type: "string"
+    UpdatePhotoCategoryResponse:
+      type: "string"
+      enum:
+        - "PhotoAddedToCategory"
+        - "PhotoRemovedFromCategory"
+tags:
+  - name: "Health Checks"
+    description: "Information about the health of the API"
+
+  - name: "Categories"
+    description: "Categories"
+
+  - name: "Photos"
+    description: "Photos"
+
