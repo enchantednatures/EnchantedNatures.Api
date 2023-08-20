@@ -25,7 +25,7 @@ tower-http = { version = "0.4.3", features = ["add-extension", "trace", "cors"] 
 tracing = "0.1"
 tracing-bunyan-formatter = "0.3.8"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-utoipa = { version = "3.4.3", features = ["axum_extras", "chrono"] }
+utoipa = { version = "3.5.0", features = ["axum_extras", "chrono"] }
 utoipa-swagger-ui = { version = "3.1.4", features = ["axum"] }
 
 [dependencies.axum]
