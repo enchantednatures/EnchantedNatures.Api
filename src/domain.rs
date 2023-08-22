@@ -11,7 +11,7 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub(crate) fn new(repo: PhotoRepository, client: aws_sdk_s3::Client) -> Self {
+    pub fn new(repo: PhotoRepository, client: aws_sdk_s3::Client) -> Self {
         Self {
             repo,
             client,

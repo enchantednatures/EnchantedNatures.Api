@@ -114,7 +114,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/CategoryDetails"
         "401":
-          description: authorization required
+          "description": "Authorization required"
+          $ref: "#/components/responses/Unauthorized"
         "408":
           description: timed out creating category
         "409":
@@ -145,23 +146,20 @@ paths:
               schema:
                 $ref: "#/components/schemas/CategoryDetails"
         "404":
-          description: No category with id
+          description: Photo not found
+          $ref: '#/components/responses/NotFound'
 
-    patch:
-      description: Update a specific category by category_id
-      operationId: update_category
-      tags:
-        - Categories
-      #... rest of the endpoint details
     delete:
       description: Delete a specific category by category_id
       operationId: delete_category
       tags:
         - Categories
-
+        -
       responses:
         "204":
-          description: Deleted photos
+          description: Deleted photo
+        "404":
+          description: Photo not found
 
 
   /photos:
@@ -170,33 +168,70 @@ paths:
       operationId: get_photos
       tags:
         - Photos
-      #... rest of the endpoint details
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhotoSummary"
     post:
       description: Create a new photo
       operationId: create_photo
       tags:
         - Photos
-      #... rest of the endpoint details
+      requestBody:
+        security:
+          - authentik:
+              - read_photos
+              - write_photos
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  required: true
+                location_taken:
+                  type: string
+                  required: true
+                filename:
+                  type: string
+                  required: true
 
   "/photos/{photo_id}":
+    parameters:
+      - in: path
+        name: photo_id
+        description: id of photo
+        required: true
+        example: 1
+        schema:
+          type: integer
     get:
       description: Get a specific photo by photo_id
       operationId: get_photo
       tags:
         - Photos
-      #... rest of the endpoint details
-    patch:
-      description: Update a specific photo by photo_id
-      operationId: update_photo
-      tags:
-        - Photos
-      #... rest of the endpoint details
+      responses:
+        "200":
+          description: Photo at photo_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhotoDetails"
     delete:
       description: Delete a specific photo by photo_id
       operationId: delete_photo
       tags:
         - Photos
-      #... rest of the endpoint details
+      responses:
+        "204":
+           description: "Deleted"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   "/photos?category={category_id}":
     get:
@@ -205,12 +240,32 @@ paths:
       tags:
         - Photos
         - Categories
-      #... rest of the endpoint details
+      responses:
+        "200":
+          description: "Photos with category"
+          content:
+            application/json:
+              schema:
+                type: array
+                properties:
+
+
+
 components:
   examples: { } # TODO: add examples of each type
   responses:
-    404NotFound:
-      description: The specified resource was not found.
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   securitySchemes:
     authentik:
       type: oauth2
@@ -223,7 +278,6 @@ components:
             upload_photos: upload photos in your account
   schemas:
     Error:
-      # Can be referenced as '#/components/schemas/Error'
       type: object
       properties:
         code:

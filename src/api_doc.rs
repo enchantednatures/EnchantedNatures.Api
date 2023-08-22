@@ -46,4 +46,4 @@ use crate::models;
 
     )
 )]
-pub(crate) struct ApiDoc;
+pub struct ApiDoc;

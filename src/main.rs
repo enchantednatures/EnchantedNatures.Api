@@ -1,18 +1,17 @@
 #![allow(dead_code)]
 
-use crate::api_doc::ApiDoc;
-use crate::database::PhotoRepository;
-
-use app::{create_router, App};
 use aws_sdk_s3::config::Region;
 use aws_sdk_s3::Client;
-
-use domain::AppState;
 
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::net::SocketAddr;
 
+use api::api_doc::ApiDoc;
+use api::app::{create_router, App};
+use api::database::PhotoRepository;
+use api::domain::AppState;
+use api::router;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;

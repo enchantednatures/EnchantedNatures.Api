@@ -30,7 +30,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 pub type App = Arc<AppState>;
 
-pub(crate) fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
+pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
     let cors = CorsLayer::new()
         .allow_origin(
             "https://enchantednatures.com"

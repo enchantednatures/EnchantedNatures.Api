@@ -16,8 +16,6 @@ use serde::{Deserialize, Serialize};
 
 use utoipa::{IntoResponses, ToResponse, ToSchema};
 
-use super::auth;
-
 #[derive(Debug, Serialize, Deserialize, ToSchema, ToResponse)]
 pub struct UploadedPhotoViewModel {
     file_size: usize,
