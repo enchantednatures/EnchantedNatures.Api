@@ -11,7 +11,7 @@ use axum::{
 use futures::TryStreamExt;
 use tokio_util::io::StreamReader;
 
-use crate::{models::UserInfo, App};
+use crate::{app::App, models::UserInfo};
 use serde::{Deserialize, Serialize};
 
 use utoipa::{IntoResponses, ToResponse, ToSchema};

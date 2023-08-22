@@ -40,7 +40,10 @@ use crate::models;
         ),
     ),
     tags(
-        (name = "Health Checks", description = "Information about the health of the API")
+        (name = "Health Checks", description = "Information about the health of the API"),
+        (name = "Categories", description = "Category Resources"),
+        (name = "Photos", description = "Photo Resources"),
+
     )
 )]
 pub(crate) struct ApiDoc;

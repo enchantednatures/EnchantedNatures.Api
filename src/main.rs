@@ -20,16 +20,6 @@ use tracing_subscriber::Registry;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-mod api_doc;
-mod app;
-mod database;
-mod domain;
-mod error_handling;
-mod models;
-mod router;
-mod routes;
-mod middleware;
-
 #[tokio::main]
 async fn main() {
     let formatting_layer = BunyanFormattingLayer::new("enchanted_natures".into(), std::io::stdout);

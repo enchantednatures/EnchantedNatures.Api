@@ -3,7 +3,6 @@ use crate::models::Category;
 use crate::models::CategoryDisplayModel;
 use crate::models::CategoryViewModel;
 use crate::models::Photo;
-use crate::App;
 
 use axum::extract::Path;
 use axum::extract::State;
@@ -12,6 +11,7 @@ use axum::response::IntoResponse;
 use axum::{response, Json};
 use serde::{Deserialize, Serialize};
 
+use crate::app::App;
 use tracing::info;
 use utoipa::{IntoResponses, ToSchema};
 
@@ -25,6 +25,7 @@ pub struct AddPhotoToCategoryRequest {
     post,
     path = "/api/v0/categories/{id}/photos",
     request_body = AddPhotoToCategoryRequest,
+    tag="Categories",
     params(
         ("id"= i32, Path, description = "Category to add photo to")
     ),

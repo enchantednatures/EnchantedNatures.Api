@@ -1,7 +1,7 @@
+use crate::app::App;
 use crate::database::PhotoRepo;
 use crate::error_handling::AppError;
 use crate::models::{Photo, PhotoViewModel};
-use crate::App;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
