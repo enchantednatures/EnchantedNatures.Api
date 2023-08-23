@@ -15,7 +15,7 @@ info:
 servers:
   - url: http://localhost:6969
     description: localhost
-  - url: https://api-{environment}.enchantednatures.com/v0/
+  - url: https://api-{environment}.enchantednatures.com/v0
     description: Prod
     variables:
       environment:
@@ -83,14 +83,15 @@ paths:
     post:
       description: Create a new category
       operationId: create_category
+      security:
+        - authentik:
+            - read_photos
+            - write_photos
       tags:
         - Categories
       requestBody:
         description: Create category properties
-        security:
-          - authentik:
-              - read_photos
-              - write_photos
+
         content:
           application/json:
             schema:
@@ -98,7 +99,6 @@ paths:
               properties:
                 name:
                   type: string
-                  required: true
 
       responses:
         "201":
@@ -114,7 +114,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/CategoryDetails"
         "401":
-          "description": "Authorization required"
           $ref: "#/components/responses/Unauthorized"
         "408":
           description: timed out creating category
@@ -146,7 +145,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/CategoryDetails"
         "404":
-          description: Photo not found
           $ref: '#/components/responses/NotFound'
 
     delete:
@@ -154,22 +152,29 @@ paths:
       operationId: delete_category
       tags:
         - Categories
-        -
       responses:
         "204":
           description: Deleted photo
         "404":
           description: Photo not found
 
-
   /photos:
     get:
       description: Get all photos
       operationId: get_photos
+      parameters:
+        - in: query
+          name: category
+          description: id of category
+          required: false
+          example: 1
+          schema:
+            type: integer
       tags:
         - Photos
       responses:
-        200:
+        "200":
+          description: Photos which match query
           content:
             application/json:
               schema:
@@ -179,13 +184,13 @@ paths:
     post:
       description: Create a new photo
       operationId: create_photo
+      security:
+        - authentik:
+            - read_photos
+            - write_photos
       tags:
         - Photos
       requestBody:
-        security:
-          - authentik:
-              - read_photos
-              - write_photos
         content:
           application/json:
             schema:
@@ -193,13 +198,14 @@ paths:
               properties:
                 title:
                   type: string
-                  required: true
                 location_taken:
                   type: string
-                  required: true
                 filename:
                   type: string
-                  required: true
+
+      responses:
+        "201":
+          description: created TODO
 
   "/photos/{photo_id}":
     parameters:
@@ -229,30 +235,12 @@ paths:
         - Photos
       responses:
         "204":
-           description: "Deleted"
+          description: "Deleted"
         "404":
           $ref: "#/components/responses/NotFound"
 
-  "/photos?category={category_id}":
-    get:
-      description: Get all photos within a specific category
-      operationId: get_photos_in_category
-      tags:
-        - Photos
-        - Categories
-      responses:
-        "200":
-          description: "Photos with category"
-          content:
-            application/json:
-              schema:
-                type: array
-                properties:
-
-
-
 components:
-  examples: { } # TODO: add examples of each type
+  examples: {} # TODO: add examples of each type
   responses:
     NotFound:
       description: The specified resource was not found
@@ -325,10 +313,10 @@ components:
           type: string
         filename:
           type: string
-    CreatePhoto: { }
-    CreateCategory: { }
+    CreatePhoto: {}
+    CreateCategory: {}
 
-    CategorySummary: { }
+    CategorySummary: {}
     HealthStatus:
       type: object
       properties:
