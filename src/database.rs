@@ -56,6 +56,10 @@ impl PhotoRepository {
             db_pool: Arc::new(pg_pool),
         }
     }
+    pub async fn migrate(&self) -> Result<()> {
+        sqlx::migrate!().run(&*self.db_pool).await?;
+        Ok(())
+    }
 }
 
 #[async_trait]
@@ -77,6 +81,13 @@ impl PhotoRepo for PhotoRepository {
         )
         .fetch_one(&*self.db_pool)
         .await?;
+        Ok(response)
+    }
+
+    async fn get_photo(&self, id: i32) -> Result<Photo> {
+        let response = query_file_as!(Photo, "sql/photos/get.sql", id)
+            .fetch_one(&*self.db_pool)
+            .await?;
         Ok(response)
     }
 
@@ -121,13 +132,6 @@ impl PhotoRepo for PhotoRepository {
             }
             Err(e) => Err(e),
         }
-    }
-
-    async fn get_photo(&self, id: i32) -> Result<Photo> {
-        let response = query_file_as!(Photo, "sql/photos/get.sql", id)
-            .fetch_one(&*self.db_pool)
-            .await?;
-        Ok(response)
     }
 
     async fn get_photos_in_category(&self, id: i32) -> Result<Vec<Photo>> {

@@ -1,5 +1,6 @@
 pub mod api_doc;
 pub mod app;
+pub mod auth;
 pub mod configuration;
 pub mod database;
 pub mod domain;
@@ -8,3 +9,4 @@ pub mod middleware;
 pub mod models;
 pub mod router;
 pub mod routes;
+pub mod sessions;

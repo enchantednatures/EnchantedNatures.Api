@@ -1,3 +1,4 @@
+use crate::auth::{default_auth, login_authorized};
 use crate::domain::AppState;
 use crate::routes::categories::add_photo_to_category;
 use crate::routes::categories::categories_by_id;
@@ -19,7 +20,6 @@ use axum::routing::post;
 use axum::Router;
 use photos::get_photos;
 use photos::post_photo;
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::error::Elapsed;
 use tower::BoxError;
@@ -28,9 +28,7 @@ use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use utoipa_swagger_ui::SwaggerUi;
 
-pub type App = Arc<AppState>;
-
-pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
+pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
     let cors = CorsLayer::new()
         .allow_origin(
             "https://enchantednatures.com"
@@ -43,6 +41,8 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
 
     Router::new()
         .merge(swagger_ui)
+        .route("/api/v0/authorize", get(default_auth))
+        .route("/api/v0/authorized", get(login_authorized))
         .route("/health_check", get(health_check))
         .route("/api/v0/photos", get(get_photos).post(post_photo))
         .route(

@@ -11,9 +11,10 @@ use axum::{
 use futures::TryStreamExt;
 use tokio_util::io::StreamReader;
 
-use crate::{app::App, models::UserInfo};
+use crate::models::UserInfo;
 use serde::{Deserialize, Serialize};
 
+use crate::domain::AppState;
 use utoipa::{IntoResponses, ToResponse, ToSchema};
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, ToResponse)]
@@ -46,7 +47,7 @@ pub enum UploadPhotoResponses {
 )]
 #[tracing::instrument(name = "Save file", skip(app, body))]
 pub async fn save_request_body(
-    State(app): State<App>,
+    State(app): State<AppState>,
     Path(file_name): Path<String>,
     TypedHeader(user_agent): TypedHeader<UserInfo>,
     body: BodyStream,

@@ -1,5 +1,5 @@
-use crate::app::App;
 use crate::database::PhotoRepo;
+use crate::domain::AppState;
 use crate::error_handling::AppError;
 use crate::models::{Photo, PhotoViewModel};
 use axum::extract::{Path, State};
@@ -35,7 +35,7 @@ pub struct PhotoCreateRequest {
 )]
 #[tracing::instrument(name = "Delete photo", skip(app))]
 pub async fn delete_photo(
-    State(app): State<App>,
+    State(app): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, AppError> {
     app.repo.delete_photo(id).await?;
@@ -70,7 +70,7 @@ pub enum CreatePhotoResponses {
 )]
 #[tracing::instrument(name = "add photo", skip(app))]
 pub async fn post_photo(
-    State(app): State<App>,
+    State(app): State<AppState>,
     Json(payload): Json<PhotoCreateRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     info!("creating photo");
@@ -122,7 +122,7 @@ pub enum UpdatePhotoResponses {
 )]
 #[tracing::instrument(name = "update photo", skip(app))]
 pub async fn put_photo(
-    State(app): State<App>,
+    State(app): State<AppState>,
     Path(id): Path<i32>,
     Json(payload): Json<PhotoUpdateRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
@@ -152,7 +152,7 @@ pub enum GetPhotosResponses {
 #[utoipa::path(get, path = "/api/v0/photos", responses(GetPhotosResponses))]
 #[tracing::instrument(name = "Get photos", skip(app))]
 pub async fn get_photos(
-    State(app): State<App>,
+    State(app): State<AppState>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     info!("getting all photos");
     match app.repo.get_photos().await {
@@ -197,7 +197,7 @@ pub enum GetPhotoResponses {
 )]
 #[tracing::instrument(name = "Get photo", skip(app))]
 pub async fn get_photo(
-    State(app): State<App>,
+    State(app): State<AppState>,
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     match app.repo.get_photo(id).await {

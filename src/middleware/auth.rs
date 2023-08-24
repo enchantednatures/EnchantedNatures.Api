@@ -46,7 +46,7 @@ where
         //
         // See `axum::RequestExt` for how to run extractors directly from
         // a `Request`.
-        let auth_header = req
+        let _auth_header = req
             .headers()
             .get(http::header::AUTHORIZATION)
             .and_then(|header| header.to_str().ok());
