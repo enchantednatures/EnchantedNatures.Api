@@ -24,7 +24,7 @@ use std::time::Duration;
 use tokio::time::error::Elapsed;
 use tower::BoxError;
 use tower::ServiceBuilder;
-use tower_http::cors::CorsLayer;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -32,29 +32,30 @@ pub type App = Arc<AppState>;
 
 pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
     let cors = CorsLayer::new()
-        .allow_origin(
-            "https://enchantednatures.com"
-                .parse::<HeaderValue>()
-                .unwrap(),
-        )
-        .allow_methods([Method::GET, Method::POST, Method::PATCH, Method::DELETE])
-        .allow_credentials(true)
-        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
+        // allow `GET` and `POST` when accessing the resource
+        .allow_methods([Method::GET, Method::POST])
+        // allow requests from any origin
+        .allow_origin(Any);
 
     Router::new()
         .merge(swagger_ui)
         .route("/health_check", get(health_check))
-        .route("/api/v0/photos", get(get_photos).post(post_photo))
-        .route(
-            "/api/v0/photos/:id",
-            get(get_photo).delete(delete_photo).put(put_photo),
+        .nest(
+            "/api/v0",
+            Router::new()
+                .route("/api/v0/photos", get(get_photos).post(post_photo))
+                .route(
+                    "/api/v0/photos/:id",
+                    get(get_photo).delete(delete_photo).put(put_photo),
+                )
+                .route(
+                    "/api/v0/categories",
+                    get(get_categories).post(post_category),
+                )
+                .route("/api/v0/categories/:id", get(categories_by_id))
+                .route("/api/v0/categories/:id/photos", post(add_photo_to_category)),
         )
-        .route(
-            "/api/v0/categories",
-            get(get_categories).post(post_category),
-        )
-        .route("/api/v0/categories/:id", get(categories_by_id))
-        .route("/api/v0/categories/:id/photos", post(add_photo_to_category))
+        .layer(cors)
         .layer(
             ServiceBuilder::new()
                 .layer(HandleErrorLayer::new(|error: BoxError| async move {
@@ -71,6 +72,5 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
                 .layer(TraceLayer::new_for_http())
                 .into_inner(),
         )
-        // .layer(cors)
         .with_state(app_state)
 }
