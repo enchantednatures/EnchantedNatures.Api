@@ -7,7 +7,6 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::net::SocketAddr;
 
-use api::api_doc::ApiDoc;
 use api::app::{create_router, App};
 use api::database::PhotoRepository;
 use api::domain::AppState;
@@ -16,8 +15,7 @@ use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::Registry;
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
+use utoipa_swagger_ui::{Config, SwaggerUi};
 
 #[tokio::main]
 async fn main() {
@@ -56,8 +54,8 @@ async fn main() {
     sqlx::migrate!().run(&pool).await.unwrap();
     let photo_repo = PhotoRepository::new(pool.clone());
     let app_state = App::new(AppState::new(photo_repo, client));
-    let swagger_path = "/swagger-ui";
-    let swagger_ui = SwaggerUi::new(swagger_path).url("/api-docs/openapi.json", ApiDoc::openapi());
+    let swagger_ui = SwaggerUi::new("/swagger-ui")
+        .config(Config::from("/api/enchanted-natures.openapi.spec.yaml"));
     let app = create_router(swagger_ui, app_state);
     router::serve(app, SocketAddr::from(([0, 0, 0, 0], 6969))).await; // s(addr, app)
 }

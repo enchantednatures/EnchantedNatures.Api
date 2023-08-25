@@ -1,49 +1,6 @@
-use utoipa::OpenApi;
+use std::fs::read_to_string;
+use std::path::Path;
 
-use crate::routes::categories;
-use crate::routes::health;
-use crate::routes::photos;
-
-use crate::models;
-
-#[derive(OpenApi)]
-#[openapi(
-    paths(
-        health::health_check,
-        categories::categories_by_id,
-        categories::get_categories,
-        categories::post_category,
-        categories::add_photo_to_category,
-        categories::delete,
-        photos::post_photo,
-        photos::get_photo,
-        photos::get_photos,
-        photos::delete_photo
-    ),
-    components(
-        schemas(
-            models::CategoryViewModel,
-            models::CategoryDisplayModel,
-            models::PhotoViewModel,
-            models::PhotoDisplayModel,
-            models::Photo,
-            models::Category,
-            photos::PhotoCreateRequest,
-            categories::CategoryError,
-            categories::AddPhotoToCategoryRequest,
-            categories::UpdatePhotoCategoryResponse,
-            categories::CategoryGetByIdRequest,
-            categories::CreateCategoryRequest,
-            categories::CategoryGetByIdResponse,
-            health::HealthStatus,
-            health::HealthStatusEnum
-        ),
-    ),
-    tags(
-        (name = "Health Checks", description = "Information about the health of the API"),
-        (name = "Categories", description = "Category Resources"),
-        (name = "Photos", description = "Photo Resources"),
-
-    )
-)]
-pub struct ApiDoc;
+pub fn read_spec() -> String {
+    read_to_string(Path::new("api/enchanted-natures.openapi.spec.yaml".into())).unwrap()
+}

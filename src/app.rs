@@ -9,11 +9,8 @@ use crate::routes::photos::delete_photo;
 use crate::routes::photos::get_photo;
 use crate::routes::photos::put_photo;
 use axum::error_handling::HandleErrorLayer;
+use axum::http::Method;
 use axum::http::StatusCode;
-use axum::http::{
-    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
-    HeaderValue, Method,
-};
 use axum::routing::get;
 use axum::routing::post;
 use axum::Router;
@@ -28,6 +25,8 @@ use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use utoipa_swagger_ui::SwaggerUi;
 
+use tower_http::services::ServeFile;
+
 pub type App = Arc<AppState>;
 
 pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
@@ -39,6 +38,10 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
 
     Router::new()
         .merge(swagger_ui)
+        .nest_service(
+            "/api/enchanted-natures.openapi.spec.yaml",
+            ServeFile::new("api/enchanted-natures.openapi.spec.yaml"),
+        )
         .route("/health_check", get(health_check))
         .nest(
             "/api/v0",

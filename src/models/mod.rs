@@ -1,7 +1,6 @@
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::{DateTime, Utc};
-use utoipa::ToSchema;
 
 pub use auth::*;
 pub use view_models::*;
@@ -9,7 +8,7 @@ pub use view_models::*;
 mod auth;
 mod view_models;
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Photo {
     pub id: i32,
     pub title: String,
@@ -20,7 +19,7 @@ pub struct Photo {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Category {
     pub id: i32,
     pub name: String,
@@ -44,7 +43,7 @@ impl Category {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PhotoCategory {
     pub id: i32,
     pub display_order: i32,

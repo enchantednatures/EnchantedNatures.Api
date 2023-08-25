@@ -10,7 +10,7 @@ impl AuthService {
         unimplemented!();
     }
 
-    async fn logout() -> Result<(), AppError> { 
+    async fn logout() -> Result<(), AppError> {
         unimplemented!()
     }
 }

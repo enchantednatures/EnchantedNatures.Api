@@ -1,8 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
-use utoipa::ToSchema;
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UserInfo {
     pub user_id: String,
 }

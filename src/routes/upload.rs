@@ -14,9 +14,7 @@ use tokio_util::io::StreamReader;
 use crate::{app::App, models::UserInfo};
 use serde::{Deserialize, Serialize};
 
-use utoipa::{IntoResponses, ToResponse, ToSchema};
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, ToResponse)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UploadedPhotoViewModel {
     file_size: usize,
 }
@@ -27,23 +25,13 @@ impl UploadedPhotoViewModel {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, IntoResponses)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum UploadPhotoResponses {
-    #[response(status = StatusCode::CREATED, description = "Get photo by id")]
     Success(UploadedPhotoViewModel),
 
-    #[response(status = StatusCode::INTERNAL_SERVER_ERROR, description = "Unable to upload Photo")]
     UploadError,
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/v0/upload/{file_name}",
-    params(
-        ("file_name"= String, Path, description = "Filename")
-    ),
-    request_body(content = [u8], description = "File contents", content_type = "image/jpeg")
-)]
 #[tracing::instrument(name = "Save file", skip(app, body))]
 pub async fn save_request_body(
     State(app): State<App>,

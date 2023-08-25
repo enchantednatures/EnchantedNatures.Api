@@ -1,9 +1,8 @@
 use crate::models::{Category, Photo};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PhotoViewModel {
     pub id: i32,
     pub title: String,
@@ -42,7 +41,7 @@ impl From<Photo> for PhotoViewModel {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CategoryViewModel {
     pub id: i32,
     pub name: String,
@@ -57,7 +56,7 @@ impl From<Category> for CategoryViewModel {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PhotoDisplayModel {
     pub id: i32,
     pub title: String,
@@ -67,7 +66,7 @@ pub struct PhotoDisplayModel {
     pub categories: Vec<CategoryViewModel>,
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CategoryDisplayModel {
     pub id: i32,
     pub name: String,

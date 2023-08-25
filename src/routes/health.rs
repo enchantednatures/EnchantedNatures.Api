@@ -2,15 +2,14 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::{response, Json};
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize)]
 pub enum HealthStatusEnum {
     Ok,
     Error,
 }
 
-#[derive(Deserialize, Serialize, ToSchema)]
+#[derive(Deserialize, Serialize)]
 pub struct HealthStatus {
     status: HealthStatusEnum,
 }
@@ -23,13 +22,6 @@ impl HealthStatus {
     }
 }
 
-#[utoipa::path(
-    get,
-    path = "/health_check",
-    responses(
-        (status = StatusCode::OK, description = "Check health", body = HealthStatus)
-    )
-)]
 pub async fn health_check() -> response::Result<impl IntoResponse, (StatusCode, String)> {
     Ok(Json(HealthStatus::new()))
 }

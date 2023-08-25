@@ -3,9 +3,8 @@ use hyper::http;
 use serde::{Deserialize, Serialize};
 use std::task::{Context, Poll};
 use tower::{Layer, Service};
-use utoipa::ToSchema;
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct LoginCredentials {
     pub email: String,
     pub password: String,
