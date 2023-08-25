@@ -71,6 +71,6 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
                 .layer(TraceLayer::new_for_http())
                 .into_inner(),
         )
-        .layer(cors)
+        // .layer(cors)
         .with_state(app_state)
 }
