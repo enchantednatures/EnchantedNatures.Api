@@ -19,7 +19,7 @@ impl SessionManager {
         self.session.insert(p0.into(), user.clone());
         Ok(())
     }
-    pub(crate) fn get(&mut self, p0: &str) -> Option<&User> {
-        self.session.get(p0)
+    pub(crate) async fn load_session(&mut self, p0: String) -> Result<Option<&User>> {
+        Ok(self.session.get(&p0))
     }
 }

@@ -1,4 +1,4 @@
-use crate::auth::{default_auth, login_authorized};
+use crate::auth::{default_auth, login_authorized, protected};
 use crate::domain::AppState;
 use crate::routes::categories::add_photo_to_category;
 use crate::routes::categories::categories_by_id;
@@ -43,6 +43,7 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
         .merge(swagger_ui)
         .route("/api/v0/authorize", get(default_auth))
         .route("/api/v0/authorized", get(login_authorized))
+        .route("/protected", get(protected))
         .route("/health_check", get(health_check))
         .route("/api/v0/photos", get(get_photos).post(post_photo))
         .route(

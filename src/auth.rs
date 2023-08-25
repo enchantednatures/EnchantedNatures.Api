@@ -8,12 +8,22 @@ use crate::configuration::AuthSettings;
 use axum::extract::{Query, State};
 use axum::headers::HeaderMap;
 use axum::http::header::SET_COOKIE;
-use axum::response::{IntoResponse, Redirect};
+use axum::response::{IntoResponse, Redirect, Response};
+
+use axum::http::header;
+use axum::http::request::Parts;
+use axum::{
+    async_trait,
+    extract::{rejection::TypedHeaderRejectionReason, FromRef, FromRequestParts, TypedHeader},
+    headers, RequestPartsExt,
+};
 use serde::Deserialize;
 
 use crate::sessions::SessionManager;
 use oauth2::{reqwest::async_http_client, AuthorizationCode, TokenResponse};
 use serde::Serialize;
+
+static COOKIE_NAME: &str = "X-Auth";
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
@@ -23,12 +33,62 @@ pub struct AuthRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub(crate) struct User {
+pub struct User {
     id: String,
     avatar: Option<String>,
     username: String,
     discriminator: String,
 }
+
+pub struct AuthRedirect;
+
+impl IntoResponse for AuthRedirect {
+    fn into_response(self) -> Response {
+        Redirect::temporary("/api/v0/authorize").into_response()
+    }
+}
+#[async_trait]
+impl<S> FromRequestParts<S> for User
+where
+    SessionManager: FromRef<S>,
+    S: Send + Sync,
+{
+    // If anything goes wrong or no session is found, redirect to the auth page
+    type Rejection = AuthRedirect;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let mut store = SessionManager::from_ref(state);
+
+        let cookies = parts
+            .extract::<TypedHeader<headers::Cookie>>()
+            .await
+            .map_err(|e| match *e.name() {
+                header::COOKIE => match e.reason() {
+                    TypedHeaderRejectionReason::Missing => AuthRedirect,
+                    _ => panic!("unexpected error getting Cookie header(s): {}", e),
+                },
+                _ => panic!("unexpected error getting cookies: {}", e),
+            })?;
+        let session_cookie = cookies.get(COOKIE_NAME).ok_or(AuthRedirect)?;
+
+        let session = store
+            .load_session(session_cookie.to_string())
+            .await
+            .unwrap()
+            .ok_or(AuthRedirect)?;
+
+        // let user = session.get::<User>("user").ok_or(AuthRedirect)?;
+
+        Ok(session.clone())
+    }
+}
+pub async fn protected(user: User) -> impl IntoResponse {
+    format!(
+        "Welcome to the protected area :)\nHere's your info:\n{:?}",
+        user
+    )
+}
+
 pub async fn login_authorized(
     Query(query): Query<AuthRequest>,
     State(mut session): State<SessionManager>,
@@ -55,7 +115,7 @@ pub async fn login_authorized(
 
     session.insert("user", &user_data).unwrap();
 
-    let cookie = format!("{}={}; SameSite=Lax; Path=/", "EXAMPLE", "");
+    let cookie = format!("{}={}; SameSite=Lax; Path=/", COOKIE_NAME, "");
     // Set cookie
     let mut headers = HeaderMap::new();
     headers.insert(SET_COOKIE, cookie.parse().unwrap());
