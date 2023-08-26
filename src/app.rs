@@ -4,10 +4,10 @@ use crate::routes::categories::categories_by_id;
 use crate::routes::categories::get_categories;
 use crate::routes::categories::post_category;
 use crate::routes::health::health_check;
-use crate::routes::photos;
 use crate::routes::photos::delete_photo;
 use crate::routes::photos::get_photo;
 use crate::routes::photos::put_photo;
+use crate::routes::{delete_category, photos};
 use axum::error_handling::HandleErrorLayer;
 use axum::http::Method;
 use axum::http::StatusCode;
@@ -52,7 +52,10 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
                     get(get_photo).delete(delete_photo).put(put_photo),
                 )
                 .route("/categories", get(get_categories).post(post_category))
-                .route("/categories/:id", get(categories_by_id))
+                .route(
+                    "/categories/:id",
+                    get(categories_by_id).delete(delete_category),
+                )
                 .route("/categories/:id/photos", post(add_photo_to_category)),
         )
         .layer(cors)

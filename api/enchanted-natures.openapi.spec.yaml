@@ -13,9 +13,9 @@ info:
     email: huntercasten@gmail.com
     url: https://github.com/enchantednatures
 servers:
-  - url: http://localhost:6969
+  - url: http://localhost:6969/api/v0
     description: localhost
-  - url: https://api-{environment}.enchantednatures.com/v0
+  - url: https://api-{environment}.enchantednatures.com/api/v0
     description: Prod
     variables:
       environment:
@@ -27,6 +27,8 @@ servers:
 
 paths:
   /health_check:
+    servers:
+      - url: /
     get:
       description: health of the service
       tags:
@@ -140,7 +142,7 @@ paths:
       operationId: get_photos
       parameters:
         - in: query
-          name: category
+          name: category_id
           description: id of category
           required: false
           example: 1

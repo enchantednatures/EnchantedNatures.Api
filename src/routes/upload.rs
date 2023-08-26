@@ -6,7 +6,7 @@ use tokio::io::AsyncReadExt;
 use axum::{
     extract::{BodyStream, Path, State},
     response::{self, IntoResponse},
-    Json, TypedHeader,
+    Json,
 };
 use futures::TryStreamExt;
 use tokio_util::io::StreamReader;

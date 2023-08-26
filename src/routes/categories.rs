@@ -129,11 +129,6 @@ pub enum UpdatePhotoCategoryResponse {
 struct DeleteCategoryResponses {
     status: String,
 }
-enum DeleteCategoryStatus {
-    Success,
-    NotFound,
-    ServerError,
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct BadRequest {
@@ -149,7 +144,7 @@ enum DeleteCategoryResponse {
     BadRequest(BadRequest),
 }
 
-async fn delete(
+pub async fn delete_category(
     State(app): State<App>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, StatusCode> {

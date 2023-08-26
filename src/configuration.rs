@@ -1,48 +1,19 @@
-use std::net::SocketAddr;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
-pub struct DatabaseSettings {
-    pub url: String,
-}
-
-impl DatabaseSettings {
-    fn new(url: String) -> Self {
-        Self { url }
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ApplicationSettings {
-    pub addr: String,
-    pub port: usize,
+    pub addr: [u8; 4],
+    pub port: u16,
 }
 
 impl ApplicationSettings {
-    fn new(addr: String, port: usize) -> Self {
+    fn new(addr: [u8; 4], port: u16) -> Self {
         Self { addr, port }
     }
 }
 
 impl Default for ApplicationSettings {
     fn default() -> Self {
-        Self {
-            addr: "localhost".to_string(),
-            port: 6969,
-        }
-    }
-}
-
-#[derive(Debug)]
-struct Configuration {
-    database_settings: DatabaseSettings,
-    app_settings: ApplicationSettings,
-}
-
-impl Configuration {
-    fn new(database_settings: DatabaseSettings, app_settings: ApplicationSettings) -> Self {
-        Self {
-            database_settings,
-            app_settings,
-        }
+        Self::new([127, 0, 0, 1], 6969)
     }
 }

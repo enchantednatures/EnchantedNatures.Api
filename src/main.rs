@@ -57,5 +57,11 @@ async fn main() {
     let swagger_ui = SwaggerUi::new("/swagger-ui")
         .config(Config::from("/api/enchanted-natures.openapi.spec.yaml"));
     let app = create_router(swagger_ui, app_state);
-    router::serve(app, SocketAddr::from(([0, 0, 0, 0], 6969))).await; // s(addr, app)
+    let app_settings = ApplicationSettings::default();
+    router::serve(
+        app,
+        SocketAddr::from((app_settings.addr, app_settings.port)),
+    )
+    .await;
+    // s(addr, app)
 }
