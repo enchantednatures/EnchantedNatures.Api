@@ -8,6 +8,7 @@ use sqlx::PgPool;
 use std::net::SocketAddr;
 
 use api::app::{create_router, App};
+use api::configuration::ApplicationSettings;
 use api::database::PhotoRepository;
 use api::domain::AppState;
 use api::router;
@@ -29,7 +30,6 @@ async fn main() {
     tracing::subscriber::set_global_default(subscriber).unwrap();
 
     let db_connection_str = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-
     let aws_endpoint_url = std::env::var("AWS_ENDPOINT_URL").expect("AWS_ENDPOINT_URL must be set");
     let _aws_access_key =
         std::env::var("AWS_ACCESS_KEY_ID").expect("AWS_ACCESS_KEY_ID must be set");

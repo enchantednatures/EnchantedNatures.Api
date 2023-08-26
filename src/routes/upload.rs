@@ -11,7 +11,7 @@ use axum::{
 use futures::TryStreamExt;
 use tokio_util::io::StreamReader;
 
-use crate::{app::App, models::UserInfo};
+use crate::app::App;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -36,7 +36,7 @@ pub enum UploadPhotoResponses {
 pub async fn save_request_body(
     State(app): State<App>,
     Path(file_name): Path<String>,
-    TypedHeader(user_agent): TypedHeader<UserInfo>,
+    // TypedHeader(user_agent): TypedHeader<UserInfo>,
     body: BodyStream,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     let body_with_io_error = body.map_err(|err| io::Error::new(io::ErrorKind::Other, err));

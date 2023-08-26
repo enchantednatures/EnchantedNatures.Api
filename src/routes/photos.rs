@@ -2,7 +2,7 @@ use crate::app::App;
 use crate::database::PhotoRepo;
 use crate::error_handling::AppError;
 use crate::models::{Photo, PhotoViewModel};
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::{response, Json};
@@ -113,12 +113,22 @@ pub enum GetPhotosResponses {
     Success(Vec<Photo>),
 }
 
+#[derive(Deserialize, Debug)]
+pub struct CategoryQuery {
+    pub category_id: i32,
+}
+
 #[tracing::instrument(name = "Get photos", skip(app))]
 pub async fn get_photos(
+    query: Option<Query<CategoryQuery>>,
     State(app): State<App>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     info!("getting all photos");
-    match app.repo.get_photos().await {
+    let query_result = match query {
+        Some(category_query) => app.repo.get_photos_in_category(category_query.category_id),
+        None => app.repo.get_photos(),
+    };
+    match query_result.await {
         Ok(response) => {
             info!("retrieved {} photos", response.len());
 

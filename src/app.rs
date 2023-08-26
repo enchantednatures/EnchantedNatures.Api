@@ -46,17 +46,14 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
         .nest(
             "/api/v0",
             Router::new()
-                .route("/api/v0/photos", get(get_photos).post(post_photo))
+                .route("/photos", get(get_photos).post(post_photo))
                 .route(
-                    "/api/v0/photos/:id",
+                    "/photos/:id",
                     get(get_photo).delete(delete_photo).put(put_photo),
                 )
-                .route(
-                    "/api/v0/categories",
-                    get(get_categories).post(post_category),
-                )
-                .route("/api/v0/categories/:id", get(categories_by_id))
-                .route("/api/v0/categories/:id/photos", post(add_photo_to_category)),
+                .route("/categories", get(get_categories).post(post_category))
+                .route("/categories/:id", get(categories_by_id))
+                .route("/categories/:id/photos", post(add_photo_to_category)),
         )
         .layer(cors)
         .layer(

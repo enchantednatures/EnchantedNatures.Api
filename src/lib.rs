@@ -1,10 +1,8 @@
-pub mod api_doc;
 pub mod app;
 pub mod configuration;
 pub mod database;
 pub mod domain;
 pub mod error_handling;
-pub mod middleware;
 pub mod models;
 pub mod router;
 pub mod routes;
