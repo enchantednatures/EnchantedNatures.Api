@@ -11,14 +11,10 @@ use axum::{
 use futures::TryStreamExt;
 use tokio_util::io::StreamReader;
 
-use crate::models::UserInfo;
-use crate::app::App;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::AppState;
-use utoipa::{IntoResponses, ToResponse, ToSchema};
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, ToResponse)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UploadedPhotoViewModel {
     file_size: usize,

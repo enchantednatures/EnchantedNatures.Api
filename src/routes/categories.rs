@@ -145,7 +145,7 @@ enum DeleteCategoryResponse {
 }
 
 pub async fn delete_category(
-    State(app): State<App>,
+    State(app): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, StatusCode> {
     // TODO: verify a row was deleted

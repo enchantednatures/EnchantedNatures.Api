@@ -27,9 +27,6 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use tower_http::services::ServeFile;
 
-pub type App = Arc<AppState>;
-
-pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
 pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
     let cors = CorsLayer::new()
         // allow `GET` and `POST` when accessing the resource

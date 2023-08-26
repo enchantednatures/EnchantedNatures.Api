@@ -121,7 +121,7 @@ pub struct CategoryQuery {
 #[tracing::instrument(name = "Get photos", skip(app))]
 pub async fn get_photos(
     query: Option<Query<CategoryQuery>>,
-    State(app): State<App>,
+    State(app): State<AppState>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     info!("getting all photos");
     let query_result = match query {

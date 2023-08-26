@@ -6,11 +6,9 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::net::SocketAddr;
 
-use api::app::{create_router, App};
-use api::configuration::ApplicationSettings;
-use api::api_doc::ApiDoc;
 use api::app::create_router;
 use api::auth::create_oauth_client;
+use api::configuration::ApplicationSettings;
 use api::database::PhotoRepository;
 use api::domain::AppState;
 use api::router;
@@ -56,9 +54,6 @@ async fn main() {
     let photo_repo = PhotoRepository::new(pool.clone());
     photo_repo.migrate().await.unwrap();
     let app_state = AppState::new(photo_repo, oauth_client, s3_client);
-    let swagger_path = "/swagger-ui";
-    let swagger_ui = SwaggerUi::new(swagger_path).url("/api-docs/openapi.json", ApiDoc::openapi());
-    let app_state = App::new(AppState::new(photo_repo, client));
     let swagger_ui = SwaggerUi::new("/swagger-ui")
         .config(Config::from("/api/enchanted-natures.openapi.spec.yaml"));
     let app = create_router(swagger_ui, app_state);

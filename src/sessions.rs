@@ -1,6 +1,5 @@
 use crate::auth::User;
 use anyhow::Result;
-use redis;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
