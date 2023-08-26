@@ -11,7 +11,7 @@ use axum::response::IntoResponse;
 use axum::{response, Json};
 use serde::{Deserialize, Serialize};
 
-use crate::app::App;
+use crate::domain::AppState;
 use tracing::info;
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -22,7 +22,7 @@ pub struct AddPhotoToCategoryRequest {
 
 #[tracing::instrument(name = "add photo to category", skip(app))]
 pub async fn add_photo_to_category(
-    State(app): State<App>,
+    State(app): State<AppState>,
     Path(category_id): Path<i32>,
     Json(request): Json<AddPhotoToCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
@@ -55,7 +55,7 @@ pub struct CategoryGetByIdResponse {
 
 #[tracing::instrument(name = "Get Categories", skip(app))]
 pub async fn get_categories(
-    State(app): State<App>,
+    State(app): State<AppState>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     match app.repo.get_categories().await {
         Ok(resp) => {
@@ -75,7 +75,7 @@ pub async fn get_categories(
 
 #[tracing::instrument(name = "Get Category", skip(app))]
 pub async fn categories_by_id(
-    State(app): State<App>,
+    State(app): State<AppState>,
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     match app.repo.get_category(id).await {
@@ -105,7 +105,7 @@ pub enum CategoryError {
 
 #[tracing::instrument(name = "add category", skip(app))]
 pub async fn post_category(
-    State(app): State<App>,
+    State(app): State<AppState>,
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     let category: CategoryViewModel = app.repo.add_category(payload.name).await.unwrap().into();
@@ -145,7 +145,7 @@ enum DeleteCategoryResponse {
 }
 
 pub async fn delete_category(
-    State(app): State<App>,
+    State(app): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, StatusCode> {
     // TODO: verify a row was deleted

@@ -265,7 +265,7 @@ components:
       flows:
         authorizationCode:
           authorizationUrl: https://auth.enchantednatures.com/application/o/authorize/
-          tokenUrl: https://auth.enchantednatures.com/application/o/token
+          tokenUrl: https://auth.enchantednatures.com/application/o/token/
           scopes:
             read_photos: read photos in your account
             write_photos: modify photos in your account

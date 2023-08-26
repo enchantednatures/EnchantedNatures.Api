@@ -1,13 +1,13 @@
 #![allow(dead_code)]
 
 use aws_sdk_s3::config::Region;
-use aws_sdk_s3::Client;
 
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::net::SocketAddr;
 
-use api::app::{create_router, App};
+use api::app::create_router;
+use api::auth::create_oauth_client;
 use api::configuration::ApplicationSettings;
 use api::database::PhotoRepository;
 use api::domain::AppState;
@@ -43,17 +43,17 @@ async fn main() {
         .region(Region::new(aws_region))
         .load()
         .await;
-    let client = Client::new(&config);
-
+    let s3_client = aws_sdk_s3::Client::new(&config);
+    let oauth_client = create_oauth_client().unwrap();
     let pool: PgPool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&db_connection_str)
         .await
         .expect("can't connect to database");
 
-    sqlx::migrate!().run(&pool).await.unwrap();
     let photo_repo = PhotoRepository::new(pool.clone());
-    let app_state = App::new(AppState::new(photo_repo, client));
+    photo_repo.migrate().await.unwrap();
+    let app_state = AppState::new(photo_repo, oauth_client, s3_client);
     let swagger_ui = SwaggerUi::new("/swagger-ui")
         .config(Config::from("/api/enchanted-natures.openapi.spec.yaml"));
     let app = create_router(swagger_ui, app_state);

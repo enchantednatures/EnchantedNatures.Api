@@ -1,3 +1,4 @@
+use crate::auth::{default_auth, login_authorized, protected};
 use crate::domain::AppState;
 use crate::routes::categories::add_photo_to_category;
 use crate::routes::categories::categories_by_id;
@@ -16,7 +17,6 @@ use axum::routing::post;
 use axum::Router;
 use photos::get_photos;
 use photos::post_photo;
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::error::Elapsed;
 use tower::BoxError;
@@ -27,9 +27,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use tower_http::services::ServeFile;
 
-pub type App = Arc<AppState>;
-
-pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
+pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
     let cors = CorsLayer::new()
         // allow `GET` and `POST` when accessing the resource
         .allow_methods([Method::GET, Method::POST])
@@ -42,6 +40,9 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: App) -> Router {
             "/api/enchanted-natures.openapi.spec.yaml",
             ServeFile::new("api/enchanted-natures.openapi.spec.yaml"),
         )
+        .route("/api/v0/authorize", get(default_auth))
+        .route("/api/v0/authorized", get(login_authorized))
+        .route("/protected", get(protected))
         .route("/health_check", get(health_check))
         .nest(
             "/api/v0",

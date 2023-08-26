@@ -2,18 +2,17 @@ use aws_sdk_s3::config::Region;
 use aws_sdk_s3::Client;
 use std::net::{SocketAddr, TcpListener};
 
+use api::api_doc::ApiDoc;
+use api::app::{create_router, AppState};
 use api::app::{create_router, App};
 use api::database::PhotoRepository;
 use api::domain::AppState;
 use axum::http::Request;
-use axum::{
-    extract::ConnectInfo,
-    routing::{get, post},
-    Json, Router,
-};
 use hyper::Body;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use utoipa_swagger_ui::{Config, SwaggerUi};
