@@ -13,10 +13,10 @@ info:
     email: huntercasten@gmail.com
     url: https://github.com/enchantednatures
 servers:
-  - url: http://localhost:6969
+  - url: http://localhost:6969/api/v0
     description: localhost
-  - url: https://api-{environment}.enchantednatures.com/v0
-    description: Prod
+  - url: https://api-{environment}.enchantednatures.com/api/v0
+    description: Enchanted Natures Api
     variables:
       environment:
         enum:
@@ -26,33 +26,9 @@ servers:
         default: production
 
 paths:
-  "/upload/{filename}":
-    post:
-      description: upload a file
-      tags:
-        - Upload
-      operationId: save_request_body
-      security:
-        - authentik: [ upload_photos ]
-      parameters:
-        - name: filename
-          in: path
-          description: Filename
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: File contents
-        content:
-          image/jpeg:
-            schema:
-              type: string
-              format: binary
-        required: true
-      responses:
-        "200":
-          description: upload successful
   /health_check:
+    servers:
+      - url: /
     get:
       description: health of the service
       tags:
@@ -65,6 +41,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
   /categories:
     get:
       description: Get all categories
@@ -80,6 +57,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/CategorySummary"
+
     post:
       description: Create a new category
       operationId: create_category
@@ -164,7 +142,7 @@ paths:
       operationId: get_photos
       parameters:
         - in: query
-          name: category
+          name: category_id
           description: id of category
           required: false
           example: 1
@@ -239,8 +217,35 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  "/upload/{filename}":
+    post:
+      description: upload a file
+      tags:
+        - Upload
+      operationId: save_request_body
+      security:
+        - authentik: [ upload_photos ]
+      parameters:
+        - name: filename
+          in: path
+          description: Filename
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: File contents
+        content:
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        "200":
+          description: upload successful
+
 components:
-  examples: {} # TODO: add examples of each type
+  examples: { } # TODO: add examples of each type
   responses:
     NotFound:
       description: The specified resource was not found
@@ -258,8 +263,9 @@ components:
     authentik:
       type: oauth2
       flows:
-        implicit:
-          authorizationUrl: https://auth.enchantednatures.com/oauth2/authorize
+        authorizationCode:
+          authorizationUrl: https://auth.enchantednatures.com/application/o/authorize/
+          tokenUrl: https://auth.enchantednatures.com/application/o/token
           scopes:
             read_photos: read photos in your account
             write_photos: modify photos in your account
@@ -313,10 +319,10 @@ components:
           type: string
         filename:
           type: string
-    CreatePhoto: {}
-    CreateCategory: {}
+    CreatePhoto: { }
+    CreateCategory: { }
 
-    CategorySummary: {}
+    CategorySummary: { }
     HealthStatus:
       type: object
       properties:

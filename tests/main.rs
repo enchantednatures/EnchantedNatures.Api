@@ -4,6 +4,7 @@ use std::net::{SocketAddr, TcpListener};
 
 use api::api_doc::ApiDoc;
 use api::app::{create_router, AppState};
+use api::app::{create_router, App};
 use api::database::PhotoRepository;
 use api::domain::AppState;
 use axum::http::Request;
@@ -12,6 +13,9 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+use tower_http::trace::TraceLayer;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use utoipa_swagger_ui::{Config, SwaggerUi};
 
 #[tokio::test]
 async fn the_real_deal() {
@@ -42,9 +46,10 @@ async fn the_real_deal() {
 
     sqlx::migrate!().run(&pool).await.unwrap();
     let photo_repo = PhotoRepository::new(pool.clone());
-    let app_state = AppState::new(AppState::new(photo_repo, client));
-    let swagger_path = "/swagger-ui";
-    let swagger_ui = SwaggerUi::new(swagger_path).url("/api-docs/openapi.json", ApiDoc::openapi());
+    let app_state = App::new(AppState::new(photo_repo, client));
+
+    let swagger_ui = SwaggerUi::new("/swagger-ui")
+        .config(Config::from("/api/enchanted-natures.openapi.spec.yaml"));
     let app = create_router(swagger_ui, app_state);
     tokio::spawn(async move {
         axum::Server::from_tcp(listener)
@@ -59,7 +64,7 @@ async fn the_real_deal() {
     let response = client
         .request(
             Request::builder()
-                .uri(format!("http://{}", addr))
+                .uri(format!("http://{}/health_check", addr))
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -67,5 +72,5 @@ async fn the_real_deal() {
         .unwrap();
 
     let body = hyper::body::to_bytes(response.into_body()).await.unwrap();
-    assert_eq!(&body[..], b"");
+    assert_eq!(&body[..], b"{\"status\":\"Ok\"}");
 }

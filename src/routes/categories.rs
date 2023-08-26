@@ -13,26 +13,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::AppState;
 use tracing::info;
-use utoipa::{IntoResponses, ToSchema};
 
-#[derive(Deserialize, Serialize, Debug, ToSchema)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct AddPhotoToCategoryRequest {
     pub photo_id: i32,
     pub display_order: Option<i32>,
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/v0/categories/{id}/photos",
-    request_body = AddPhotoToCategoryRequest,
-    tag="Categories",
-    params(
-        ("id"= i32, Path, description = "Category to add photo to")
-    ),
-    responses(
-        (status = StatusCode::ACCEPTED, description = "Photo added to category"),
-    )
-)]
 #[tracing::instrument(name = "add photo to category", skip(app))]
 pub async fn add_photo_to_category(
     State(app): State<AppState>,
@@ -55,24 +42,17 @@ pub async fn add_photo_to_category(
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CategoryGetByIdRequest {
     pub id: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CategoryGetByIdResponse {
     pub category: Category,
     pub photos: Vec<Photo>,
 }
 
-#[utoipa::path(
-    get,
-    path = "/api/v0/categories",
-    responses(
-        (status = StatusCode::OK, description = "Get all categories", body = [Category]),
-    )
-)]
 #[tracing::instrument(name = "Get Categories", skip(app))]
 pub async fn get_categories(
     State(app): State<AppState>,
@@ -93,16 +73,6 @@ pub async fn get_categories(
     }
 }
 
-#[utoipa::path(
-    get,
-    path = "/api/v0/categories/{id}",
-    params(
-        ("id"= i32, Path, description = "Id of category to get photos for")
-    ),
-    responses(
-        (status = StatusCode::OK, description = "Check health", body = CategoryDisplayModel),
-    )
-)]
 #[tracing::instrument(name = "Get Category", skip(app))]
 pub async fn categories_by_id(
     State(app): State<AppState>,
@@ -123,25 +93,16 @@ pub async fn categories_by_id(
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CreateCategoryRequest {
     pub name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum CategoryError {
     CategoryAlreadyExists,
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/v0/categories",
-    request_body = CreateCategoryRequest,
-    responses(
-        (status = 201, description = "Category created successfully", body = CategoryViewModel),
-        (status = 409, description = "Category already exists", body = CategoryError),
-    )
-)]
 #[tracing::instrument(name = "add category", skip(app))]
 pub async fn post_category(
     State(app): State<AppState>,
@@ -152,58 +113,39 @@ pub async fn post_category(
     Ok((StatusCode::CREATED, Json(category)))
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PhotoAddedToCategory;
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PhotoRemovedFromCategory;
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum UpdatePhotoCategoryResponse {
     PhotoAddedToCategory,
     PhotoRemovedFromCategory,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize)]
 struct DeleteCategoryResponses {
     status: String,
 }
-enum DeleteCategoryStatus {
-    Success,
-    NotFound,
-    ServerError,
-}
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize)]
 struct BadRequest {
     message: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, IntoResponses)]
-#[response(description = "Delete a category", content_type = "application/json")]
+#[derive(Debug, Serialize, Deserialize)]
 enum DeleteCategoryResponse {
-    #[response(status = 200, description = "Category Deleted")]
     Success,
 
-    #[response(status = StatusCode::NOT_FOUND, description = "Category Not Found")]
     NotFound,
 
-    #[response(status = StatusCode::INTERNAL_SERVER_ERROR, description = "Server Error")]
     BadRequest(BadRequest),
 }
 
-#[utoipa::path(
-    delete,
-    path = "/api/v0/categories/{id}/photos",
-    params(
-        ("id" = i32, Path, description = "Id of category to delete" ),
-    ),
-    responses(
-        DeleteCategoryResponse,
-    )
-)]
-async fn delete(
-    State(app): State<AppState>,
+pub async fn delete_category(
+    State(app): State<App>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, StatusCode> {
     // TODO: verify a row was deleted

@@ -6,6 +6,8 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::net::SocketAddr;
 
+use api::app::{create_router, App};
+use api::configuration::ApplicationSettings;
 use api::api_doc::ApiDoc;
 use api::app::create_router;
 use api::auth::create_oauth_client;
@@ -16,8 +18,7 @@ use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::Registry;
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
+use utoipa_swagger_ui::{Config, SwaggerUi};
 
 #[tokio::main]
 async fn main() {
@@ -31,7 +32,6 @@ async fn main() {
     tracing::subscriber::set_global_default(subscriber).unwrap();
 
     let db_connection_str = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-
     let aws_endpoint_url = std::env::var("AWS_ENDPOINT_URL").expect("AWS_ENDPOINT_URL must be set");
     let _aws_access_key =
         std::env::var("AWS_ACCESS_KEY_ID").expect("AWS_ACCESS_KEY_ID must be set");
@@ -58,6 +58,15 @@ async fn main() {
     let app_state = AppState::new(photo_repo, oauth_client, s3_client);
     let swagger_path = "/swagger-ui";
     let swagger_ui = SwaggerUi::new(swagger_path).url("/api-docs/openapi.json", ApiDoc::openapi());
+    let app_state = App::new(AppState::new(photo_repo, client));
+    let swagger_ui = SwaggerUi::new("/swagger-ui")
+        .config(Config::from("/api/enchanted-natures.openapi.spec.yaml"));
     let app = create_router(swagger_ui, app_state);
-    router::serve(app, SocketAddr::from(([0, 0, 0, 0], 6969))).await; // s(addr, app)
+    let app_settings = ApplicationSettings::default();
+    router::serve(
+        app,
+        SocketAddr::from((app_settings.addr, app_settings.port)),
+    )
+    .await;
+    // s(addr, app)
 }
