@@ -26,32 +26,6 @@ servers:
         default: production
 
 paths:
-  "/upload/{filename}":
-    post:
-      description: upload a file
-      tags:
-        - Upload
-      operationId: save_request_body
-      security:
-        - authentik: [ upload_photos ]
-      parameters:
-        - name: filename
-          in: path
-          description: Filename
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: File contents
-        content:
-          image/jpeg:
-            schema:
-              type: string
-              format: binary
-        required: true
-      responses:
-        "200":
-          description: upload successful
   /health_check:
     get:
       description: health of the service
@@ -65,6 +39,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
   /categories:
     get:
       description: Get all categories
@@ -80,6 +55,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/CategorySummary"
+
     post:
       description: Create a new category
       operationId: create_category
@@ -239,8 +215,35 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  "/upload/{filename}":
+    post:
+      description: upload a file
+      tags:
+        - Upload
+      operationId: save_request_body
+      security:
+        - authentik: [ upload_photos ]
+      parameters:
+        - name: filename
+          in: path
+          description: Filename
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: File contents
+        content:
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        "200":
+          description: upload successful
+
 components:
-  examples: {} # TODO: add examples of each type
+  examples: { } # TODO: add examples of each type
   responses:
     NotFound:
       description: The specified resource was not found
@@ -313,10 +316,10 @@ components:
           type: string
         filename:
           type: string
-    CreatePhoto: {}
-    CreateCategory: {}
+    CreatePhoto: { }
+    CreateCategory: { }
 
-    CategorySummary: {}
+    CategorySummary: { }
     HealthStatus:
       type: object
       properties:
