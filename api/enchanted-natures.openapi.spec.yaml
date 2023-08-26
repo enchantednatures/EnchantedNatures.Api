@@ -16,7 +16,7 @@ servers:
   - url: http://localhost:6969/api/v0
     description: localhost
   - url: https://api-{environment}.enchantednatures.com/api/v0
-    description: Prod
+    description: Enchanted Natures Api
     variables:
       environment:
         enum:
