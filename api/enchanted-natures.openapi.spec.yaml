@@ -263,8 +263,9 @@ components:
     authentik:
       type: oauth2
       flows:
-        implicit:
-          authorizationUrl: https://auth.enchantednatures.com/oauth2/authorize
+        authorizationCode:
+          authorizationUrl: https://auth.enchantednatures.com/application/o/authorize/
+          tokenUrl: https://auth.enchantednatures.com/application/o/token
           scopes:
             read_photos: read photos in your account
             write_photos: modify photos in your account
