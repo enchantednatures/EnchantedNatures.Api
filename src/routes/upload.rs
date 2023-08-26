@@ -6,17 +6,15 @@ use tokio::io::AsyncReadExt;
 use axum::{
     extract::{BodyStream, Path, State},
     response::{self, IntoResponse},
-    Json, TypedHeader,
+    Json,
 };
 use futures::TryStreamExt;
 use tokio_util::io::StreamReader;
 
-use crate::{app::App, models::UserInfo};
+use crate::app::App;
 use serde::{Deserialize, Serialize};
 
-use utoipa::{IntoResponses, ToResponse, ToSchema};
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, ToResponse)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UploadedPhotoViewModel {
     file_size: usize,
 }
@@ -27,28 +25,18 @@ impl UploadedPhotoViewModel {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, IntoResponses)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum UploadPhotoResponses {
-    #[response(status = StatusCode::CREATED, description = "Get photo by id")]
     Success(UploadedPhotoViewModel),
 
-    #[response(status = StatusCode::INTERNAL_SERVER_ERROR, description = "Unable to upload Photo")]
     UploadError,
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/v0/upload/{file_name}",
-    params(
-        ("file_name"= String, Path, description = "Filename")
-    ),
-    request_body(content = [u8], description = "File contents", content_type = "image/jpeg")
-)]
 #[tracing::instrument(name = "Save file", skip(app, body))]
 pub async fn save_request_body(
     State(app): State<App>,
     Path(file_name): Path<String>,
-    TypedHeader(user_agent): TypedHeader<UserInfo>,
+    // TypedHeader(user_agent): TypedHeader<UserInfo>,
     body: BodyStream,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     let body_with_io_error = body.map_err(|err| io::Error::new(io::ErrorKind::Other, err));

@@ -1,37 +1,19 @@
-#[derive(Debug)]
-pub struct DatabaseSettings {
-    pub url: String,
-}
+use serde::{Deserialize, Serialize};
 
-impl DatabaseSettings {
-    fn new(url: String) -> Self {
-        Self { url }
-    }
-}
-
-#[derive(Debug)]
-struct ApplicationSettings {
-    addr: String,
-    port: usize,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ApplicationSettings {
+    pub addr: [u8; 4],
+    pub port: u16,
 }
 
 impl ApplicationSettings {
-    fn new(addr: String, port: usize) -> Self {
+    fn new(addr: [u8; 4], port: u16) -> Self {
         Self { addr, port }
     }
 }
 
-#[derive(Debug)]
-struct Configuration {
-    database_settings: DatabaseSettings,
-    app_settings: ApplicationSettings,
-}
-
-impl Configuration {
-    fn new(database_settings: DatabaseSettings, app_settings: ApplicationSettings) -> Self {
-        Self {
-            database_settings,
-            app_settings,
-        }
+impl Default for ApplicationSettings {
+    fn default() -> Self {
+        Self::new([127, 0, 0, 1], 6969)
     }
 }
