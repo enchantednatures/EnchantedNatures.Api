@@ -82,6 +82,8 @@ where
         Ok(user)
     }
 }
+
+#[tracing::instrument(name = "Protected area")]
 pub async fn protected(user: User) -> impl IntoResponse {
     format!(
         "Welcome to the protected area :)\nHere's your info:\n{:?}",
@@ -89,9 +91,10 @@ pub async fn protected(user: User) -> impl IntoResponse {
     )
 }
 
+#[tracing::instrument(name = "Login authorized", skip(store, client, oauth_client))]
 pub async fn login_authorized(
     Query(query): Query<AuthRequest>,
-    State(mut store): State<MemoryStore>,
+    State(store): State<MemoryStore>,
     State(client): State<reqwest::Client>,
     State(oauth_client): State<BasicClient>,
 ) -> impl IntoResponse {
@@ -102,16 +105,18 @@ pub async fn login_authorized(
         .unwrap();
 
     // Fetch user data from discord
-    let user_data: User = client
+    let raw_user_data = client
         // https://discord.com/developers/docs/resources/user#get-current-user
         .get("https://auth.enchantednatures.com/application/o/userinfo/")
         .bearer_auth(token.access_token().secret())
         .send()
         .await
-        .unwrap()
-        .json::<User>()
-        .await
         .unwrap();
+
+    let user_string = raw_user_data.text().await.unwrap();
+    todo!("");
+    /*
+    // let user_data: User = raw_user_data.json::<User>().await.unwrap();
 
     // Create a new session filled with user data
     let mut session = Session::new();
@@ -128,7 +133,10 @@ pub async fn login_authorized(
     headers.insert(SET_COOKIE, cookie.parse().unwrap());
 
     (headers, Redirect::to("/"))
+     */
 }
+
+#[tracing::instrument(name = "Default Auth", skip(client))]
 pub async fn default_auth(State(client): State<BasicClient>) -> impl IntoResponse {
     println!("auth");
     let (auth_url, csrf_token) = client

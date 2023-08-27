@@ -13,7 +13,7 @@ use tokio_util::io::StreamReader;
 
 use serde::{Deserialize, Serialize};
 
-use crate::domain::AppState;
+use crate::{auth::User, domain::AppState};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UploadedPhotoViewModel {
@@ -29,7 +29,6 @@ impl UploadedPhotoViewModel {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum UploadPhotoResponses {
     Success(UploadedPhotoViewModel),
-
     UploadError,
 }
 
@@ -37,7 +36,7 @@ pub enum UploadPhotoResponses {
 pub async fn save_request_body(
     State(app): State<AppState>,
     Path(file_name): Path<String>,
-    // TypedHeader(user_agent): TypedHeader<UserInfo>,
+    user: User,
     body: BodyStream,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     let body_with_io_error = body.map_err(|err| io::Error::new(io::ErrorKind::Other, err));

@@ -144,6 +144,7 @@ enum DeleteCategoryResponse {
     BadRequest(BadRequest),
 }
 
+#[tracing::instrument(name = "Delete Category", skip(app))]
 pub async fn delete_category(
     State(app): State<AppState>,
     Path(id): Path<i32>,

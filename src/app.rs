@@ -8,7 +8,7 @@ use crate::routes::health::health_check;
 use crate::routes::photos::delete_photo;
 use crate::routes::photos::get_photo;
 use crate::routes::photos::put_photo;
-use crate::routes::{delete_category, photos};
+use crate::routes::{delete_category, photos, save_request_body};
 use axum::error_handling::HandleErrorLayer;
 use axum::http::Method;
 use axum::http::StatusCode;
@@ -40,8 +40,8 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
             "/api/enchanted-natures.openapi.spec.yaml",
             ServeFile::new("api/enchanted-natures.openapi.spec.yaml"),
         )
-        .route("/api/v0/authorize", get(default_auth))
-        .route("/api/v0/authorized", get(login_authorized))
+        .route("/authorize", get(default_auth))
+        .route("/authorized", get(login_authorized))
         .route("/protected", get(protected))
         .route("/health_check", get(health_check))
         .nest(
@@ -57,11 +57,12 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
                     "/categories/:id",
                     get(categories_by_id).delete(delete_category),
                 )
-                .route("/categories/:id/photos", post(add_photo_to_category)),
+                .route("/categories/:id/photos", post(add_photo_to_category))
+                .route("/upload/:filename", post(save_request_body)),
         )
-        .layer(cors)
         .layer(
             ServiceBuilder::new()
+                .layer(cors)
                 .layer(HandleErrorLayer::new(|error: BoxError| async move {
                     if error.is::<Elapsed>() {
                         Ok(StatusCode::REQUEST_TIMEOUT)
