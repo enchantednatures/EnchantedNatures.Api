@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 
+use async_session::{MemoryStore, Session, SessionStore};
 use oauth2::{
     basic::BasicClient, AuthUrl, ClientId, ClientSecret, CsrfToken, RedirectUrl, Scope, TokenUrl,
 };
@@ -19,7 +20,6 @@ use axum::{
 };
 use serde::Deserialize;
 
-use crate::sessions::SessionManager;
 use oauth2::{reqwest::async_http_client, AuthorizationCode, TokenResponse};
 use serde::Serialize;
 
@@ -50,14 +50,14 @@ impl IntoResponse for AuthRedirect {
 #[async_trait]
 impl<S> FromRequestParts<S> for User
 where
-    SessionManager: FromRef<S>,
+    MemoryStore: FromRef<S>,
     S: Send + Sync,
 {
     // If anything goes wrong or no session is found, redirect to the auth page
     type Rejection = AuthRedirect;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let mut store = SessionManager::from_ref(state);
+        let store = MemoryStore::from_ref(state);
 
         let cookies = parts
             .extract::<TypedHeader<headers::Cookie>>()
@@ -77,9 +77,9 @@ where
             .unwrap()
             .ok_or(AuthRedirect)?;
 
-        // let user = session.get::<User>("user").ok_or(AuthRedirect)?;
+        let user = session.get::<User>("user").ok_or(AuthRedirect)?;
 
-        Ok(session.clone())
+        Ok(user)
     }
 }
 pub async fn protected(user: User) -> impl IntoResponse {
@@ -91,7 +91,7 @@ pub async fn protected(user: User) -> impl IntoResponse {
 
 pub async fn login_authorized(
     Query(query): Query<AuthRequest>,
-    State(mut session): State<SessionManager>,
+    State(mut store): State<MemoryStore>,
     State(client): State<reqwest::Client>,
     State(oauth_client): State<BasicClient>,
 ) -> impl IntoResponse {
@@ -104,7 +104,7 @@ pub async fn login_authorized(
     // Fetch user data from discord
     let user_data: User = client
         // https://discord.com/developers/docs/resources/user#get-current-user
-        .get("https://discordapp.com/api/users/@me")
+        .get("https://auth.enchantednatures.com/application/o/userinfo/")
         .bearer_auth(token.access_token().secret())
         .send()
         .await
@@ -113,16 +113,22 @@ pub async fn login_authorized(
         .await
         .unwrap();
 
+    // Create a new session filled with user data
+    let mut session = Session::new();
     session.insert("user", &user_data).unwrap();
 
-    let cookie = format!("{}={}; SameSite=Lax; Path=/", COOKIE_NAME, "");
+    // Store session and get corresponding cookie
+    let cookie = store.store_session(session).await.unwrap().unwrap();
+
+    // Build the cookie
+    let cookie = format!("{}={}; SameSite=Lax; Path=/", COOKIE_NAME, cookie);
+
     // Set cookie
     let mut headers = HeaderMap::new();
     headers.insert(SET_COOKIE, cookie.parse().unwrap());
 
     (headers, Redirect::to("/"))
 }
-
 pub async fn default_auth(State(client): State<BasicClient>) -> impl IntoResponse {
     println!("auth");
     let (auth_url, csrf_token) = client
