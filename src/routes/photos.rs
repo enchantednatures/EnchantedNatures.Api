@@ -1,3 +1,4 @@
+use crate::auth::User;
 use crate::database::PhotoRepo;
 use crate::domain::AppState;
 use crate::error_handling::AppError;
@@ -26,6 +27,7 @@ pub struct PhotoCreateRequest {
 pub async fn delete_photo(
     State(app): State<AppState>,
     Path(id): Path<i32>,
+    user: User,
 ) -> Result<impl IntoResponse, AppError> {
     app.repo.delete_photo(id).await?;
     Ok((StatusCode::NO_CONTENT, Json(json!({ "deleted": &id }))))
@@ -48,6 +50,7 @@ pub enum CreatePhotoResponses {
 #[tracing::instrument(name = "add photo", skip(app))]
 pub async fn post_photo(
     State(app): State<AppState>,
+    user: User,
     Json(payload): Json<PhotoCreateRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     info!("creating photo");
@@ -89,6 +92,7 @@ pub enum UpdatePhotoResponses {
 pub async fn put_photo(
     State(app): State<AppState>,
     Path(id): Path<i32>,
+    user: User,
     Json(payload): Json<PhotoUpdateRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     info!("creating photo");

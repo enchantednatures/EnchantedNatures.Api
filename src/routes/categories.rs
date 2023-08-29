@@ -1,3 +1,4 @@
+use crate::auth::User;
 use crate::database::PhotoRepo;
 use crate::models::Category;
 use crate::models::CategoryDisplayModel;
@@ -24,6 +25,7 @@ pub struct AddPhotoToCategoryRequest {
 pub async fn add_photo_to_category(
     State(app): State<AppState>,
     Path(category_id): Path<i32>,
+    user: User,
     Json(request): Json<AddPhotoToCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     match app
@@ -106,6 +108,7 @@ pub enum CategoryError {
 #[tracing::instrument(name = "add category", skip(app))]
 pub async fn post_category(
     State(app): State<AppState>,
+    user: User,
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     let category: CategoryViewModel = app.repo.add_category(payload.name).await.unwrap().into();

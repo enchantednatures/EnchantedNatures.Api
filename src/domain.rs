@@ -79,3 +79,9 @@ impl FromRef<AppState> for BasicClient {
         state.oauth_client.clone()
     }
 }
+
+impl FromRef<AppState> for BasicClient {
+    fn from_ref(state: &AppState) -> Self {
+        state.oauth_client.clone()
+    }
+}

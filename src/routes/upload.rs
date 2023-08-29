@@ -34,8 +34,8 @@ pub enum UploadPhotoResponses {
 
 #[tracing::instrument(name = "Save file", skip(app, body))]
 pub async fn save_request_body(
-    State(app): State<AppState>,
     Path(file_name): Path<String>,
+    State(app): State<AppState>,
     user: User,
     body: BodyStream,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
@@ -48,6 +48,7 @@ pub async fn save_request_body(
         .await
         .expect("Failed to read body");
 
+    tracing::info!("Uploading photo {}", &file_name);
     let result = app.upload_photo(buffer, &file_name).await.unwrap();
 
     Ok((StatusCode::OK, Json(json!({"key": result.checksum_crc32}))))

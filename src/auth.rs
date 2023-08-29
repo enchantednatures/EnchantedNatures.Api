@@ -4,6 +4,7 @@ use async_session::{MemoryStore, Session, SessionStore};
 use oauth2::{
     basic::BasicClient, AuthUrl, ClientId, ClientSecret, CsrfToken, RedirectUrl, Scope, TokenUrl,
 };
+use oauth2::{IntrospectionUrl, RevocationUrl};
 
 use crate::configuration::AuthSettings;
 use axum::extract::{Query, State};
@@ -23,10 +24,9 @@ use serde::Deserialize;
 use oauth2::{reqwest::async_http_client, AuthorizationCode, TokenResponse};
 use serde::Serialize;
 
-static COOKIE_NAME: &str = "X-Auth";
+static COOKIE_NAME: &str = "SESSION";
 
 #[derive(Debug, Deserialize)]
-#[allow(dead_code)]
 pub struct AuthRequest {
     code: String,
     state: String,
@@ -34,17 +34,15 @@ pub struct AuthRequest {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
-    id: String,
-    avatar: Option<String>,
-    username: String,
-    discriminator: String,
+    pub email: String,
+    pub sub: String,
 }
 
 pub struct AuthRedirect;
 
 impl IntoResponse for AuthRedirect {
     fn into_response(self) -> Response {
-        Redirect::temporary("/api/v0/authorize").into_response()
+        Redirect::temporary("/authorize").into_response()
     }
 }
 #[async_trait]
@@ -91,11 +89,10 @@ pub async fn protected(user: User) -> impl IntoResponse {
     )
 }
 
-#[tracing::instrument(name = "Login authorized", skip(store, client, oauth_client))]
+#[tracing::instrument(name = "Login authorized", skip(store, oauth_client))]
 pub async fn login_authorized(
     Query(query): Query<AuthRequest>,
     State(store): State<MemoryStore>,
-    State(client): State<reqwest::Client>,
     State(oauth_client): State<BasicClient>,
 ) -> impl IntoResponse {
     let token = oauth_client
@@ -104,19 +101,20 @@ pub async fn login_authorized(
         .await
         .unwrap();
 
+    let access_token_secret = token.access_token().secret();
     // Fetch user data from discord
-    let raw_user_data = client
+
+    let client = reqwest::Client::new();
+    let user_data: User = client
         // https://discord.com/developers/docs/resources/user#get-current-user
-        .get("https://auth.enchantednatures.com/application/o/userinfo/")
-        .bearer_auth(token.access_token().secret())
+        .get(oauth_client.introspection_url().unwrap().url().as_str())
+        .bearer_auth(access_token_secret)
         .send()
         .await
+        .unwrap()
+        .json()
+        .await
         .unwrap();
-
-    let user_string = raw_user_data.text().await.unwrap();
-    todo!("");
-    /*
-    // let user_data: User = raw_user_data.json::<User>().await.unwrap();
 
     // Create a new session filled with user data
     let mut session = Session::new();
@@ -132,33 +130,23 @@ pub async fn login_authorized(
     let mut headers = HeaderMap::new();
     headers.insert(SET_COOKIE, cookie.parse().unwrap());
 
-    (headers, Redirect::to("/"))
-     */
+    (headers, Redirect::to("/swagger-ui"))
 }
 
 #[tracing::instrument(name = "Default Auth", skip(client))]
 pub async fn default_auth(State(client): State<BasicClient>) -> impl IntoResponse {
-    println!("auth");
     let (auth_url, csrf_token) = client
         .authorize_url(CsrfToken::new_random)
         .add_scope(Scope::new("identify".to_string()))
+        .add_scope(Scope::new("email".to_string()))
+        .add_scope(Scope::new("openid".to_string()))
         .url();
 
-    println!("{:?}", auth_url);
-    println!("{:?}", csrf_token);
-    // Redirect to Discord's oauth service
     Redirect::to(auth_url.as_ref())
 }
 
 pub fn create_oauth_client() -> Result<BasicClient> {
-    // Environment variables (* = required):
-    // *"CLIENT_ID"     "REPLACE_ME";
-    // *"CLIENT_SECRET" "REPLACE_ME";
-    //  "REDIRECT_URL"  "http://127.0.0.1:3000/auth/authorized";
-    //  "AUTH_URL"      "https://discord.com/api/oauth2/authorize?response_type=code";
-    //  "TOKEN_URL"     "https://discord.com/api/oauth2/token";
-
-    let auth_settings = AuthSettings::new();
+    let auth_settings = AuthSettings::default();
     Ok(BasicClient::new(
         ClientId::new(auth_settings.client_id),
         Some(ClientSecret::new(auth_settings.client_secret)),
@@ -169,6 +157,8 @@ pub fn create_oauth_client() -> Result<BasicClient> {
                 .context("failed to create new token endpoint URL")?,
         ),
     )
+    .set_revocation_uri(RevocationUrl::new(auth_settings.revocation_url)?)
+    .set_introspection_uri(IntrospectionUrl::new(auth_settings.introspection_url)?)
     .set_redirect_uri(
         RedirectUrl::new(auth_settings.redirect_url)
             .context("failed to create new redirection URL")?,
