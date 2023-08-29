@@ -1,5 +1,5 @@
 # Use the official Rust image as the base
-FROM rust:1.69.0 as build
+FROM rust:1.72.0 as build
 
 
 # Create a new empty shell project
@@ -19,6 +19,7 @@ COPY ./.sqlx ./.sqlx
 COPY ./src ./src
 COPY ./sql ./sql
 COPY ./migrations ./migrations
+COPY ./api ./api
 
 # Build the release binary
 RUN rm ./target/release/deps/api*
