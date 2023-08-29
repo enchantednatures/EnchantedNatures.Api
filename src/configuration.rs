@@ -31,7 +31,8 @@ impl Default for AuthSettings {
             auth_url: std::env::var("AUTH_URL").expect("AUTH_URL must be set"),
             token_url: std::env::var("TOKEN_URL").expect("TOKEN_URL must be set"),
             revocation_url: std::env::var("REVOCATION_URL").expect("REVOCATION_URL must be set"),
-            introspection_url: std::env::var("INTROSPECTION_URL").expect("INTROSPECTION_URL must be set"),
+            introspection_url: std::env::var("INTROSPECTION_URL")
+                .expect("INTROSPECTION_URL must be set"),
         }
     }
 }

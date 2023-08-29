@@ -79,4 +79,3 @@ impl FromRef<AppState> for BasicClient {
         state.oauth_client.clone()
     }
 }
-
