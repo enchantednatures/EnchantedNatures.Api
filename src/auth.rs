@@ -135,7 +135,7 @@ pub async fn login_authorized(
 
 #[tracing::instrument(name = "Default Auth", skip(client))]
 pub async fn default_auth(State(client): State<BasicClient>) -> impl IntoResponse {
-    let (auth_url, csrf_token) = client
+    let (auth_url, _csrf_token) = client
         .authorize_url(CsrfToken::new_random)
         .add_scope(Scope::new("identify".to_string()))
         .add_scope(Scope::new("email".to_string()))
