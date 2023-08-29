@@ -39,6 +39,6 @@ impl Default for AuthSettings {
 
 impl Default for ApplicationSettings {
     fn default() -> Self {
-        Self::new([127, 0, 0, 1], 6969)
+        Self::new([0, 0, 0, 0], 6969)
     }
 }

@@ -1,10 +1,9 @@
+use api::auth::create_oauth_client;
 use aws_sdk_s3::config::Region;
 use aws_sdk_s3::Client;
 use std::net::{SocketAddr, TcpListener};
 
-use api::api_doc::ApiDoc;
-use api::app::{create_router, App};
-use api::app::{create_router, AppState};
+use api::app::create_router;
 use api::database::PhotoRepository;
 use api::domain::AppState;
 use axum::http::Request;
@@ -13,9 +12,7 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
-use utoipa_swagger_ui::{Config, SwaggerUi};
+use utoipa_swagger_ui::{SwaggerUi, Config};
 
 #[tokio::test]
 async fn the_real_deal() {
@@ -46,7 +43,9 @@ async fn the_real_deal() {
 
     sqlx::migrate!().run(&pool).await.unwrap();
     let photo_repo = PhotoRepository::new(pool.clone());
-    let app_state = App::new(AppState::new(photo_repo, client));
+
+    let oauth_client = create_oauth_client().unwrap();
+    let app_state = AppState::new(photo_repo, oauth_client, client);
 
     let swagger_ui = SwaggerUi::new("/swagger-ui")
         .config(Config::from("/api/enchanted-natures.openapi.spec.yaml"));
