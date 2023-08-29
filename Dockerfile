@@ -19,7 +19,6 @@ COPY ./.sqlx ./.sqlx
 COPY ./src ./src
 COPY ./sql ./sql
 COPY ./migrations ./migrations
-COPY ./api ./api
 
 # Build the release binary
 RUN rm ./target/release/deps/api*
@@ -37,9 +36,9 @@ RUN apt-get update && \
 
 # Copy the release binary from the build stage
 COPY --from=build /usr/local/cargo/bin/api /usr/local/bin/api
+COPY ./api ./api
 
 # Expose the port the API will run on
-ENV DATABASE_URL = ""
 EXPOSE 6969
 # Run the API
 
