@@ -7,15 +7,13 @@ info:
 
     Photos can be uploaded to S3. Still a work in progress.
     Enchanted Natures Photography api backend for the https://enchantednatures.com website ............
-  version: 0.1.1
+  version: 0.2.0
   contact:
     name: Hunter Casten
     email: huntercasten@gmail.com
     url: https://github.com/enchantednatures
 servers:
-  - url: http://localhost:6969/api/v0
-    description: localhost
-  - url: https://api-{environment}.enchantednatures.com/api/v0
+  - url: https://{environment}-api.enchantednatures.com/api/v0
     description: Enchanted Natures Api
     variables:
       environment:
@@ -24,7 +22,8 @@ servers:
           - production
           - staging
         default: production
-
+  - url: http://localhost:6969/api/v0
+    description: localhost
 paths:
   /health_check:
     servers:

@@ -54,8 +54,8 @@ async fn main() {
     let photo_repo = PhotoRepository::new(pool.clone());
     photo_repo.migrate().await.unwrap();
     let app_state = AppState::new(photo_repo, oauth_client, s3_client);
-    let swagger_ui =
-        SwaggerUi::new("/swagger-ui").config(Config::from("/enchanted-natures.openapi.spec.yaml"));
+    let swagger_config = Config::from("/enchanted-natures.openapi.spec.yaml");
+    let swagger_ui = SwaggerUi::new("/swagger-ui").config(swagger_config);
     let app = create_router(swagger_ui, app_state);
     let app_settings = ApplicationSettings::default();
     router::serve(
