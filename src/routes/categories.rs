@@ -7,9 +7,12 @@ use crate::models::Photo;
 
 use axum::extract::Path;
 use axum::extract::State;
+use axum::http::header;
 use axum::http::StatusCode;
-use axum::response::IntoResponse;
+use axum::response::{IntoResponse, Redirect};
 use axum::{response, Json};
+use hyper::http::HeaderValue;
+use hyper::HeaderMap;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::AppState;
@@ -112,8 +115,14 @@ pub async fn post_category(
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     let category: CategoryViewModel = app.repo.add_category(payload.name).await.unwrap().into();
+    let redirect_url = format!("/{}", category.id);
+    let mut response_headers: HeaderMap = HeaderMap::new();
+    response_headers.insert(
+        header::LOCATION,
+        HeaderValue::from_str(redirect_url.as_str()).unwrap(),
+    );
 
-    Ok((StatusCode::CREATED, Json(category)))
+    Ok((StatusCode::CREATED, response_headers, Json(category)))
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -12,6 +12,9 @@ create table photos
     updated_at  timestamp with time zone default now() not null
 );
 
+
+alter sequence photos_id_seq restart with 1000;
+
 create table categories
 (
     id          serial                                 not null
@@ -22,6 +25,7 @@ create table categories
     updated_at  timestamp with time zone default now() not null
 );
 
+ALTER sequence categories_id_seq restart with 1000;
 
 create table photo_categories
 (

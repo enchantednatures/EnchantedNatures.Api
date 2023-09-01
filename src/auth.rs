@@ -102,11 +102,9 @@ pub async fn login_authorized(
         .unwrap();
 
     let access_token_secret = token.access_token().secret();
-    // Fetch user data from discord
 
     let client = reqwest::Client::new();
     let user_data: User = client
-        // https://discord.com/developers/docs/resources/user#get-current-user
         .get(oauth_client.introspection_url().unwrap().url().as_str())
         .bearer_auth(access_token_secret)
         .send()
