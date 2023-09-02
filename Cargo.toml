@@ -18,7 +18,7 @@ name = "enchanted-natures-api"
 anyhow = "1.0.75"
 async-trait = "0.1.73"
 aws-config = "0.56.1"
-aws-sdk-s3 = "0.30.0"
+aws-sdk-s3 = "0.29.0"
 chrono = { version = "0.4.28", features = ["serde"] }
 futures = "0.3"
 hyper = { version = "0.14.27", features = ["full"] }
@@ -38,7 +38,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 utoipa-swagger-ui = { version = "3.1.5", features = ["axum"] }
 oauth2 = "4.4"
 reqwest = { version = "0.11.20" , features = ["json"]}
-redis = "0.23.2"
+redis = {version ="0.23.2", features = ["tokio-comp"]}
 config = { version = "0.13", default-features = false, features = ["yaml"] }
 
 [dependencies.axum]

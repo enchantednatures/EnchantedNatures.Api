@@ -1,12 +1,13 @@
 use anyhow::{Context, Result};
 
-use async_session::{MemoryStore, Session, SessionStore};
+use async_session::Session;
 use oauth2::{
     basic::BasicClient, AuthUrl, ClientId, ClientSecret, CsrfToken, RedirectUrl, Scope, TokenUrl,
 };
 use oauth2::{IntrospectionUrl, RevocationUrl};
 
 use crate::configuration::AuthSettings;
+use crate::sessions::SessionManager;
 use axum::extract::{Query, State};
 use axum::headers::HeaderMap;
 use axum::http::header::SET_COOKIE;
@@ -48,14 +49,14 @@ impl IntoResponse for AuthRedirect {
 #[async_trait]
 impl<S> FromRequestParts<S> for User
 where
-    MemoryStore: FromRef<S>,
+    SessionManager: FromRef<S>,
     S: Send + Sync,
 {
     // If anything goes wrong or no session is found, redirect to the auth page
     type Rejection = AuthRedirect;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let store = MemoryStore::from_ref(state);
+        let store = SessionManager::from_ref(state);
 
         let cookies = parts
             .extract::<TypedHeader<headers::Cookie>>()
@@ -70,7 +71,7 @@ where
         let session_cookie = cookies.get(COOKIE_NAME).ok_or(AuthRedirect)?;
 
         let session = store
-            .load_session(session_cookie.to_string())
+            .get_session(session_cookie)
             .await
             .unwrap()
             .ok_or(AuthRedirect)?;
@@ -92,7 +93,7 @@ pub async fn protected(user: User) -> impl IntoResponse {
 #[tracing::instrument(name = "Login authorized", skip(store, oauth_client))]
 pub async fn login_authorized(
     Query(query): Query<AuthRequest>,
-    State(store): State<MemoryStore>,
+    State(store): State<SessionManager>,
     State(oauth_client): State<BasicClient>,
 ) -> impl IntoResponse {
     let token = oauth_client
@@ -119,7 +120,7 @@ pub async fn login_authorized(
     session.insert("user", &user_data).unwrap();
 
     // Store session and get corresponding cookie
-    let cookie = store.store_session(session).await.unwrap().unwrap();
+    let cookie = store.set_session(&session).await.unwrap();
 
     // Build the cookie
     let cookie = format!("{}={}; SameSite=Lax; Path=/", COOKIE_NAME, cookie);
