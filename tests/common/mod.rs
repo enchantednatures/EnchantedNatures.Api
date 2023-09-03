@@ -8,34 +8,33 @@ use aws_sdk_s3::Client;
 use api::app::create_router;
 use api::database::PhotoRepository;
 use api::domain::AppState;
-use sqlx::postgres::PgPoolOptions;
-use sqlx::PgPool;
-use tokio::runtime::Runtime;
-use utoipa_swagger_ui::{Config, SwaggerUi};
 use async_once::AsyncOnce;
 use lazy_static::lazy_static;
+use sqlx::postgres::PgPoolOptions;
+use sqlx::PgPool;
 use std::net::SocketAddr;
+use tokio::runtime::Runtime;
+use utoipa_swagger_ui::{Config, SwaggerUi};
 
 lazy_static! {
-  static ref RUNTIME: Runtime = Runtime::new().unwrap();
+    static ref RUNTIME: Runtime = Runtime::new().unwrap();
 }
 
 lazy_static! {
-  pub static ref API: AsyncOnce<()> = AsyncOnce::new(async {
-    std::env::set_var("RUN_MODE", "test");
+    pub static ref API: AsyncOnce<()> = AsyncOnce::new(async {
+        std::env::set_var("RUN_MODE", "test");
 
-    let app = spawn_app().await.expect("Unable to start app");
-    let address = SocketAddr::from(([127, 0, 0, 1], 6969));
+        let app = spawn_app().await.expect("Unable to start app");
+        let address = SocketAddr::from(([127, 0, 0, 1], 6969));
 
-    tokio::spawn(async move {
-      axum::Server::bind(&address)
-        .serve(app.into_make_service())
-        .await
-        .expect("Failed to start server");
+        tokio::spawn(async move {
+            axum::Server::bind(&address)
+                .serve(app.into_make_service())
+                .await
+                .expect("Failed to start server");
+        });
     });
-  });
 }
-
 
 pub async fn spawn_app() -> Result<Router> {
     let db_connection_str = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -72,17 +71,13 @@ pub async fn spawn_app() -> Result<Router> {
     Ok(app)
 }
 
-
-
-
 pub fn use_app<F>(test: F)
 where
-  F: std::future::Future,
+    F: std::future::Future,
 {
-  RUNTIME.block_on(async move {
-    API.get().await;
+    RUNTIME.block_on(async move {
+        API.get().await;
 
-
-    test.await;
-  })
+        test.await;
+    })
 }

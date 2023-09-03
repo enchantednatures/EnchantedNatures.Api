@@ -42,8 +42,10 @@ fn auth() {
             .await
             .unwrap();
 
-
-        assert!(response.url().to_string().contains("auth.enchantednatures.com"))
+        assert!(response
+            .url()
+            .to_string()
+            .contains("auth.enchantednatures.com"))
         // assert!(response.len() > 0)
     })
 }
