@@ -34,11 +34,17 @@ paths:
         - Health Checks
       operationId: health_check
       responses:
-        "200":
+        "200": # TODO: refactor responses to do use the right enum value
           description: Check health
           content:
             application/json:
               schema:
+                $ref: "#/components/schemas/HealthStatus"
+        "500":
+          description: Health invalid
+          content: 
+            application/json:
+              schema: 
                 $ref: "#/components/schemas/HealthStatus"
 
   /categories:
@@ -331,7 +337,6 @@ components:
           format: int32
         name:
           type: string
-
     HealthStatus:
       type: object
       properties:

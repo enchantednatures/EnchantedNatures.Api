@@ -23,6 +23,6 @@ impl HealthStatus {
 }
 
 #[tracing::instrument(name = "Health Check")]
-pub async fn health_check() -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    Ok(Json(HealthStatus::new()))
+pub async fn health_check() -> impl IntoResponse {
+    (StatusCode::OK, Json(HealthStatus::new()))
 }

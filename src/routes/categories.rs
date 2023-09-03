@@ -24,6 +24,11 @@ pub struct AddPhotoToCategoryRequest {
     pub display_order: Option<i32>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CreateCategoryRequest {
+    pub name: String,
+}
+
 #[tracing::instrument(name = "add photo to category", skip(app))]
 pub async fn add_photo_to_category(
     State(app): State<AppState>,
@@ -45,17 +50,6 @@ pub async fn add_photo_to_category(
             ))
         }
     }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CategoryGetByIdRequest {
-    pub id: i32,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CategoryGetByIdResponse {
-    pub category: Category,
-    pub photos: Vec<Photo>,
 }
 
 #[tracing::instrument(name = "Get Categories", skip(app))]
@@ -98,16 +92,6 @@ pub async fn categories_by_id(
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CreateCategoryRequest {
-    pub name: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum CategoryError {
-    CategoryAlreadyExists,
-}
-
 #[tracing::instrument(name = "add category", skip(app))]
 pub async fn post_category(
     State(app): State<AppState>,
@@ -125,48 +109,15 @@ pub async fn post_category(
     Ok((StatusCode::CREATED, response_headers, Json(category)))
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PhotoAddedToCategory;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PhotoRemovedFromCategory;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum UpdatePhotoCategoryResponse {
-    PhotoAddedToCategory,
-    PhotoRemovedFromCategory,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct DeleteCategoryResponses {
-    status: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct BadRequest {
-    message: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-enum DeleteCategoryResponse {
-    Success,
-
-    NotFound,
-
-    BadRequest(BadRequest),
-}
-
 #[tracing::instrument(name = "Delete Category", skip(app))]
 pub async fn delete_category(
     State(app): State<AppState>,
     Path(id): Path<i32>,
-) -> Result<impl IntoResponse, StatusCode> {
+) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     // TODO: verify a row was deleted
     sqlx::query!(
-        r#"
-    DELETE FROM categories
-    WHERE id = $1
-    "#,
+        r#" DELETE FROM categories
+            WHERE id = $1 "#,
         id
     )
     .execute(&*app.repo.db_pool)
