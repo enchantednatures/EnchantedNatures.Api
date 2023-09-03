@@ -31,10 +31,10 @@ async fn main() {
 
     let db_connection_str = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let aws_endpoint_url = std::env::var("AWS_ENDPOINT_URL").expect("AWS_ENDPOINT_URL must be set");
-    let access_key_id = std::env::var("AWS_ACCESS_KEY_ID").expect("AWS_ACCESS_KEY_ID must be set");
-    let aws_secret_key =
+    let _access_key_id = std::env::var("AWS_ACCESS_KEY_ID").expect("AWS_ACCESS_KEY_ID must be set");
+    let _aws_secret_key =
         std::env::var("AWS_SECRET_ACCESS_KEY").expect("AWS_SECRET_ACCESS_KEY must be set");
-    let aws_bucket_name = std::env::var("AWS_BUCKET_NAME").expect("AWS_BUCKET_NAME must be set");
+    let _aws_bucket_name = std::env::var("AWS_BUCKET_NAME").expect("AWS_BUCKET_NAME must be set");
     let aws_region = std::env::var("AWS_REGION").expect("AWS_REGION must be set");
 
     let config = aws_config::from_env()

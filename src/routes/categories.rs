@@ -1,15 +1,15 @@
 use crate::auth::User;
 use crate::database::PhotoRepo;
-use crate::models::Category;
+
 use crate::models::CategoryDisplayModel;
 use crate::models::CategoryViewModel;
-use crate::models::Photo;
+
 
 use axum::extract::Path;
 use axum::extract::State;
 use axum::http::header;
 use axum::http::StatusCode;
-use axum::response::{IntoResponse, Redirect};
+use axum::response::{IntoResponse};
 use axum::{response, Json};
 use hyper::http::HeaderValue;
 use hyper::HeaderMap;

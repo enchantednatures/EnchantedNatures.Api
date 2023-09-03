@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::error_handling::AppError;
+
 
 struct Settings;
 
@@ -16,7 +16,7 @@ impl Settings {
             .unwrap_or(Environment::Local);
 
         let environment_filename = format!("{}.yaml", &environment.as_str());
-        let settings = config::Config::builder()
+        let _settings = config::Config::builder()
             .add_source(config::File::from(
                 configuration_directory.join("base.yaml"),
             ))
@@ -97,9 +97,9 @@ impl Environment {
     }
 }
 
-impl Into<String> for &Environment {
-    fn into(self) -> String {
-        match &self {
+impl From<&Environment> for String {
+    fn from(val: &Environment) -> Self {
+        match &val {
             Environment::Development => "development".into(),
             Environment::Local => "local".into(),
             Environment::Staging => "staging".into(),
