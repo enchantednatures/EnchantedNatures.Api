@@ -1,14 +1,14 @@
 use crate::auth::{default_auth, login_authorized, protected};
 use crate::domain::AppState;
-use crate::routes::categories::add_photo_to_category;
-use crate::routes::categories::categories_by_id;
-use crate::routes::categories::get_categories;
-use crate::routes::categories::post_category;
+
+
+
+
 use crate::routes::health::health_check;
-use crate::routes::photos::delete_photo;
-use crate::routes::photos::get_photo;
+
+
 use crate::routes::photos::photo_router;
-use crate::routes::{categories_router, delete_category, photos, save_request_body};
+use crate::routes::{categories_router, save_request_body};
 use axum::error_handling::HandleErrorLayer;
 use axum::extract::MatchedPath;
 use axum::http::Method;
@@ -19,8 +19,8 @@ use axum::routing::post;
 use axum::Router;
 use hyper::body::Bytes;
 use hyper::{HeaderMap, Request};
-use photos::get_photos;
-use photos::post_photo;
+
+
 use std::time::Duration;
 use tokio::time::error::Elapsed;
 use tower::BoxError;
