@@ -1,7 +1,7 @@
 use anyhow::Result;
 use axum::Router;
 
-use api::auth::create_oauth_client;
+use api::{auth::create_oauth_client, sessions::SessionManager};
 use aws_sdk_s3::config::Region;
 use aws_sdk_s3::Client;
 
@@ -63,7 +63,9 @@ pub async fn spawn_app() -> Result<Router> {
     let photo_repo = PhotoRepository::new(pool.clone());
 
     let oauth_client = create_oauth_client().unwrap();
-    let app_state = AppState::new(photo_repo, oauth_client, client);
+    let redis = redis::Client::open(std::env::var("REDIS_URL").expect("REDIS_URL must be set")).unwrap();
+    let session_manager = SessionManager::new(redis);
+    let app_state = AppState::new(photo_repo, oauth_client, client, session_manager);
 
     let swagger_ui = SwaggerUi::new("/swagger-ui")
         .config(Config::from("/api/enchanted-natures.openapi.spec.yaml"));

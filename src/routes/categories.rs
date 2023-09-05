@@ -4,12 +4,12 @@ use crate::database::PhotoRepo;
 use crate::models::CategoryDisplayModel;
 use crate::models::CategoryViewModel;
 
-
 use axum::extract::Path;
 use axum::extract::State;
 use axum::http::header;
 use axum::http::StatusCode;
-use axum::response::{IntoResponse};
+use axum::response::IntoResponse;
+use axum::Router;
 use axum::{response, Json};
 use hyper::http::HeaderValue;
 use hyper::HeaderMap;
@@ -17,6 +17,18 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::AppState;
 use tracing::info;
+
+pub fn categories_router() -> Router<AppState> {
+    use axum::routing::get;
+    use axum::routing::post;
+    Router::new()
+        .route("/categories", get(get_categories).post(post_category))
+        .route(
+            "/categories/:id",
+            get(categories_by_id).delete(delete_category),
+        )
+        .route("/categories/:id/photos", post(add_photo_to_category))
+}
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct AddPhotoToCategoryRequest {

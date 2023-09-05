@@ -1,9 +1,5 @@
 use crate::common::*;
 use api::models::PhotoViewModel;
-use axum::http::{Request, StatusCode};
-use hyper::Body;
-use std::net::{SocketAddr, TcpListener};
-use tower::ServiceExt;
 
 mod common;
 
@@ -31,7 +27,7 @@ fn photos() {
             .await
             .unwrap();
 
-        assert!(response.len() > 0)
+        assert!(!response.is_empty())
     })
 }
 

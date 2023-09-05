@@ -6,11 +6,21 @@ use crate::models::{Photo, PhotoViewModel};
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::{response, Json};
+use axum::routing::get;
+use axum::{response, Json, Router};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tracing::info;
+
+pub fn photo_router() -> Router<AppState> {
+    Router::new()
+        .route("/photos", get(get_photos).post(post_photo))
+        .route(
+            "/photos/:id",
+            get(get_photo).delete(delete_photo).put(put_photo),
+        )
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PhotoGetAllResponse;
