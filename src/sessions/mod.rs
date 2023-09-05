@@ -21,8 +21,7 @@ impl SessionManager {
 
     pub(crate) async fn set_session(&self, session: &Session) -> Result<String> {
         let mut con = self.redis.get_async_connection().await?;
-        con
-            .set(session.id(), serde_json::to_string(session)?)
+        con.set(session.id(), serde_json::to_string(session)?)
             .await?;
         Ok(session.id().to_string())
     }

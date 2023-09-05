@@ -1,8 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-
-
 struct Settings;
 
 impl Settings {

@@ -1,11 +1,7 @@
 use crate::auth::{default_auth, login_authorized, protected};
 use crate::domain::AppState;
 
-
-
-
 use crate::routes::health::health_check;
-
 
 use crate::routes::photos::photo_router;
 use crate::routes::{categories_router, save_request_body};
@@ -20,7 +16,6 @@ use axum::Router;
 use hyper::body::Bytes;
 use hyper::{HeaderMap, Request};
 
-
 use std::time::Duration;
 use tokio::time::error::Elapsed;
 use tower::BoxError;
@@ -33,7 +28,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use tower_http::services::ServeFile;
 
-pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router{
+pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
     let cors = CorsLayer::new()
         // allow `GET` and `POST` when accessing the resource
         .allow_methods([Method::GET, Method::POST])
@@ -55,7 +50,7 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router{
             Router::new()
                 .route("/upload/:filename", post(save_request_body))
                 .merge(photo_router())
-                .merge(categories_router())
+                .merge(categories_router()),
         )
         .layer(
             ServiceBuilder::new()
