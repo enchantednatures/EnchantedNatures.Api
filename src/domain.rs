@@ -13,7 +13,6 @@ pub struct AppState {
     pub http_client: reqwest::Client,
     pub oauth_client: BasicClient,
     session_store: SessionManager,
-    pub session_manager: MemoryStore,
     bucket_name: String,
 }
 
@@ -29,7 +28,6 @@ impl AppState {
             s3_client,
             http_client: reqwest::Client::new(),
             oauth_client,
-            session_manager: MemoryStore::new(),
             bucket_name: "photos".into(),
             session_store,
         }
@@ -52,12 +50,6 @@ impl AppState {
 impl FromRef<AppState> for PhotoRepository {
     fn from_ref(state: &AppState) -> Self {
         state.repo.clone()
-    }
-}
-
-impl FromRef<AppState> for MemoryStore {
-    fn from_ref(state: &AppState) -> Self {
-        state.session_manager.clone()
     }
 }
 

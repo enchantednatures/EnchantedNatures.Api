@@ -20,3 +20,4 @@ configuration/
 *.pdb
 
 /ijhttp/
+config/local.yaml

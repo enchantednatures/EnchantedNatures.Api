@@ -22,7 +22,7 @@ servers:
           - production
           - staging
         default: production
-  - url: http://localhost:6969/api/v0
+  - url: http://127.0.0.1:6969/api/v0
     description: localhost
 paths:
   /health_check:

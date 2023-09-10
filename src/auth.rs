@@ -144,8 +144,7 @@ pub async fn default_auth(State(client): State<BasicClient>) -> impl IntoRespons
     Redirect::to(auth_url.as_ref())
 }
 
-pub fn create_oauth_client() -> Result<BasicClient> {
-    let auth_settings = AuthSettings::default();
+pub fn create_oauth_client(auth_settings: AuthSettings) -> Result<BasicClient> {
     Ok(BasicClient::new(
         ClientId::new(auth_settings.client_id),
         Some(ClientSecret::new(auth_settings.client_secret)),

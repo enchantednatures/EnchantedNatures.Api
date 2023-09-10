@@ -1,12 +1,34 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-struct Settings;
+#[derive(Debug, Deserialize)]
+pub struct AuthSettings {
+    pub(crate) client_id: String,
+    pub(crate) client_secret: String,
+    pub(crate) redirect_url: String,
+    pub(crate) token_url: String,
+    pub(crate) auth_url: String,
+    pub(crate) introspection_url: String,
+    pub(crate) revocation_url: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Settings {
+    pub database_url: String,
+    aws_access_key_id: String,
+    aws_secret_access_key: String,
+    pub aws_endpoint_url: String,
+    pub aws_region: String,
+    pub aws_bucket_name: String,
+    pub auth_settings: AuthSettings,
+    pub app_settings: ApplicationSettings,
+    redis_url: String,
+}
 
 impl Settings {
-    fn load_config() -> Result<Self> {
+    pub fn load_config() -> Result<Self> {
         let base_path = std::env::current_dir()?;
-        let configuration_directory = base_path.join("configuration");
+        let configuration_directory = base_path.join("config");
 
         let environment: Environment = std::env::var("ENVIRONMENT")
             .unwrap_or_else(|_| "local".into())
@@ -14,7 +36,7 @@ impl Settings {
             .unwrap_or(Environment::Local);
 
         let environment_filename = format!("{}.yaml", &environment.as_str());
-        let _settings = config::Config::builder()
+        let settings = config::Config::builder()
             .add_source(config::File::from(
                 configuration_directory.join("base.yaml"),
             ))
@@ -30,7 +52,7 @@ impl Settings {
             )
             .build()?;
 
-        Ok(Self {})
+        Ok(settings.try_deserialize::<Self>()?)
     }
 }
 
@@ -38,43 +60,6 @@ impl Settings {
 pub struct ApplicationSettings {
     pub addr: [u8; 4],
     pub port: u16,
-}
-
-impl ApplicationSettings {
-    fn new(addr: [u8; 4], port: u16) -> Self {
-        Self { addr, port }
-    }
-}
-#[derive(Debug)]
-pub struct AuthSettings {
-    pub client_id: String,
-    pub client_secret: String,
-    pub redirect_url: String,
-    pub revocation_url: String,
-    pub introspection_url: String,
-    pub auth_url: String,
-    pub token_url: String,
-}
-
-impl Default for AuthSettings {
-    fn default() -> Self {
-        Self {
-            client_id: std::env::var("CLIENT_ID").expect("CLIENT_ID must be set"),
-            client_secret: std::env::var("CLIENT_SECRET").expect("CLIENT_SECRET must be set"),
-            redirect_url: std::env::var("REDIRECT_URL").expect("REDIRECT_URL must be set"),
-            auth_url: std::env::var("AUTH_URL").expect("AUTH_URL must be set"),
-            token_url: std::env::var("TOKEN_URL").expect("TOKEN_URL must be set"),
-            revocation_url: std::env::var("REVOCATION_URL").expect("REVOCATION_URL must be set"),
-            introspection_url: std::env::var("INTROSPECTION_URL")
-                .expect("INTROSPECTION_URL must be set"),
-        }
-    }
-}
-
-impl Default for ApplicationSettings {
-    fn default() -> Self {
-        Self::new([0, 0, 0, 0], 6969)
-    }
 }
 
 pub enum Environment {

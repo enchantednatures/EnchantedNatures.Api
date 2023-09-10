@@ -1,7 +1,7 @@
 use anyhow::Result;
 use axum::Router;
 
-use api::{auth::create_oauth_client, sessions::SessionManager};
+use api::{auth::create_oauth_client, sessions::SessionManager, configuration::{AuthSettings, Settings}};
 use aws_sdk_s3::config::Region;
 use aws_sdk_s3::Client;
 
@@ -37,7 +37,7 @@ lazy_static! {
 }
 
 pub async fn spawn_app() -> Result<Router> {
-    let db_connection_str = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let settings = Settings::load_config()?;
 
     let aws_endpoint_url = std::env::var("AWS_ENDPOINT_URL").expect("AWS_ENDPOINT_URL must be set");
     let _aws_access_key =
@@ -52,17 +52,20 @@ pub async fn spawn_app() -> Result<Router> {
         .region(Region::new(aws_region))
         .load()
         .await;
+
+
+
     let client = Client::new(&config);
     let pool: PgPool = PgPoolOptions::new()
         .max_connections(5)
-        .connect(&db_connection_str)
+        .connect(&settings.database_url)
         .await
         .expect("can't connect to database");
 
     sqlx::migrate!().run(&pool).await.unwrap();
     let photo_repo = PhotoRepository::new(pool.clone());
 
-    let oauth_client = create_oauth_client().unwrap();
+    let oauth_client = create_oauth_client(settings.auth_settings).unwrap();
     let redis =
         redis::Client::open(std::env::var("REDIS_URL").expect("REDIS_URL must be set")).unwrap();
     let session_manager = SessionManager::new(redis);
