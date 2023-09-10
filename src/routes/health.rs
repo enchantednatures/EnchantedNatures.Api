@@ -22,7 +22,6 @@ impl HealthStatus {
     }
 }
 
-#[tracing::instrument(name = "Health Check")]
 pub async fn health_check() -> impl IntoResponse {
     (StatusCode::OK, Json(HealthStatus::new()))
 }

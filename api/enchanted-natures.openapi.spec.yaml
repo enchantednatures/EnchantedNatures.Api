@@ -34,7 +34,8 @@ paths:
         - Health Checks
       operationId: health_check
       responses:
-        "200": # TODO: refactor responses to do use the right enum value
+        "200":
+          # TODO: refactor responses to do use the right enum value
           description: Check health
           content:
             application/json:
@@ -42,9 +43,9 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
         "500":
           description: Health invalid
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/HealthStatus"
 
   /categories:
@@ -222,6 +223,41 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  "/mp-upload/{filename}":
+    post:
+      description: upload a file
+      tags:
+        - Upload
+      operationId: save_request_body_2
+      security:
+        - authentik: [ upload_photos ]
+      parameters:
+        - name: filename
+          in: path
+          description: Filename
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                orderId:
+                  type: integer
+                userId:
+                  type: integer
+                fileName:
+                  type: string
+                  format: binary
+            encoding:
+              fileName:
+                contentType: image/png, image/jpeg
+      responses:
+        "200": 
+          description: Success
+
   "/upload/{filename}":
     post:
       description: upload a file
@@ -250,7 +286,7 @@ paths:
           description: upload successful
 
 components:
-  examples: { } # TODO: add examples of each type
+  examples: {} # TODO: add examples of each type
   responses:
     NotFound:
       description: The specified resource was not found

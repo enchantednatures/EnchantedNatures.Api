@@ -32,13 +32,14 @@ pub enum UploadPhotoResponses {
     UploadError,
 }
 
-#[tracing::instrument(name = "Save file", skip(app, body))]
+// #[tracing::instrument(name = "Save file", skip(app, body))]
 pub async fn save_request_body(
     Path(file_name): Path<String>,
     State(app): State<AppState>,
     user: User,
     body: BodyStream,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
+    tracing::info!("Uploading file for user: {:?}", user);
     let body_with_io_error = body.map_err(|err| io::Error::new(io::ErrorKind::Other, err));
     let mut body_reader = StreamReader::new(body_with_io_error);
 
