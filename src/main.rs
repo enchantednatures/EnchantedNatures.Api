@@ -47,11 +47,11 @@ async fn connect_database(database_url: &str) -> PgPool {
         .await
         .expect("can't connect to database")
 }
+
 fn check_env() -> Result<()> { 
     let _access_key_id = std::env::var("AWS_ACCESS_KEY_ID").expect("AWS_ACCESS_KEY_ID must be set");
     let _aws_secret_key =
         std::env::var("AWS_SECRET_ACCESS_KEY").expect("AWS_SECRET_ACCESS_KEY must be set");
-    let _aws_bucket_name = std::env::var("AWS_BUCKET_NAME").expect("AWS_BUCKET_NAME must be set");
     Ok(())
 }
 
