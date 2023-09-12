@@ -1,23 +1,34 @@
 #![warn(dead_code)]
 
 use anyhow::Result;
-use api::sessions::SessionManager;
+use sessions::SessionManager;
+use app::create_router;
 use aws_sdk_s3::config::Region;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::net::SocketAddr;
 
-use api::app::create_router;
-use api::auth::create_oauth_client;
-use api::configuration::Settings;
-use api::database::PhotoRepository;
-use api::domain::AppState;
-use api::router;
+use auth::create_oauth_client;
+use configuration::Settings;
+use database::PhotoRepository;
+use domain::AppState;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::Registry;
 use utoipa_swagger_ui::{Config, SwaggerUi};
+
+
+pub mod app;
+pub mod auth;
+pub mod configuration;
+pub mod database;
+pub mod domain;
+pub mod error_handling;
+pub mod models;
+pub mod routes;
+pub mod router;
+pub mod sessions;
 
 fn setup_logging() {
     let formatting_layer = BunyanFormattingLayer::new("enchanted_natures".into(), std::io::stdout);

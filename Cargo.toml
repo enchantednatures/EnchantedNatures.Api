@@ -4,12 +4,6 @@ authors = ["H. Casten <huntercasten@icloud.com>"]
 version = "0.2.0"
 edition = "2021"
 
-[lib]
-path = "src/lib.rs"
-
-[[bin]]
-path = "src/main.rs"
-name = "enchanted-natures-api"
 
 [profile.release]
 # Do not perform backtrace for panic on release builds.
