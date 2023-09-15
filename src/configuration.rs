@@ -22,7 +22,7 @@ pub struct Settings {
     pub aws_bucket_name: String,
     pub auth_settings: AuthSettings,
     pub app_settings: ApplicationSettings,
-    redis_url: String,
+    pub redis_url: String,
 }
 
 impl Settings {

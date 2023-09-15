@@ -73,7 +73,7 @@ async fn main() {
     let s3_client = aws_sdk_s3::Client::new(&config);
     let oauth_client = create_oauth_client(settings.auth_settings).unwrap();
     let session_manager = SessionManager::new(
-        redis::Client::open(std::env::var("REDIS_URL").expect("REDIS_URL must be set")).unwrap(),
+        redis::Client::open(settings.redis_url).unwrap(),
     );
 
     let photo_repo = PhotoRepository::new(pool.clone());
