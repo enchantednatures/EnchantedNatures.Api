@@ -16,6 +16,7 @@ impl SessionManager {
         let mut con = self.redis.get_async_connection().await?;
         let session: String = con.get(session_id).await?;
         let session: Session = serde_json::from_str(&session)?;
+        con.expire(session.id(), 300).await?;
         Ok(Some(session))
     }
 
@@ -23,6 +24,7 @@ impl SessionManager {
         let mut con = self.redis.get_async_connection().await?;
         con.set(session.id(), serde_json::to_string(session)?)
             .await?;
+        con.expire(session.id(), 300).await?;
         Ok(session.id().to_string())
     }
 }

@@ -43,7 +43,6 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
         )
         .route("/authorize", get(default_auth))
         .route("/authorized", get(login_authorized))
-        .route("/protected", get(protected))
         .route("/health_check", get(health_check))
         .nest(
             "/api/v0",
