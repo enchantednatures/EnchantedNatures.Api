@@ -43,7 +43,7 @@ EXPOSE 6969
 # Run the API
 
 COPY ./config ./config
-ENV APP_ENVIRONMENT production
+ENV APP__ENVIRONMENT production
 ENV RUST_LOG=info,axum::rejection=trace 
 CMD ["api"]
 
