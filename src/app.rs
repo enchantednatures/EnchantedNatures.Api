@@ -1,4 +1,4 @@
-use crate::auth::{default_auth, login_authorized, protected};
+use crate::auth::{default_auth, login_authorized};
 use crate::domain::AppState;
 
 use crate::routes::health::health_check;
