@@ -73,6 +73,7 @@ paths:
             - write_photos
       tags:
         - Categories
+
       requestBody:
         description: Create category properties
 
@@ -136,12 +137,51 @@ paths:
       operationId: delete_category
       tags:
         - Categories
+      security:
+        - authentik: [ write_photos ]
       responses:
         "204":
           description: Deleted photo
         "404":
           description: Photo not found
-
+  "/categories/{category_id}/photos":
+    parameters:
+      - in: path
+        name: category_id
+        description: id of category
+        required: true
+        example: 1
+        schema:
+          type: integer
+    put: 
+      description: Include a photo in the category 
+      operationId: add_photo_to_category 
+      tags:
+        - Categories
+        - Photos
+      security:
+        - authentik: [ write_photos ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                photo_id:
+                  type: integer
+                display_order:
+                  type: integer 
+                  required: false 
+        
+      responses:
+        "200":
+          description: successfully retrieved category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryDetails"
+        "404":
+          $ref: '#/components/responses/NotFound'
   /photos:
     get:
       description: Get all photos
@@ -189,7 +229,7 @@ paths:
 
       responses:
         "201":
-          description: created TODO
+          description: created Photo
 
   "/photos/{photo_id}":
     parameters:
@@ -217,6 +257,8 @@ paths:
       operationId: delete_photo
       tags:
         - Photos
+      security:
+        - authentik: [ write_photos ]
       responses:
         "204":
           description: "Deleted"
@@ -361,6 +403,9 @@ components:
           type: string
         filename:
           type: string
+        date_taken: 
+          type: string 
+          format: date-time
 
     CategorySummary:
       type: object

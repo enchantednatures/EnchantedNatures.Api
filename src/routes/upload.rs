@@ -32,7 +32,7 @@ pub enum UploadPhotoResponses {
     UploadError,
 }
 
-// #[tracing::instrument(name = "Save file", skip(app, body))]
+#[tracing::instrument(name = "Save file", skip(app, body))]
 pub async fn save_request_body(
     Path(file_name): Path<String>,
     State(app): State<AppState>,
@@ -51,6 +51,31 @@ pub async fn save_request_body(
 
     tracing::info!("Uploading photo {}", &file_name);
     let result = app.upload_photo(buffer, &file_name).await.unwrap();
+    // let cloudflare_upload  = upload_photo_to_cloudflare(file_name, State(app), user, body).await.unwrap();
 
     Ok((StatusCode::OK, Json(json!({"key": result.checksum_crc32}))))
 }
+
+
+// #[tracing::instrument(name = "Save file", skip(app, body))]
+// pub async fn upload_photo_to_cloudflare(
+//     Path(file_name): Path<String>,
+//     State(app): State<AppState>,
+//     user: User,
+//     body: BodyStream,
+// ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
+//     tracing::info!("Uploading file for user: {:?}", user);
+//     let body_with_io_error = body.map_err(|err| io::Error::new(io::ErrorKind::Other, err));
+//     let mut body_reader = StreamReader::new(body_with_io_error);
+
+//     let mut buffer = Vec::new();
+//     body_reader
+//         .read_to_end(&mut buffer)
+//         .await
+//         .expect("Failed to read body");
+
+//     tracing::info!("Uploading photo {}", &file_name);
+//     let result = app.upload_photo(buffer, &file_name).await.unwrap();
+
+//     Ok((StatusCode::OK, Json(json!({"key": result.checksum_crc32}))))
+// }

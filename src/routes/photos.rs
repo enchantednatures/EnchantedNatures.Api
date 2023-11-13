@@ -1,5 +1,5 @@
 use crate::auth::User;
-use crate::database::PhotoRepo;
+use crate::database::PhotoRepository;
 use crate::domain::AppState;
 use crate::error_handling::AppError;
 use crate::models::{Photo, PhotoViewModel};
@@ -132,21 +132,26 @@ pub struct CategoryQuery {
     pub category_id: i32,
 }
 
-#[tracing::instrument(name = "Get photos", skip(app))]
+#[tracing::instrument(name = "Get photos", skip(photo_repo))]
 pub async fn get_photos(
     query: Option<Query<CategoryQuery>>,
-    State(app): State<AppState>,
+    State(photo_repo): State<PhotoRepository>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     info!("getting all photos");
     let query_result = match query {
-        Some(category_query) => app.repo.get_photos_in_category(category_query.category_id),
-        None => app.repo.get_photos(),
+        Some(category_query) => {
+            photo_repo
+                .get_photos_in_category(category_query.category_id)
+                .await
+        }
+        None => photo_repo.get_photos().await,
     };
-    match query_result.await {
+    match query_result {
         Ok(response) => {
             info!("retrieved {} photos", response.len());
+            let view_models: Vec<PhotoViewModel> = response.into_iter().map(|x| x.into()).collect();
 
-            Ok((StatusCode::OK, Json(response)))
+            Ok((StatusCode::OK, Json(view_models)))
         }
         Err(e) => {
             tracing::error!("Failed to get photos: {:?}", e);

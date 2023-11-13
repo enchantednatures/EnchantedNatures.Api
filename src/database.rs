@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use axum::async_trait;
 use chrono::NaiveDate;
 use sqlx::{query_file, query_file_as, PgPool};
 
@@ -10,40 +9,6 @@ use crate::models::{Category, CategoryPhotos, Photo};
 #[derive(sqlx::Type)]
 #[sqlx(transparent)]
 struct Id(i32);
-
-#[async_trait]
-pub trait PhotoRepo {
-    async fn add_photo(
-        &self,
-        title: String,
-        filename: String,
-        location_taken: String,
-        date_taken: NaiveDate,
-    ) -> Result<Photo>;
-    async fn get_photo(&self, id: i32) -> Result<Photo>;
-    async fn update_photo(
-        &self,
-        id: i32,
-        title: Option<String>,
-        filename: Option<String>,
-        location_taken: Option<String>,
-        date_taken: Option<NaiveDate>,
-    ) -> Result<Photo>;
-    async fn get_photos_in_category(&self, id: i32) -> Result<Vec<Photo>>;
-    async fn get_photos(&self) -> Result<Vec<Photo>>;
-    async fn delete_photo(&self, id: i32) -> Result<()>;
-
-    async fn add_photo_to_category(
-        &self,
-        photo_id: i32,
-        category_id: i32,
-        display_order: Option<i32>,
-    ) -> Result<()>;
-
-    async fn add_category(&self, name: String) -> Result<Category>;
-    async fn get_category(&self, id: i32) -> Result<CategoryPhotos>;
-    async fn get_categories(&self) -> Result<Vec<Category>>;
-}
 
 #[derive(Debug, Clone)]
 pub struct PhotoRepository {
@@ -60,11 +25,8 @@ impl PhotoRepository {
         sqlx::migrate!().run(&*self.db_pool).await?;
         Ok(())
     }
-}
 
-#[async_trait]
-impl PhotoRepo for PhotoRepository {
-    async fn add_photo(
+    pub async fn add_photo(
         &self,
         title: String,
         filename: String,
@@ -84,14 +46,14 @@ impl PhotoRepo for PhotoRepository {
         Ok(response)
     }
 
-    async fn get_photo(&self, id: i32) -> Result<Photo> {
+    pub async fn get_photo(&self, id: i32) -> Result<Photo> {
         let response = query_file_as!(Photo, "sql/photos/get.sql", id)
             .fetch_one(&*self.db_pool)
             .await?;
         Ok(response)
     }
 
-    async fn update_photo(
+    pub async fn update_photo(
         &self,
         id: i32,
         title: Option<String>,
@@ -134,28 +96,28 @@ impl PhotoRepo for PhotoRepository {
         }
     }
 
-    async fn get_photos_in_category(&self, id: i32) -> Result<Vec<Photo>> {
+    pub async fn get_photos_in_category(&self, id: i32) -> Result<Vec<Photo>> {
         let response = query_file_as!(Photo, "sql/photo_categories/get.sql", id)
             .fetch_all(&*self.db_pool)
             .await?;
         Ok(response)
     }
 
-    async fn get_photos(&self) -> Result<Vec<Photo>> {
+    pub async fn get_photos(&self) -> Result<Vec<Photo>> {
         let response = query_file_as!(Photo, "sql/photos/get_all.sql")
             .fetch_all(&*self.db_pool)
             .await?;
         Ok(response)
     }
 
-    async fn delete_photo(&self, id: i32) -> Result<()> {
+    pub async fn delete_photo(&self, id: i32) -> Result<()> {
         query_file!("sql/photos/delete.sql", id)
             .execute(&*self.db_pool)
             .await?;
         Ok(())
     }
 
-    async fn add_photo_to_category(
+    pub async fn add_photo_to_category(
         &self,
         photo_id: i32,
         category_id: i32,
@@ -246,14 +208,14 @@ impl PhotoRepo for PhotoRepository {
         Ok(())
     }
 
-    async fn add_category(&self, name: String) -> Result<Category> {
+    pub async fn add_category(&self, name: String) -> Result<Category> {
         let response = query_file_as!(Category, "sql/categories/insert.sql", name)
             .fetch_one(&*self.db_pool)
             .await?;
         Ok(response)
     }
 
-    async fn get_category(&self, id: i32) -> Result<CategoryPhotos> {
+   pub async fn get_category(&self, id: i32) -> Result<CategoryPhotos> {
         let response = query_file_as!(Category, "sql/categories/get.sql", id)
             .fetch_one(&*self.db_pool)
             .await?;
@@ -263,7 +225,7 @@ impl PhotoRepo for PhotoRepository {
         Ok((response, photos_in_category))
     }
 
-    async fn get_categories(&self) -> Result<Vec<Category>> {
+    pub async fn get_categories(&self) -> Result<Vec<Category>> {
         let response = query_file_as!(Category, "sql/categories/get_all.sql")
             .fetch_all(&*self.db_pool)
             .await?;
