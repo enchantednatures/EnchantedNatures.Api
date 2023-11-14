@@ -171,7 +171,8 @@ paths:
                   type: integer
                 display_order:
                   type: integer 
-                  required: false 
+              required:  
+                - photo_id
         
       responses:
         "200":
@@ -205,18 +206,17 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/PhotoSummary"
+
     post:
-      description: Create a new photo
-      operationId: create_photo
-      security:
-        - authentik:
-            - read_photos
-            - write_photos
+      description: upload a file
       tags:
-        - Photos
+        - Upload
+      operationId: save_request_body_2
+      security:
+        - authentik: [ upload_photos ]
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -224,12 +224,19 @@ paths:
                   type: string
                 location_taken:
                   type: string
+                date_taken:
+                  type: string
+                  format: date-time
+                  example: "2023-07-21T17:32:28Z"
                 filename:
                   type: string
-
+                  format: binary
+            encoding:
+              filename:
+                contentType: image/png, image/jpeg
       responses:
-        "201":
-          description: created Photo
+        "201": 
+          description: Photo Uploaded Successfully
 
   "/photos/{photo_id}":
     parameters:
@@ -265,67 +272,6 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  "/mp-upload/{filename}":
-    post:
-      description: upload a file
-      tags:
-        - Upload
-      operationId: save_request_body_2
-      security:
-        - authentik: [ upload_photos ]
-      parameters:
-        - name: filename
-          in: path
-          description: Filename
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                orderId:
-                  type: integer
-                userId:
-                  type: integer
-                fileName:
-                  type: string
-                  format: binary
-            encoding:
-              fileName:
-                contentType: image/png, image/jpeg
-      responses:
-        "200": 
-          description: Success
-
-  "/upload/{filename}":
-    post:
-      description: upload a file
-      tags:
-        - Upload
-      operationId: save_request_body
-      security:
-        - authentik: [ upload_photos ]
-      parameters:
-        - name: filename
-          in: path
-          description: Filename
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: File contents
-        content:
-          image/jpeg:
-            schema:
-              type: string
-              format: binary
-        required: true
-      responses:
-        "200":
-          description: upload successful
 
 components:
   examples: {} # TODO: add examples of each type
@@ -451,8 +397,8 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/PhotoSummary"
-    BadRequest:
-      type: string
+    # BadRequest:
+    #   type: string
 tags:
   - name: Health Checks
     description: Information about the health of the API
