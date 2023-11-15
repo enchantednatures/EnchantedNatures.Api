@@ -73,6 +73,7 @@ paths:
             - write_photos
       tags:
         - Categories
+
       requestBody:
         description: Create category properties
 
@@ -136,12 +137,52 @@ paths:
       operationId: delete_category
       tags:
         - Categories
+      security:
+        - authentik: [ write_photos ]
       responses:
         "204":
           description: Deleted photo
         "404":
           description: Photo not found
-
+  "/categories/{category_id}/photos":
+    parameters:
+      - in: path
+        name: category_id
+        description: id of category
+        required: true
+        example: 1
+        schema:
+          type: integer
+    put: 
+      description: Include a photo in the category 
+      operationId: add_photo_to_category 
+      tags:
+        - Categories
+        - Photos
+      security:
+        - authentik: [ write_photos ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                photo_id:
+                  type: integer
+                display_order:
+                  type: integer 
+              required:  
+                - photo_id
+        
+      responses:
+        "200":
+          description: successfully retrieved category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryDetails"
+        "404":
+          $ref: '#/components/responses/NotFound'
   /photos:
     get:
       description: Get all photos
@@ -165,18 +206,17 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/PhotoSummary"
+
     post:
-      description: Create a new photo
-      operationId: create_photo
-      security:
-        - authentik:
-            - read_photos
-            - write_photos
+      description: upload a file
       tags:
-        - Photos
+        - Upload
+      operationId: save_request_body_2
+      security:
+        - authentik: [ upload_photos ]
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -184,12 +224,19 @@ paths:
                   type: string
                 location_taken:
                   type: string
+                date_taken:
+                  type: string
+                  format: date-time
+                  example: "2023-07-21T17:32:28Z"
                 filename:
                   type: string
-
+                  format: binary
+            encoding:
+              filename:
+                contentType: image/png, image/jpeg
       responses:
-        "201":
-          description: created TODO
+        "201": 
+          description: Photo Uploaded Successfully
 
   "/photos/{photo_id}":
     parameters:
@@ -217,73 +264,14 @@ paths:
       operationId: delete_photo
       tags:
         - Photos
+      security:
+        - authentik: [ write_photos ]
       responses:
         "204":
           description: "Deleted"
         "404":
           $ref: "#/components/responses/NotFound"
 
-  "/mp-upload/{filename}":
-    post:
-      description: upload a file
-      tags:
-        - Upload
-      operationId: save_request_body_2
-      security:
-        - authentik: [ upload_photos ]
-      parameters:
-        - name: filename
-          in: path
-          description: Filename
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                orderId:
-                  type: integer
-                userId:
-                  type: integer
-                fileName:
-                  type: string
-                  format: binary
-            encoding:
-              fileName:
-                contentType: image/png, image/jpeg
-      responses:
-        "200": 
-          description: Success
-
-  "/upload/{filename}":
-    post:
-      description: upload a file
-      tags:
-        - Upload
-      operationId: save_request_body
-      security:
-        - authentik: [ upload_photos ]
-      parameters:
-        - name: filename
-          in: path
-          description: Filename
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: File contents
-        content:
-          image/jpeg:
-            schema:
-              type: string
-              format: binary
-        required: true
-      responses:
-        "200":
-          description: upload successful
 
 components:
   examples: {} # TODO: add examples of each type
@@ -361,6 +349,9 @@ components:
           type: string
         filename:
           type: string
+        date_taken: 
+          type: string 
+          format: date-time
 
     CategorySummary:
       type: object
@@ -406,8 +397,8 @@ components:
           type: array
           items:
             "$ref": "#/components/schemas/PhotoSummary"
-    BadRequest:
-      type: string
+    # BadRequest:
+    #   type: string
 tags:
   - name: Health Checks
     description: Information about the health of the API

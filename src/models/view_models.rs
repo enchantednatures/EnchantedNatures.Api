@@ -56,6 +56,7 @@ impl From<Category> for CategoryViewModel {
     }
 }
 
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PhotoDisplayModel {
     pub id: i32,
