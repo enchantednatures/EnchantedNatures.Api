@@ -58,7 +58,7 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
         .merge(swagger_ui)
         .nest_service(
             "/enchanted-natures.openapi.spec.yaml",
-            ServeFile::new("api/enchanted-natures.openapi.spec.yaml"),
+            ServeFile::new("specs/enchanted-natures.openapi.spec.yaml"),
         )
         .route("/authorize", get(default_auth))
         .route("/authorized", get(login_authorized))
