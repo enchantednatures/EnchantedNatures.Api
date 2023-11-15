@@ -26,7 +26,7 @@ pub enum PhotoCreateRequestBuilderError {
     FilenameRequired,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct PhotoCreateRequestBuilder {
     title: String,
     location_taken: String,
@@ -36,12 +36,7 @@ pub struct PhotoCreateRequestBuilder {
 
 impl PhotoCreateRequestBuilder {
     pub fn new() -> Self {
-        Self {
-            title: "".to_string(),
-            location_taken: "".to_string(),
-            date_taken: "".to_string(),
-            filename: "".to_string(),
-        }
+        Self::default()
     }
 
     pub fn title(mut self, title: String) -> Self {
@@ -96,6 +91,7 @@ pub struct PhotoCreateRequest {
     pub date_taken: NaiveDate,
     pub filename: String,
 }
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UploadedPhotoViewModel {
     file_size: usize,
@@ -184,7 +180,7 @@ pub async fn save_request_body(
                 tracing::info!("Uploaded location_taken: {:?}", &location_taken);
             }
             "date_taken" => {
-                let date_taken = Some(field.text().await.unwrap());
+                date_taken = Some(field.text().await.unwrap());
                 tracing::info!("Uploaded date_taken: {:?}", &date_taken);
             }
             _ => {
