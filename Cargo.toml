@@ -1,3 +1,9 @@
 [workspace]
 members = ["api"]
 resolver = "2"
+
+[profile.release]
+panic = 'abort'
+codegen-units = 1
+opt-level = 's' # or 'z' to optimize "aggressively" for size
+lto = true
