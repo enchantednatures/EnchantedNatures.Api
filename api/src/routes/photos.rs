@@ -3,7 +3,8 @@ use crate::database::PhotoRepository;
 use crate::domain::AppState;
 use crate::error_handling::AppError;
 use crate::models::{Photo, PhotoViewModel};
-use axum::extract::{Path, Query, State, Multipart};
+use anyhow::Result;
+use axum::extract::{Multipart, Path, Query, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
@@ -12,7 +13,6 @@ use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tracing::info;
-use anyhow::Result;
 
 pub fn photo_router() -> Router<AppState> {
     Router::new()
@@ -25,7 +25,6 @@ pub fn photo_router() -> Router<AppState> {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PhotoGetAllResponse;
-
 
 #[tracing::instrument(name = "Delete photo", skip(app))]
 pub async fn delete_photo(
@@ -162,7 +161,6 @@ pub async fn get_photo(
         )),
     }
 }
-
 
 #[derive(Debug)]
 pub enum PhotoCreateRequestBuilderError {

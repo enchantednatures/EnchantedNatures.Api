@@ -1,9 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-
-
-
 #[derive(Debug, Deserialize)]
 pub struct AuthSettings {
     pub(crate) client_id: String,

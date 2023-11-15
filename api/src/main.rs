@@ -24,8 +24,8 @@ use api::auth::{default_auth, login_authorized};
 
 use api::routes::health::health_check;
 
-use api::routes::photos::photo_router;
 use api::routes::categories_router;
+use api::routes::photos::photo_router;
 use axum::error_handling::HandleErrorLayer;
 use axum::extract::MatchedPath;
 use axum::http::Method;
