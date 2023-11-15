@@ -15,10 +15,10 @@ RUN rm src/*.rs
 
 # Copy your source code
 
-COPY ./.sqlx ./.sqlx
-COPY ./src ./src
-COPY ./sql ./sql
-COPY ./migrations ./migrations
+COPY ./api/.sqlx ./.sqlx
+COPY ./api/src ./src
+COPY ./api/sql ./sql
+COPY ./api/migrations ./migrations
 
 # Build the release binary
 RUN rm ./target/release/deps/api*
