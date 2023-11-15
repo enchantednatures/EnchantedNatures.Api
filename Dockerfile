@@ -26,15 +26,15 @@ COPY ./api/migrations ./api/migrations
 RUN rm ./target/release/deps/api*
 ENV SQLX_OFFLINE true
 ENV RUST_LOG=info,axum::rejection=trace 
-WORKDIR /enchantednatures/api
-RUN cargo install --path .
 
+RUN cargo install --path api
 # Start a new stage for the runtime image
 FROM debian:bullseye-slim as runtime
 
 # Install necessary runtime libraries for PostgreSQL
 RUN apt-get update && \
-    apt-get install -y libpq-dev ca-certificates  && \
+    apt-get install -y libpq-dev ca-certificates && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the release binary from the build stage
