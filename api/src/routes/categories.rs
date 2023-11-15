@@ -131,7 +131,6 @@ pub async fn delete_category(
     _user: User,
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    // TODO: verify a row was deleted
     sqlx::query!(
         r#" DELETE FROM categories
             WHERE id = $1 "#,

@@ -3,27 +3,30 @@ FROM rust:1.73.0 as build
 
 
 # Create a new empty shell project
+
+WORKDIR /enchantednatures
 RUN USER=root cargo new --bin api
-WORKDIR /api
+# WORKDIR /enchantednatures/api
 
 # Copy your project's Cargo.toml and Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
+COPY ./api/Cargo.toml ./api/Cargo.toml
 
 # Cache dependencies
 RUN cargo build --release
-RUN rm src/*.rs
+RUN rm api/src/*.rs
 
 # Copy your source code
 
-COPY ./api/.sqlx ./.sqlx
-COPY ./api/src ./src
-COPY ./api/sql ./sql
-COPY ./api/migrations ./migrations
+COPY ./.sqlx ./.sqlx
+COPY ./api/src ./api/src
+COPY ./api/migrations ./api/migrations
 
 # Build the release binary
 RUN rm ./target/release/deps/api*
 ENV SQLX_OFFLINE true
 ENV RUST_LOG=info,axum::rejection=trace 
+WORKDIR /enchantednatures/api
 RUN cargo install --path .
 
 # Start a new stage for the runtime image
@@ -36,7 +39,7 @@ RUN apt-get update && \
 
 # Copy the release binary from the build stage
 COPY --from=build /usr/local/cargo/bin/api /usr/local/bin/api
-COPY ./api ./api
+COPY ./specs ./specs
 
 # Expose the port the API will run on
 EXPOSE 6969

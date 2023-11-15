@@ -25,14 +25,13 @@ use api::auth::{default_auth, login_authorized};
 use api::routes::health::health_check;
 
 use api::routes::photos::photo_router;
-use api::routes::{categories_router, save_request_body};
+use api::routes::categories_router;
 use axum::error_handling::HandleErrorLayer;
 use axum::extract::MatchedPath;
 use axum::http::Method;
 use axum::http::StatusCode;
 use axum::response::Response;
 use axum::routing::get;
-use axum::routing::post;
 use axum::Router;
 use hyper::body::Bytes;
 use hyper::{HeaderMap, Request};
@@ -66,7 +65,6 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
         .nest(
             "/api/v0",
             Router::new()
-                .route("/upload/:filename", post(save_request_body))
                 .merge(photo_router())
                 .merge(categories_router()),
         )
@@ -155,7 +153,7 @@ fn check_env() -> Result<()> {
     Ok(())
 }
 
-#[tokio::main]
+#[tokio::main(worker_threads = 16)]
 async fn main() {
     setup_logging();
     check_env().expect("Environment Variable must be set");
