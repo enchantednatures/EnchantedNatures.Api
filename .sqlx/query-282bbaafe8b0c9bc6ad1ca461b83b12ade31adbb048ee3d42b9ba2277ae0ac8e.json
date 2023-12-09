@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                SELECT p.id          as \"id!\",\n                    p.title as \"title!\",\n                    p.filename as \"filename!\",\n                    p.location_taken as \"location_taken!\",\n                    p.date_taken as \"date_taken!\",\n                    p.created_at as \"created_at!\",\n                    p.updated_at as \"updated_at!\"\n                FROM categories\n                        JOIN photo_categories pc on categories.id = pc.category_id\n                        JOIN photos p on p.id = pc.photo_id\n                WHERE category_id = $1\n            ",
+  "query": "SELECT id as \"id!\",\n       title as \"title!\",\n       filename as \"filename!\",\n       location_taken as \"location_taken!\",\n       date_taken as \"date_taken!\",\n       created_at as \"created_at!\",\n       updated_at as \"updated_at!\"\nFROM photos\nWHERE id = $1;\n",
   "describe": {
     "columns": [
       {
@@ -54,5 +54,5 @@
       false
     ]
   },
-  "hash": "6f3772286accab2fa38580eaf1a3dd04f44aaebeb887d2083514f20443611cab"
+  "hash": "282bbaafe8b0c9bc6ad1ca461b83b12ade31adbb048ee3d42b9ba2277ae0ac8e"
 }

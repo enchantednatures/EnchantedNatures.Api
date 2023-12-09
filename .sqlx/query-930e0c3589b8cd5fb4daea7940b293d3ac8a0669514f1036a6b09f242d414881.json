@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                INSERT INTO categories (name)\n                VALUES ($1)\n                RETURNING id as \"id!\",\n                        name as \"name!\",\n                        created_at as \"created_at!\",\n                        updated_at as \"updated_at!\";\n            ",
+  "query": "SELECT id as \"id!\",\n       name as \"name!\",\n       created_at as \"created_at!\",\n       updated_at as \"updated_at!\"\nFROM categories\nWHERE id = $1;\n",
   "describe": {
     "columns": [
       {
@@ -26,7 +26,7 @@
     ],
     "parameters": {
       "Left": [
-        "Varchar"
+        "Int4"
       ]
     },
     "nullable": [
@@ -36,5 +36,5 @@
       false
     ]
   },
-  "hash": "fccc9c851dcc7503f9a5eacb186aa6d0d2511344546fd7e1bf30505ecc4a5104"
+  "hash": "930e0c3589b8cd5fb4daea7940b293d3ac8a0669514f1036a6b09f242d414881"
 }

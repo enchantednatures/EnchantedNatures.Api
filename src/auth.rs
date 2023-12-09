@@ -96,13 +96,8 @@ pub async fn login_authorized(
     State(store): State<SessionManager>,
     State(oauth_client): State<BasicClient>,
 ) -> impl IntoResponse {
-    let AuthRequest {
-        code,
-        state: _state,
-    } = query;
-
     let token = oauth_client
-        .exchange_code(AuthorizationCode::new(code))
+        .exchange_code(AuthorizationCode::new(query.code.clone()))
         .request_async(async_http_client)
         .await
         .unwrap();
