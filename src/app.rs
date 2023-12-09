@@ -2,15 +2,15 @@ use crate::domain::AppState;
 
 use crate::routes::health::health_check;
 
+use crate::routes::categories_router;
 use crate::routes::photos::photo_router;
-use crate::routes::{categories_router};
 use axum::error_handling::HandleErrorLayer;
 use axum::extract::MatchedPath;
 use axum::http::Method;
 use axum::http::StatusCode;
 use axum::response::Response;
 use axum::routing::get;
-use axum::routing::post;
+
 use axum::Router;
 use hyper::body::Bytes;
 use hyper::{HeaderMap, Request};

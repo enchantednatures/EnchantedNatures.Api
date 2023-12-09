@@ -1,9 +1,7 @@
-use crate::{database::PhotoRepository, sessions::SessionManager};
-use anyhow::{Ok, Result};
-use async_session::MemoryStore;
-use aws_sdk_s3::{operation::put_object::PutObjectOutput, primitives::ByteStream};
+use crate::database::PhotoRepository;
+
 use axum::extract::FromRef;
-use oauth2::basic::BasicClient;
+
 use reqwest;
 
 #[derive(Debug, Clone)]
@@ -17,9 +15,7 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(
-        repo: PhotoRepository
-    ) -> Self {
+    pub fn new(repo: PhotoRepository) -> Self {
         Self {
             repo,
             // s3_client,
@@ -29,8 +25,6 @@ impl AppState {
             // session_store,
         }
     }
-
-
 }
 
 impl FromRef<AppState> for PhotoRepository {

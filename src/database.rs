@@ -215,7 +215,7 @@ impl PhotoRepository {
         Ok(response)
     }
 
-   pub async fn get_category(&self, id: i32) -> Result<CategoryPhotos> {
+    pub async fn get_category(&self, id: i32) -> Result<CategoryPhotos> {
         let response = query_file_as!(Category, "sql/categories/get.sql", id)
             .fetch_one(&*self.db_pool)
             .await?;

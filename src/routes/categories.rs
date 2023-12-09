@@ -18,15 +18,17 @@ use tracing::info;
 
 pub fn categories_router() -> Router<AppState> {
     use axum::routing::get;
-    use axum::routing::post;
+
     Router::new()
-        .route("/categories", get(get_categories)//.post(post_category)
+        .route(
+            "/categories",
+            get(get_categories), //.post(post_category)
         )
         .route(
             "/categories/:id",
-            get(categories_by_id)//.delete(delete_category),
+            get(categories_by_id), //.delete(delete_category),
         )
-        //.route("/categories/:id/photos", post(add_photo_to_category))
+    //.route("/categories/:id/photos", post(add_photo_to_category))
 }
 
 #[derive(Deserialize, Serialize, Debug)]
