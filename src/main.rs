@@ -10,24 +10,24 @@ use shuttle_runtime::CustomError;
 use sqlx::PgPool;
 
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::EnvFilter;
-use tracing_subscriber::Registry;
+// use tracing_subscriber::layer::SubscriberExt;
+// use tracing_subscriber::EnvFilter;
+// use tracing_subscriber::Registry;
 use utoipa_swagger_ui::{Config, SwaggerUi};
 
-fn setup_logging() {
-    let formatting_layer = BunyanFormattingLayer::new("enchanted_natures".into(), std::io::stdout);
-    let subscriber = Registry::default()
-        .with(JsonStorageLayer)
-        .with(EnvFilter::new("info"))
-        .with(formatting_layer);
+// fn setup_logging() {
+//     let formatting_layer = BunyanFormattingLayer::new("enchanted_natures".into(), std::io::stdout);
+//     let subscriber = Registry::default()
+//         .with(JsonStorageLayer)
+//         .with(EnvFilter::new("info"))
+//         .with(formatting_layer);
 
-    tracing::subscriber::set_global_default(subscriber).unwrap();
-}
+//     tracing::subscriber::set_global_default(subscriber).unwrap();
+// }
 
 #[shuttle_runtime::main]
 async fn main(#[shuttle_shared_db::Postgres] pool: PgPool) -> shuttle_axum::ShuttleAxum {
-    setup_logging();
+    // setup_logging();
 
     sqlx::migrate!()
         .run(&pool)
