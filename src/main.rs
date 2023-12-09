@@ -1,9 +1,9 @@
 #![warn(dead_code)]
 
-use api::app::create_router;
+use enchantednatures::app::create_router;
 
-use api::database::PhotoRepository;
-use api::domain::AppState;
+use enchantednatures::database::PhotoRepository;
+use enchantednatures::domain::AppState;
 
 use sqlx::PgPool;
 

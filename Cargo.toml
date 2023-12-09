@@ -1,5 +1,5 @@
 [package]
-name = "api"
+name = "enchantednatures"
 authors = ["H. Casten <huntercasten@icloud.com>"]
 version = "0.2.0"
 edition = "2021"
