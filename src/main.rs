@@ -5,6 +5,8 @@ use enchantednatures::app::create_router;
 use enchantednatures::database::PhotoRepository;
 use enchantednatures::domain::AppState;
 
+use shuttle_runtime::CustomError;
+
 use sqlx::PgPool;
 
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
@@ -24,10 +26,15 @@ fn setup_logging() {
 }
 
 #[shuttle_runtime::main]
-async fn shuttle(#[shuttle_shared_db::Postgres] pool: PgPool) -> shuttle_axum::ShuttleAxum {
+async fn main(#[shuttle_shared_db::Postgres] pool: PgPool) -> shuttle_axum::ShuttleAxum {
     setup_logging();
-    let photo_repo = PhotoRepository::new(pool.clone());
-    photo_repo.migrate().await.unwrap();
+
+    sqlx::migrate!()
+        .run(&pool)
+        .await
+        .map_err(CustomError::new)?;
+
+    let photo_repo = PhotoRepository::new(pool);
     let app_state = AppState::new(photo_repo);
     let swagger_config = Config::from("/enchanted-natures.openapi.spec.yaml");
     let swagger_ui = SwaggerUi::new("/swagger-ui").config(swagger_config);
