@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO photos (title, filename, location_taken, date_taken)\nVALUES ($1, $2, $3, $4) RETURNING id as \"id!\",\n       title as \"title!\",\n       filename as \"filename!\",\n       location_taken as \"location_taken!\",\n       date_taken as \"date_taken!\",\n       created_at as \"created_at!\",\n       updated_at as \"updated_at!\"\n               \n",
+  "query": "\n                INSERT INTO photos (title, filename, location_taken, date_taken)\n                VALUES ($1, $2, $3, $4) RETURNING id as \"id!\",\n                    title as \"title!\",\n                    filename as \"filename!\",\n                    location_taken as \"location_taken!\",\n                    date_taken as \"date_taken!\",\n                    created_at as \"created_at!\",\n                    updated_at as \"updated_at!\"\n                    \n            ",
   "describe": {
     "columns": [
       {
@@ -57,5 +57,5 @@
       false
     ]
   },
-  "hash": "9bd9aac51c6c5df86d4687c0dadf671320b4f54d52df26881d1c29f66f96c446"
+  "hash": "39dd8a98c6335004778aaa5f7d10fc23b94fc86e8e5b2dbd2b27411fe9811eec"
 }

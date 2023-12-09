@@ -1,6 +1,7 @@
 // use crate::auth::User;
 use crate::database::PhotoRepo;
 
+use crate::database::PhotoRepository;
 use crate::models::CategoryDisplayModel;
 use crate::models::CategoryViewModel;
 
@@ -42,15 +43,14 @@ pub struct CreateCategoryRequest {
     pub name: String,
 }
 
-#[tracing::instrument(name = "add photo to category", skip(app))]
+#[tracing::instrument(name = "add photo to category", skip(photo_repo))]
 pub async fn add_photo_to_category(
-    State(app): State<AppState>,
+    State(photo_repo): State<PhotoRepository>,
     Path(category_id): Path<i32>,
     // user: User,
     Json(request): Json<AddPhotoToCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    match app
-        .repo
+    match photo_repo
         .add_photo_to_category(request.photo_id, category_id, request.display_order)
         .await
     {
@@ -65,15 +65,16 @@ pub async fn add_photo_to_category(
     }
 }
 
-#[tracing::instrument(name = "Get Categories", skip(app))]
+#[tracing::instrument(name = "Get Categories", skip(photo_repo))]
 pub async fn get_categories(
-    State(app): State<AppState>,
+    State(photo_repo): State<PhotoRepository>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    match app.repo.get_categories().await {
+    match photo_repo.get_categories().await {
         Ok(resp) => {
             info!("got {} categories", resp.len());
-            info!("{:?}", resp);
-            Ok((StatusCode::OK, Json(resp)))
+            // info!("{:?}", resp);
+            let view_model: Vec<CategoryViewModel> = resp.into_iter().map(|x| x.into()).collect();
+            Ok((StatusCode::OK, Json(view_model)))
         }
         Err(e) => {
             tracing::error!("Failed to get categories: {:?}", e);
@@ -105,13 +106,17 @@ pub async fn categories_by_id(
     }
 }
 
-#[tracing::instrument(name = "add category", skip(app))]
+#[tracing::instrument(name = "add category", skip(photo_repository))]
 pub async fn post_category(
     State(app): State<AppState>,
     // user: User,
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    let category: CategoryViewModel = app.repo.add_category(payload.name).await.unwrap().into();
+    let category: CategoryViewModel = photo_repository
+        .add_category(payload.name)
+        .await
+        .unwrap()
+        .into();
     let redirect_url = format!("/{}", category.id);
     let mut response_headers: HeaderMap = HeaderMap::new();
     response_headers.insert(
@@ -125,9 +130,9 @@ pub async fn post_category(
 #[tracing::instrument(name = "Delete Category", skip(app))]
 pub async fn delete_category(
     State(app): State<AppState>,
+    _user: User,
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    // TODO: verify a row was deleted
     sqlx::query!(
         r#" DELETE FROM categories
             WHERE id = $1 "#,

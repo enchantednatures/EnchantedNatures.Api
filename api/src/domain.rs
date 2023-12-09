@@ -1,6 +1,6 @@
 use crate::{database::PhotoRepository, sessions::SessionManager};
 use anyhow::{Ok, Result};
-use async_session::MemoryStore;
+
 use aws_sdk_s3::{operation::put_object::PutObjectOutput, primitives::ByteStream};
 use axum::extract::FromRef;
 use oauth2::basic::BasicClient;

@@ -1,49 +1,14 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use axum::async_trait;
 use chrono::NaiveDate;
-use sqlx::{query_file, query_file_as, PgPool};
+use sqlx::PgPool;
 
 use crate::models::{Category, CategoryPhotos, Photo};
 
 #[derive(sqlx::Type)]
 #[sqlx(transparent)]
 struct Id(i32);
-
-#[async_trait]
-pub trait PhotoRepo {
-    async fn add_photo(
-        &self,
-        title: String,
-        filename: String,
-        location_taken: String,
-        date_taken: NaiveDate,
-    ) -> Result<Photo>;
-    async fn get_photo(&self, id: i32) -> Result<Photo>;
-    async fn update_photo(
-        &self,
-        id: i32,
-        title: Option<String>,
-        filename: Option<String>,
-        location_taken: Option<String>,
-        date_taken: Option<NaiveDate>,
-    ) -> Result<Photo>;
-    async fn get_photos_in_category(&self, id: i32) -> Result<Vec<Photo>>;
-    async fn get_photos(&self) -> Result<Vec<Photo>>;
-    async fn delete_photo(&self, id: i32) -> Result<()>;
-
-    async fn add_photo_to_category(
-        &self,
-        photo_id: i32,
-        category_id: i32,
-        display_order: Option<i32>,
-    ) -> Result<()>;
-
-    async fn add_category(&self, name: String) -> Result<Category>;
-    async fn get_category(&self, id: i32) -> Result<CategoryPhotos>;
-    async fn get_categories(&self) -> Result<Vec<Category>>;
-}
 
 #[derive(Debug, Clone)]
 pub struct PhotoRepository {
@@ -60,20 +25,27 @@ impl PhotoRepository {
         sqlx::migrate!().run(&*self.db_pool).await?;
         Ok(())
     }
-}
 
-#[async_trait]
-impl PhotoRepo for PhotoRepository {
-    async fn add_photo(
+    pub async fn add_photo(
         &self,
         title: String,
         filename: String,
         location_taken: String,
         date_taken: NaiveDate,
     ) -> Result<Photo> {
-        let response = sqlx::query_file_as!(
+        let response = sqlx::query_as!(
             Photo,
-            "sql/photos/insert.sql",
+            r#"
+                INSERT INTO photos (title, filename, location_taken, date_taken)
+                VALUES ($1, $2, $3, $4) RETURNING id as "id!",
+                    title as "title!",
+                    filename as "filename!",
+                    location_taken as "location_taken!",
+                    date_taken as "date_taken!",
+                    created_at as "created_at!",
+                    updated_at as "updated_at!"
+                    
+            "#,
             title,
             filename,
             location_taken,
@@ -84,14 +56,28 @@ impl PhotoRepo for PhotoRepository {
         Ok(response)
     }
 
-    async fn get_photo(&self, id: i32) -> Result<Photo> {
-        let response = query_file_as!(Photo, "sql/photos/get.sql", id)
-            .fetch_one(&*self.db_pool)
-            .await?;
+    pub async fn get_photo(&self, id: i32) -> Result<Photo> {
+        let response = sqlx::query_as!(
+            Photo,
+            r#"
+                SELECT id as "id!",
+                    title as "title!",
+                    filename as "filename!",
+                    location_taken as "location_taken!",
+                    date_taken as "date_taken!",
+                    created_at as "created_at!",
+                    updated_at as "updated_at!"
+                FROM photos
+                WHERE id = $1;
+            "#,
+            id
+        )
+        .fetch_one(&*self.db_pool)
+        .await?;
         Ok(response)
     }
 
-    async fn update_photo(
+    pub async fn update_photo(
         &self,
         id: i32,
         title: Option<String>,
@@ -134,28 +120,63 @@ impl PhotoRepo for PhotoRepository {
         }
     }
 
-    async fn get_photos_in_category(&self, id: i32) -> Result<Vec<Photo>> {
-        let response = query_file_as!(Photo, "sql/photo_categories/get.sql", id)
-            .fetch_all(&*self.db_pool)
-            .await?;
+    pub async fn get_photos_in_category(&self, id: i32) -> Result<Vec<Photo>> {
+        let response = sqlx::query_as!(
+            Photo,
+            r#"
+                SELECT p.id          as "id!",
+                    p.title as "title!",
+                    p.filename as "filename!",
+                    p.location_taken as "location_taken!",
+                    p.date_taken as "date_taken!",
+                    p.created_at as "created_at!",
+                    p.updated_at as "updated_at!"
+                FROM categories
+                        JOIN photo_categories pc on categories.id = pc.category_id
+                        JOIN photos p on p.id = pc.photo_id
+                WHERE category_id = $1
+            "#,
+            id
+        )
+        .fetch_all(&*self.db_pool)
+        .await?;
         Ok(response)
     }
 
-    async fn get_photos(&self) -> Result<Vec<Photo>> {
-        let response = query_file_as!(Photo, "sql/photos/get_all.sql")
-            .fetch_all(&*self.db_pool)
-            .await?;
+    pub async fn get_photos(&self) -> Result<Vec<Photo>> {
+        let response = sqlx::query_as!(
+            Photo,
+            r#"
+                SELECT id as "id!",
+                    title as "title!",
+                    filename as "filename!",
+                    location_taken as "location_taken!",
+                    date_taken as "date_taken!",
+                    created_at as "created_at!",
+                    updated_at as "updated_at!"
+                FROM photos
+            "#
+        )
+        .fetch_all(&*self.db_pool)
+        .await?;
         Ok(response)
     }
 
-    async fn delete_photo(&self, id: i32) -> Result<()> {
-        query_file!("sql/photos/delete.sql", id)
-            .execute(&*self.db_pool)
-            .await?;
+    pub async fn delete_photo(&self, id: i32) -> Result<()> {
+        sqlx::query!(
+            r#"
+                DELETE
+                FROM photos
+                WHERE id = $1
+            "#,
+            id
+        )
+        .execute(&*self.db_pool)
+        .await?;
         Ok(())
     }
 
-    async fn add_photo_to_category(
+    pub async fn add_photo_to_category(
         &self,
         photo_id: i32,
         category_id: i32,
@@ -246,27 +267,74 @@ impl PhotoRepo for PhotoRepository {
         Ok(())
     }
 
-    async fn add_category(&self, name: String) -> Result<Category> {
-        let response = query_file_as!(Category, "sql/categories/insert.sql", name)
-            .fetch_one(&*self.db_pool)
-            .await?;
+    pub async fn add_category(&self, name: String) -> Result<Category> {
+        let response = sqlx::query_as!(
+            Category,
+            r#"
+                INSERT INTO categories (name)
+                VALUES ($1)
+                RETURNING id as "id!",
+                        name as "name!",
+                        created_at as "created_at!",
+                        updated_at as "updated_at!";
+            "#,
+            name
+        )
+        .fetch_one(&*self.db_pool)
+        .await?;
         Ok(response)
     }
 
-    async fn get_category(&self, id: i32) -> Result<CategoryPhotos> {
-        let response = query_file_as!(Category, "sql/categories/get.sql", id)
-            .fetch_one(&*self.db_pool)
-            .await?;
-        let photos_in_category = query_file_as!(Photo, "sql/photo_categories/get.sql", id)
-            .fetch_all(&*self.db_pool)
-            .await?;
+    pub async fn get_category(&self, id: i32) -> Result<CategoryPhotos> {
+        let response = sqlx::query_as!(
+            Category,
+            r#"
+                SELECT id as "id!",
+                    name as "name!",
+                    created_at as "created_at!",
+                    updated_at as "updated_at!"
+                FROM categories
+                WHERE id = $1;
+            "#,
+            id
+        )
+        .fetch_one(&*self.db_pool)
+        .await?;
+        let photos_in_category = sqlx::query_as!(
+            Photo,
+            r#"
+                SELECT p.id          as "id!",
+                    p.title as "title!",
+                    p.filename as "filename!",
+                    p.location_taken as "location_taken!",
+                    p.date_taken as "date_taken!",
+                    p.created_at as "created_at!",
+                    p.updated_at as "updated_at!"
+                FROM categories
+                        JOIN photo_categories pc on categories.id = pc.category_id
+                        JOIN photos p on p.id = pc.photo_id
+                WHERE category_id = $1
+                "#,
+            id
+        )
+        .fetch_all(&*self.db_pool)
+        .await?;
         Ok((response, photos_in_category))
     }
 
-    async fn get_categories(&self) -> Result<Vec<Category>> {
-        let response = query_file_as!(Category, "sql/categories/get_all.sql")
-            .fetch_all(&*self.db_pool)
-            .await?;
+    pub async fn get_categories(&self) -> Result<Vec<Category>> {
+        let response = sqlx::query_as!(
+            Category,
+            r#"
+                SELECT id as "id!",
+                    name as "name!",
+                    created_at as "created_at!",
+                    updated_at as "updated_at!"
+                FROM categories;
+            "#
+        )
+        .fetch_all(&*self.db_pool)
+        .await?;
         Ok(response)
     }
 }
