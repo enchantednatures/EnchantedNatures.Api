@@ -1,0 +1,6 @@
+name = "enchantednatures-api"
+
+assets = [
+  "api/", # include file.txt
+  "config/base.yaml", # include all files and subdirs in static/
+]
