@@ -1,6 +1,3 @@
-// use crate::auth::User;
-use crate::database::PhotoRepo;
-
 use crate::database::PhotoRepository;
 use crate::models::CategoryDisplayModel;
 use crate::models::CategoryViewModel;
@@ -86,12 +83,12 @@ pub async fn get_categories(
     }
 }
 
-#[tracing::instrument(name = "Get Category", skip(app))]
+#[tracing::instrument(name = "Get Category", skip(photo_repository))]
 pub async fn categories_by_id(
-    State(app): State<AppState>,
+    State(photo_repository): State<PhotoRepository>,
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    match app.repo.get_category(id).await {
+    match photo_repository.get_category(id).await {
         Ok(resp) => {
             info!("Category retrieved successfully");
             Ok((StatusCode::OK, Json(CategoryDisplayModel::from(resp))))
@@ -108,7 +105,7 @@ pub async fn categories_by_id(
 
 #[tracing::instrument(name = "add category", skip(photo_repository))]
 pub async fn post_category(
-    State(app): State<AppState>,
+    State(photo_repository): State<PhotoRepository>,
     // user: User,
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
@@ -127,10 +124,10 @@ pub async fn post_category(
     Ok((StatusCode::CREATED, response_headers, Json(category)))
 }
 
-#[tracing::instrument(name = "Delete Category", skip(app))]
+#[tracing::instrument(name = "Delete Category", skip(photo_repository))]
 pub async fn delete_category(
-    State(app): State<AppState>,
-    _user: User,
+    State(photo_repository): State<PhotoRepository>,
+    // _user: User,
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     // TODO: verify a row was deleted
@@ -139,7 +136,7 @@ pub async fn delete_category(
             WHERE id = $1 "#,
         id
     )
-    .execute(&*app.repo.db_pool)
+    .execute(&*photo_repository.db_pool)
     .await
     .unwrap();
 

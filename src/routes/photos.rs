@@ -1,5 +1,5 @@
 // use crate::auth::User;
-use crate::database::PhotoRepo;
+use crate::database::{PhotoRepository};
 use crate::domain::AppState;
 use crate::error_handling::AppError;
 use crate::models::{Photo, PhotoViewModel};
