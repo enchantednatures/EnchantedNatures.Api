@@ -1,4 +1,4 @@
-pub mod auth;
+pub mod app;
 pub mod configuration;
 pub mod database;
 pub mod domain;

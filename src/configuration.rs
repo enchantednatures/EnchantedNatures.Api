@@ -2,37 +2,9 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 
-
-#[derive(Debug, Deserialize)]
-pub struct CloudflareSettings {
-    pub(crate) account_id: String,
-    pub(crate) api_key: String,
-    // pub(crate) image_delivery_url: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct AuthSettings {
-    pub(crate) client_id: String,
-    pub(crate) client_secret: String,
-    pub(crate) redirect_url: String,
-    pub(crate) token_url: String,
-    pub(crate) auth_url: String,
-    pub(crate) introspection_url: String,
-    pub(crate) revocation_url: String,
-}
-
 #[derive(Debug, Deserialize)]
 pub struct Settings {
-    pub database_url: String,
-    aws_access_key_id: String,
-    aws_secret_access_key: String,
-    pub aws_endpoint_url: String,
-    pub aws_region: String,
-    pub aws_bucket_name: String,
-    pub auth_settings: AuthSettings,
     pub app_settings: ApplicationSettings,
-    pub cloudflare_settings: CloudflareSettings,
-    pub redis_url: String,
 }
 
 impl Settings {

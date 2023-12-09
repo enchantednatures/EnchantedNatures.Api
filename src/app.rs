@@ -1,31 +1,9 @@
-#![warn(dead_code)]
+use crate::domain::AppState;
 
-use anyhow::Result;
-use api::app::create_router;
-use api::configuration::Settings;
-use api::database::PhotoRepository;
-use api::domain::AppState;
-use api::sessions::SessionManager;
-use aws_sdk_s3::config::Region;
+use crate::routes::health::health_check;
 
-use axum::Server;
-use sqlx::postgres::PgPoolOptions;
-use sqlx::PgPool;
-use std::net::SocketAddr;
-use tower_http::trace::TraceLayer;
-
-use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::EnvFilter;
-use tracing_subscriber::Registry;
-use utoipa_swagger_ui::{Config, SwaggerUi};
-
-use api::auth::{default_auth, login_authorized};
-
-use api::routes::health::health_check;
-
-use api::routes::photos::photo_router;
-use api::routes::{categories_router, save_request_body};
+use crate::routes::photos::photo_router;
+use crate::routes::{categories_router};
 use axum::error_handling::HandleErrorLayer;
 use axum::extract::MatchedPath;
 use axum::http::Method;
@@ -43,7 +21,9 @@ use tower::BoxError;
 use tower::ServiceBuilder;
 use tower_http::classify::ServerErrorsFailureClass;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::trace::TraceLayer;
 use tracing::{info_span, Span};
+use utoipa_swagger_ui::SwaggerUi;
 
 use tower_http::services::ServeFile;
 
@@ -60,13 +40,13 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
             "/enchanted-natures.openapi.spec.yaml",
             ServeFile::new("api/enchanted-natures.openapi.spec.yaml"),
         )
-        .route("/authorize", get(default_auth))
-        .route("/authorized", get(login_authorized))
+        // .route("/authorize", get(default_auth))
+        // .route("/authorized", get(login_authorized))
         .route("/health_check", get(health_check))
         .nest(
             "/api/v0",
             Router::new()
-                .route("/upload/:filename", post(save_request_body))
+                // .route("/upload/:filename", post(save_request_body))
                 .merge(photo_router())
                 .merge(categories_router()),
         )
@@ -128,26 +108,4 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
                 .into_inner(),
         )
         .with_state(app_state)
-}
-
-fn setup_logging() {
-    let formatting_layer = BunyanFormattingLayer::new("enchanted_natures".into(), std::io::stdout);
-    let subscriber = Registry::default()
-        .with(JsonStorageLayer)
-        .with(EnvFilter::new("info"))
-        .with(formatting_layer);
-
-    tracing::subscriber::set_global_default(subscriber).unwrap();
-}
-
-#[shuttle_runtime::main]
-async fn shuttle(#[shuttle_shared_db::Postgres] pool: PgPool) -> shuttle_axum::ShuttleAxum {
-    setup_logging();
-    let photo_repo = PhotoRepository::new(pool.clone());
-    photo_repo.migrate().await.unwrap();
-    let app_state = AppState::new(photo_repo);
-    let swagger_config = Config::from("/enchanted-natures.openapi.spec.yaml");
-    let swagger_ui = SwaggerUi::new("/swagger-ui").config(swagger_config);
-    let app = create_router(swagger_ui, app_state);
-    Ok(app.into())
 }
