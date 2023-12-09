@@ -1,10 +1,9 @@
-use crate::auth::{default_auth, login_authorized};
 use crate::domain::AppState;
 
 use crate::routes::health::health_check;
 
 use crate::routes::photos::photo_router;
-use crate::routes::{categories_router, save_request_body};
+use crate::routes::{categories_router};
 use axum::error_handling::HandleErrorLayer;
 use axum::extract::MatchedPath;
 use axum::http::Method;
@@ -41,13 +40,13 @@ pub fn create_router(swagger_ui: SwaggerUi, app_state: AppState) -> Router {
             "/enchanted-natures.openapi.spec.yaml",
             ServeFile::new("api/enchanted-natures.openapi.spec.yaml"),
         )
-        .route("/authorize", get(default_auth))
-        .route("/authorized", get(login_authorized))
+        // .route("/authorize", get(default_auth))
+        // .route("/authorized", get(login_authorized))
         .route("/health_check", get(health_check))
         .nest(
             "/api/v0",
             Router::new()
-                .route("/upload/:filename", post(save_request_body))
+                // .route("/upload/:filename", post(save_request_body))
                 .merge(photo_router())
                 .merge(categories_router()),
         )

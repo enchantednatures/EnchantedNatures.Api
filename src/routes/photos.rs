@@ -1,4 +1,4 @@
-use crate::auth::User;
+// use crate::auth::User;
 use crate::database::PhotoRepo;
 use crate::domain::AppState;
 use crate::error_handling::AppError;
@@ -15,10 +15,13 @@ use tracing::info;
 
 pub fn photo_router() -> Router<AppState> {
     Router::new()
-        .route("/photos", get(get_photos).post(post_photo))
+        .route(
+            "/photos",
+            get(get_photos), //.post(post_photo)
+        )
         .route(
             "/photos/:id",
-            get(get_photo).delete(delete_photo).put(put_photo),
+            get(get_photo), //.delete(delete_photo).put(put_photo),
         )
 }
 
@@ -37,7 +40,7 @@ pub struct PhotoCreateRequest {
 pub async fn delete_photo(
     State(app): State<AppState>,
     Path(id): Path<i32>,
-    user: User,
+    // user: User,
 ) -> Result<impl IntoResponse, AppError> {
     app.repo.delete_photo(id).await?;
     Ok((StatusCode::NO_CONTENT, Json(json!({ "deleted": &id }))))
@@ -60,7 +63,7 @@ pub enum CreatePhotoResponses {
 #[tracing::instrument(name = "add photo", skip(app))]
 pub async fn post_photo(
     State(app): State<AppState>,
-    user: User,
+    // user: User,
     Json(payload): Json<PhotoCreateRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     info!("creating photo");
@@ -102,7 +105,7 @@ pub enum UpdatePhotoResponses {
 pub async fn put_photo(
     State(app): State<AppState>,
     Path(id): Path<i32>,
-    user: User,
+    // user: User,
     Json(payload): Json<PhotoUpdateRequest>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     info!("creating photo");
