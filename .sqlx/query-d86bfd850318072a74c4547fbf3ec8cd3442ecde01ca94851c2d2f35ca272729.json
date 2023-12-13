@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id as \"id!\",\n       title as \"title!\",\n       filename as \"filename!\",\n       location_taken as \"location_taken!\",\n       date_taken as \"date_taken!\",\n       created_at as \"created_at!\",\n       updated_at as \"updated_at!\"\nFROM photos\nWHERE id = $1;\n",
+  "query": "SELECT photos.id as \"id!\",\n       photos.title as \"title!\",\n       photos.filename as \"filename!\",\n       photos.location_taken as \"location_taken!\",\n       photos.date_taken as \"date_taken!\",\n       photos.created_at as \"created_at!\",\n       photos.updated_at as \"updated_at!\",\n       cf.resource_id as \"cloudflare_resource!\"\nFROM photos\nJOIN photo_cloudflare_resource cf ON cf.photo_id = photos.id\n",
   "describe": {
     "columns": [
       {
@@ -37,14 +37,18 @@
         "ordinal": 6,
         "name": "updated_at!",
         "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "cloudflare_resource!",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
-      "Left": [
-        "Int4"
-      ]
+      "Left": []
     },
     "nullable": [
+      false,
       false,
       false,
       false,
@@ -54,5 +58,5 @@
       false
     ]
   },
-  "hash": "282bbaafe8b0c9bc6ad1ca461b83b12ade31adbb048ee3d42b9ba2277ae0ac8e"
+  "hash": "d86bfd850318072a74c4547fbf3ec8cd3442ecde01ca94851c2d2f35ca272729"
 }

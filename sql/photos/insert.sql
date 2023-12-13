@@ -5,5 +5,6 @@ VALUES ($1, $2, $3, $4) RETURNING id as "id!",
        location_taken as "location_taken!",
        date_taken as "date_taken!",
        created_at as "created_at!",
-       updated_at as "updated_at!"
+       updated_at as "updated_at!",
+        $5 as "cloudflare_resource!"
                

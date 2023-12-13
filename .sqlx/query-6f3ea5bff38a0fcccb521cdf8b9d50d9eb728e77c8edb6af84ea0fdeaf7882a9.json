@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                    UPDATE photos\n                    SET title = $2,\n                        filename = $3,\n                        location_taken = $4,\n                        date_taken = $5\n                    WHERE \n                        id = $1\n                    RETURNING \n                        id as \"id!\",\n                        title as \"title!\",\n                        filename as \"filename!\",\n                        location_taken as \"location_taken!\",\n                        date_taken as \"date_taken!\",\n                        created_at as \"created_at!\",\n                        updated_at as \"updated_at!\"\n                    ",
+  "query": "\n                    UPDATE photos\n                    SET title = $2,\n                        filename = $3,\n                        location_taken = $4,\n                        date_taken = $5\n                    WHERE \n                        id = $1\n                    RETURNING \n                        id as \"id!\",\n                        title as \"title!\",\n                        filename as \"filename!\",\n                        location_taken as \"location_taken!\",\n                        date_taken as \"date_taken!\",\n                        created_at as \"created_at!\",\n                        updated_at as \"updated_at!\",\n                        $6 as \"cloudflare_resource!\"\n                    ",
   "describe": {
     "columns": [
       {
@@ -37,6 +37,11 @@
         "ordinal": 6,
         "name": "updated_at!",
         "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "cloudflare_resource!",
+        "type_info": "Text"
       }
     ],
     "parameters": {
@@ -45,7 +50,8 @@
         "Varchar",
         "Varchar",
         "Varchar",
-        "Date"
+        "Date",
+        "Text"
       ]
     },
     "nullable": [
@@ -55,8 +61,9 @@
       false,
       false,
       false,
-      false
+      false,
+      null
     ]
   },
-  "hash": "cff9b27793a96590d317c2f149b52de7ffad472a1967445a4845b3d9cf21a0c4"
+  "hash": "6f3ea5bff38a0fcccb521cdf8b9d50d9eb728e77c8edb6af84ea0fdeaf7882a9"
 }

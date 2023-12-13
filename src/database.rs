@@ -39,7 +39,8 @@ impl PhotoRepository {
             title,
             filename,
             location_taken,
-            date_taken
+            date_taken,
+            ""
         )
         .fetch_one(&*self.db_pool)
         .await?;
@@ -80,13 +81,15 @@ impl PhotoRepository {
                         location_taken as "location_taken!",
                         date_taken as "date_taken!",
                         created_at as "created_at!",
-                        updated_at as "updated_at!"
+                        updated_at as "updated_at!",
+                        $6 as "cloudflare_resource!"
                     "#,
                     id,
                     title.unwrap_or(photo.title),
                     filename.unwrap_or(photo.filename),
                     location_taken.unwrap_or(photo.location_taken),
-                    date_taken.unwrap_or(photo.date_taken)
+                    date_taken.unwrap_or(photo.date_taken),
+                    ""
                 )
                 .fetch_one(&*self.db_pool)
                 .await?;
