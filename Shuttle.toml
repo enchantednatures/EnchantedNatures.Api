@@ -1,4 +1,4 @@
-name = "enchantednatures"
+name = "enchantednatures-api"
 
 assets = [
   "api/", # include file.txt
