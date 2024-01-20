@@ -352,8 +352,6 @@ components:
         date_taken: 
           type: string 
           format: date-time
-        cloudflare_resource: 
-          type: string
 
     CategorySummary:
       type: object
