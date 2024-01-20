@@ -15,7 +15,6 @@ pub struct Photo {
     pub date_taken: NaiveDate,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    pub cloudflare_resource: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

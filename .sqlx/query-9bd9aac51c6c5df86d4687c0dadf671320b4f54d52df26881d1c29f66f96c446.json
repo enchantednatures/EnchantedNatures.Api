@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO photos (title, filename, location_taken, date_taken)\nVALUES ($1, $2, $3, $4) RETURNING id as \"id!\",\n       title as \"title!\",\n       filename as \"filename!\",\n       location_taken as \"location_taken!\",\n       date_taken as \"date_taken!\",\n       created_at as \"created_at!\",\n       updated_at as \"updated_at!\",\n        $5 as \"cloudflare_resource!\"\n               \n",
+  "query": "INSERT INTO photos (title, filename, location_taken, date_taken)\nVALUES ($1, $2, $3, $4) RETURNING id as \"id!\",\n       title as \"title!\",\n       filename as \"filename!\",\n       location_taken as \"location_taken!\",\n       date_taken as \"date_taken!\",\n       created_at as \"created_at!\",\n       updated_at as \"updated_at!\"\n               \n",
   "describe": {
     "columns": [
       {
@@ -37,11 +37,6 @@
         "ordinal": 6,
         "name": "updated_at!",
         "type_info": "Timestamptz"
-      },
-      {
-        "ordinal": 7,
-        "name": "cloudflare_resource!",
-        "type_info": "Text"
       }
     ],
     "parameters": {
@@ -49,8 +44,7 @@
         "Varchar",
         "Varchar",
         "Varchar",
-        "Date",
-        "Text"
+        "Date"
       ]
     },
     "nullable": [
@@ -60,9 +54,8 @@
       false,
       false,
       false,
-      false,
-      null
+      false
     ]
   },
-  "hash": "a717d8a018c4e5f2e0e0aa81b1c0a49b0eccf2e9dffac3b299791e337bade786"
+  "hash": "9bd9aac51c6c5df86d4687c0dadf671320b4f54d52df26881d1c29f66f96c446"
 }

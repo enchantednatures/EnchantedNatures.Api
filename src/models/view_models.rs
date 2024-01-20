@@ -9,7 +9,6 @@ pub struct PhotoViewModel {
     pub filename: String,
     pub location_taken: String,
     pub date_taken: NaiveDate,
-    pub cloudflare_resource: String
 }
 
 impl PhotoViewModel {
@@ -19,7 +18,6 @@ impl PhotoViewModel {
         filename: String,
         location_taken: String,
         date_taken: NaiveDate,
-        cloudflare_resource: String,
     ) -> Self {
         Self {
             id,
@@ -27,7 +25,6 @@ impl PhotoViewModel {
             filename,
             location_taken,
             date_taken,
-            cloudflare_resource
         }
     }
 }
@@ -40,7 +37,6 @@ impl From<Photo> for PhotoViewModel {
             filename: value.filename,
             location_taken: value.location_taken,
             date_taken: value.date_taken,
-            cloudflare_resource: value.cloudflare_resource
         }
     }
 }
@@ -88,7 +84,7 @@ impl From<CategoryPhotos> for CategoryDisplayModel {
                 .1
                 .into_iter()
                 .map(|x| {
-                    PhotoViewModel::new(x.id, x.title, x.filename, x.location_taken, x.date_taken, x.cloudflare_resource)
+                    PhotoViewModel::new(x.id, x.title, x.filename, x.location_taken, x.date_taken)
                 })
                 .collect(),
         }

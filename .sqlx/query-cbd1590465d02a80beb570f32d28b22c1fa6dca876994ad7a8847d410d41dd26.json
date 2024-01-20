@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT p.id          as \"id!\",\n     p.title as \"title!\",\n     p.filename as \"filename!\",\n     p.location_taken as \"location_taken!\",\n     p.date_taken as \"date_taken!\",\n     p.created_at as \"created_at!\",\n     p.updated_at as \"updated_at!\",\n     cf.resource_id as \"cloudflare_resource!\"\nFROM categories\n         JOIN photo_categories pc on categories.id = pc.category_id\n         JOIN photos p on p.id = pc.photo_id\n         JOIN photo_cloudflare_resource cf ON cf.photo_id = p.id\nWHERE category_id = $1\n\n",
+  "query": "SELECT p.id          as \"id!\",\n     p.title as \"title!\",\n     p.filename as \"filename!\",\n     p.location_taken as \"location_taken!\",\n     p.date_taken as \"date_taken!\",\n     p.created_at as \"created_at!\",\n     p.updated_at as \"updated_at!\"\nFROM categories\n         JOIN photo_categories pc on categories.id = pc.category_id\n         JOIN photos p on p.id = pc.photo_id\nWHERE category_id = $1\n",
   "describe": {
     "columns": [
       {
@@ -37,11 +37,6 @@
         "ordinal": 6,
         "name": "updated_at!",
         "type_info": "Timestamptz"
-      },
-      {
-        "ordinal": 7,
-        "name": "cloudflare_resource!",
-        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -56,9 +51,8 @@
       false,
       false,
       false,
-      false,
       false
     ]
   },
-  "hash": "0ba2e9930e42b7ffbddaea8ab0a1a14814ccb54a2f4a1b3811f22a8323b4a270"
+  "hash": "cbd1590465d02a80beb570f32d28b22c1fa6dca876994ad7a8847d410d41dd26"
 }
