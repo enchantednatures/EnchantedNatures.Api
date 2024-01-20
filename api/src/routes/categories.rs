@@ -1,3 +1,5 @@
+use crate::auth::User;
+
 use crate::database::PhotoRepository;
 use crate::models::CategoryDisplayModel;
 use crate::models::CategoryViewModel;
@@ -18,17 +20,14 @@ use tracing::info;
 
 pub fn categories_router() -> Router<AppState> {
     use axum::routing::get;
-
+    use axum::routing::post;
     Router::new()
-        .route(
-            "/categories",
-            get(get_categories), //.post(post_category)
-        )
+        .route("/categories", get(get_categories).post(post_category))
         .route(
             "/categories/:id",
-            get(categories_by_id), //.delete(delete_category),
+            get(categories_by_id).delete(delete_category),
         )
-    //.route("/categories/:id/photos", post(add_photo_to_category))
+        .route("/categories/:id/photos", post(add_photo_to_category))
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -46,7 +45,7 @@ pub struct CreateCategoryRequest {
 pub async fn add_photo_to_category(
     State(photo_repo): State<PhotoRepository>,
     Path(category_id): Path<i32>,
-    // user: User,
+    user: User,
     Json(request): Json<AddPhotoToCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     match photo_repo
@@ -85,12 +84,12 @@ pub async fn get_categories(
     }
 }
 
-#[tracing::instrument(name = "Get Category", skip(photo_repository))]
+#[tracing::instrument(name = "Get Category", skip(app))]
 pub async fn categories_by_id(
-    State(photo_repository): State<PhotoRepository>,
+    State(app): State<AppState>,
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    match photo_repository.get_category(id).await {
+    match app.repo.get_category(id).await {
         Ok(resp) => {
             info!("Category retrieved successfully");
             Ok((StatusCode::OK, Json(CategoryDisplayModel::from(resp))))
@@ -108,7 +107,7 @@ pub async fn categories_by_id(
 #[tracing::instrument(name = "add category", skip(photo_repository))]
 pub async fn post_category(
     State(photo_repository): State<PhotoRepository>,
-    // user: User,
+    user: User,
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     let category: CategoryViewModel = photo_repository
@@ -126,19 +125,18 @@ pub async fn post_category(
     Ok((StatusCode::CREATED, response_headers, Json(category)))
 }
 
-#[tracing::instrument(name = "Delete Category", skip(photo_repository))]
+#[tracing::instrument(name = "Delete Category", skip(app))]
 pub async fn delete_category(
-    State(photo_repository): State<PhotoRepository>,
-    // _user: User,
+    State(app): State<AppState>,
+    _user: User,
     Path(id): Path<i32>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
-    // TODO: verify a row was deleted
     sqlx::query!(
         r#" DELETE FROM categories
             WHERE id = $1 "#,
         id
     )
-    .execute(&*photo_repository.db_pool)
+    .execute(&*app.repo.db_pool)
     .await
     .unwrap();
 

@@ -1,64 +1,9 @@
-[package]
-name = "api"
-authors = ["H. Casten <huntercasten@icloud.com>"]
-version = "0.2.0"
-edition = "2021"
-
+[workspace]
+members = ["api"]
+resolver = "2"
 
 [profile.release]
-# Do not perform backtrace for panic on release builds.
 panic = 'abort'
-# Perform optimizations on all codegen units.
 codegen-units = 1
-# Optimize for size.
 opt-level = 's' # or 'z' to optimize "aggressively" for size
-# Enable link time optimization.
 lto = true
-
-[profile.dev.package.sqlx-macros]
-opt-level = 3
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-anyhow = "1.0.75"
-async-trait = "0.1.73"
-aws-config = "0.56.1"
-aws-sdk-s3 = "0.29.0"
-chrono = { version = "0.4.28", features = ["serde"] }
-futures = "0.3"
-hyper = { version = "0.14.27", features = ["full"] }
-
-shuttle-axum = "0.34.0"
-shuttle-runtime = "0.34.0"
-shuttle-shared-db = { version = "0.34.0", features = ["postgres"] }
-# jsonwebtoken = "8"
-mockall = "0.11"
-serde_json = { version = "1.0.105" }
-serde = { version = "1.0.188", features = ["derive"] }
-tokio = { version = "1.32.0", features = ["full"] }
-async-session = "3.0.0"
-tokio-util = { version = "0.7", features = ["io"] }
-tower = { version = "0.4", features = ["util", "timeout"] }
-tower-http = { version = "0.4.3", features = [
-    "add-extension",
-    "trace",
-    "cors",
-    "fs",
-] }
-tracing = "0.1"
-tracing-bunyan-formatter = "0.3.9"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-utoipa-swagger-ui = { version = "4", features = ["axum"] }
-oauth2 = "4.4"
-reqwest = { version = "0.11.20", features = ["json"] }
-redis = { version = "0.23.2", features = ["tokio-comp"] }
-config = { version = "0.13", default-features = false, features = ["yaml"] }
-
-[dependencies.axum]
-version = "0.6.20"
-features = ["headers", "json", "multipart", "tracing"]
-
-[dependencies.sqlx]
-version = "0.7.1"
-features = ["postgres", "runtime-tokio-rustls", "macros", "chrono", "uuid"]
