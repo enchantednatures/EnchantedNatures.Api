@@ -26,9 +26,9 @@ async-trait = "0.1.73"
 chrono = { version = "0.4.28", features = ["serde"] }
 hyper = { version = "0.14.27", features = ["full"] }
 
-shuttle-axum = "0.35"
-shuttle-runtime = "0.35"
-shuttle-shared-db = { version = "0.35", features = ["postgres"] }
+shuttle-axum = "0.34.0"
+shuttle-runtime = "0.34.0"
+shuttle-shared-db = { version = "0.34.0", features = ["postgres"] }
 # jsonwebtoken = "8"
 serde_json = { version = "1.0.105" }
 serde = { version = "1.0.188", features = ["derive"] }
@@ -44,7 +44,7 @@ tower-http = { version = "0.4.3", features = [
 ] }
 tracing = "0.1"
 tracing-bunyan-formatter = "0.3.9"
-# tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 utoipa-swagger-ui = { version = "4", features = ["axum"] }
 reqwest = { version = "0.11.20", features = ["json"] }
 redis = { version = "0.23.2", features = ["tokio-comp"] }
