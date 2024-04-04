@@ -1,4 +1,5 @@
-use crate::auth::User;
+// use crate::auth::User;
+use crate::database::PhotoRepo;
 
 use crate::database::PhotoRepository;
 use crate::models::CategoryDisplayModel;
@@ -22,12 +23,13 @@ pub fn categories_router() -> Router<AppState> {
     use axum::routing::get;
     use axum::routing::post;
     Router::new()
-        .route("/categories", get(get_categories).post(post_category))
+        .route("/categories", get(get_categories)//.post(post_category)
+        )
         .route(
             "/categories/:id",
-            get(categories_by_id).delete(delete_category),
+            get(categories_by_id)//.delete(delete_category),
         )
-        .route("/categories/:id/photos", post(add_photo_to_category))
+        //.route("/categories/:id/photos", post(add_photo_to_category))
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -45,7 +47,7 @@ pub struct CreateCategoryRequest {
 pub async fn add_photo_to_category(
     State(photo_repo): State<PhotoRepository>,
     Path(category_id): Path<i32>,
-    user: User,
+    // user: User,
     Json(request): Json<AddPhotoToCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     match photo_repo
@@ -106,8 +108,8 @@ pub async fn categories_by_id(
 
 #[tracing::instrument(name = "add category", skip(photo_repository))]
 pub async fn post_category(
-    State(photo_repository): State<PhotoRepository>,
-    user: User,
+    State(app): State<AppState>,
+    // user: User,
     Json(payload): Json<CreateCategoryRequest>,
 ) -> response::Result<impl IntoResponse, (StatusCode, String)> {
     let category: CategoryViewModel = photo_repository
