@@ -30,7 +30,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 utoipa-swagger-ui = { version = "4", features = ["axum"] }
 oauth2 = "4.4"
 reqwest = { version = "0.11.20", features = ["json"] }
-redis = { version = "0.23.2", features = ["tokio-comp"] }
+redis = { version = "0.25.3", features = ["tokio-comp"] }
 config = { version = "0.13", default-features = false, features = ["yaml"] }
 
 [dependencies.axum]
