@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.81"
-async-trait = "0.1.73"
+async-trait = "0.1.80"
 aws-config = "0.56.1"
 aws-sdk-s3 = "0.29.0"
 chrono = { version = "0.4.33", features = ["serde"] }
