@@ -2,11 +2,7 @@
 
 use tower_http::trace::TraceLayer;
 
-use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::EnvFilter;
-use tracing_subscriber::Registry;
-use utoipa_swagger_ui::{Config, SwaggerUi};
+use utoipa_swagger_ui::{SwaggerUi};
 
 use axum::error_handling::HandleErrorLayer;
 use axum::extract::MatchedPath;

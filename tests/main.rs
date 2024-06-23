@@ -1,4 +1,3 @@
-use anyhow::Result;
 use api::auth::create_oauth_client;
 use api::configuration::Settings;
 use api::connect_database;
@@ -8,47 +7,20 @@ use api::sessions::SessionManager;
 use api::{app, check_env, setup_logging};
 use aws_sdk_s3::config::Region;
 
-use axum::Server;
-use serde_json::json;
-use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
-use std::net::SocketAddr;
-use tower_http::trace::TraceLayer;
 
-use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::EnvFilter;
-use tracing_subscriber::Registry;
 use utoipa_swagger_ui::{Config, SwaggerUi};
 
-use api::auth::{default_auth, login_authorized};
 
-use api::routes::health::health_check;
 
-use api::routes::categories_router;
-use api::routes::photos::photo_router;
-use axum::error_handling::HandleErrorLayer;
-use axum::extract::MatchedPath;
-use axum::http::Method;
 use axum::http::StatusCode;
-use axum::response::Response;
-use axum::routing::get;
-use axum::Router;
-use hyper::body::Bytes;
-use hyper::{HeaderMap, Request};
+use hyper::{Request};
 
 use axum::{
     body::Body,
     http::{self},
 };
-use std::time::Duration;
-use tokio::time::error::Elapsed;
-use tower::ServiceBuilder;
-use tower::{BoxError, ServiceExt};
-use tower_http::classify::ServerErrorsFailureClass;
-use tower_http::cors::{Any, CorsLayer};
-use tower_http::services::ServeFile;
-use tracing::{info_span, Span};
+use tower::{ServiceExt};
 
 #[tokio::test]
 async fn default() {
@@ -76,6 +48,7 @@ async fn default() {
     let swagger_ui = SwaggerUi::new("/swagger-ui").config(swagger_config);
     let app = app(swagger_ui, app_state);
     let request = Request::builder()
+        .uri("/health_check")
         .method(http::Method::GET)
         .body(Body::empty())
         .unwrap();

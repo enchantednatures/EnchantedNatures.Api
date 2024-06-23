@@ -1,6 +1,5 @@
 #![warn(dead_code)]
 
-use anyhow::Result;
 use api::app;
 use api::auth::create_oauth_client;
 use api::check_env;
@@ -13,42 +12,16 @@ use api::setup_logging;
 use aws_sdk_s3::config::Region;
 
 use axum::Server;
-use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use std::net::SocketAddr;
 use tower_http::trace::TraceLayer;
 
-use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::EnvFilter;
-use tracing_subscriber::Registry;
 use utoipa_swagger_ui::{Config, SwaggerUi};
 
-use api::auth::{default_auth, login_authorized};
 
-use api::routes::health::health_check;
 
-use api::routes::categories_router;
-use api::routes::photos::photo_router;
-use axum::error_handling::HandleErrorLayer;
-use axum::extract::MatchedPath;
-use axum::http::Method;
-use axum::http::StatusCode;
-use axum::response::Response;
-use axum::routing::get;
-use axum::Router;
-use hyper::body::Bytes;
-use hyper::{HeaderMap, Request};
 
-use std::time::Duration;
-use tokio::time::error::Elapsed;
-use tower::BoxError;
-use tower::ServiceBuilder;
-use tower_http::classify::ServerErrorsFailureClass;
-use tower_http::cors::{Any, CorsLayer};
-use tracing::{info_span, Span};
 
-use tower_http::services::ServeFile;
 
 #[tokio::main(worker_threads = 16)]
 async fn main() {
