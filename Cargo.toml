@@ -40,7 +40,7 @@ redis = { version = "0.25.3", features = ["tokio-comp"] }
 config = { version = "0.13", default-features = false, features = ["yaml"] }
 
 [dependencies.axum]
-version = "0.6.20"
+version = "0.7.0"
 features = ["headers", "json", "multipart", "tracing"]
 
 [dependencies.sqlx]
