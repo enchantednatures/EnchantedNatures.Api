@@ -21,3 +21,4 @@ configuration/
 
 /ijhttp/
 config/local.yaml
+benchmarks/node_modules/
