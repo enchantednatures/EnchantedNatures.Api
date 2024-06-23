@@ -91,10 +91,6 @@ pub async fn put_photo(
     Ok((StatusCode::OK, Json(photo)))
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub enum GetPhotosResponses {
-    Success(Vec<Photo>),
-}
 
 #[derive(Deserialize, Debug)]
 pub struct CategoryQuery {
