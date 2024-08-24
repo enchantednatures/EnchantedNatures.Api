@@ -44,5 +44,5 @@ version = "0.6.20"
 features = ["headers", "json", "multipart", "tracing"]
 
 [dependencies.sqlx]
-version = "0.7.3"
+version = "0.8.1"
 features = ["postgres", "runtime-tokio-rustls", "macros", "chrono", "uuid"]
