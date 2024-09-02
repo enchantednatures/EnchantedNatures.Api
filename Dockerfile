@@ -1,5 +1,5 @@
 # Use the official Rust image as the base
-FROM rust:1.80.1 as build
+FROM rust:1.81.0 as build
 
 
 # Create a new empty shell project
