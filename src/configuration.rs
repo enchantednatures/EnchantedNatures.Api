@@ -1,5 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+use sqlx::postgres::{PgConnectOptions, PgSslMode};
 
 #[derive(Debug, Deserialize)]
 pub struct AuthSettings {
@@ -13,11 +14,35 @@ pub struct AuthSettings {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct DatabaseSettings {
+    pub host: String,
+    pub port: u16,
+    pub database: String,
+    pub user: String,
+    pub application_name: String,
+}
+
+impl From<DatabaseSettings> for PgConnectOptions {
+    fn from(value: DatabaseSettings) -> Self {
+        PgConnectOptions::new()
+            .host(value.host.as_ref())
+            .port(value.port)
+            .database(value.database.as_ref())
+            .username(value.user.as_ref())
+            .application_name(value.application_name.as_ref())
+            .ssl_mode(PgSslMode::VerifyCa)
+            .ssl_root_cert("./certs/ca.crt")
+            .ssl_client_key("./certs/client.key")
+            .ssl_client_cert("./certs/client.crt")
+    }
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Settings {
-    pub database_url: String,
-    pub aws_endpoint_url: String,
-    pub aws_region: String,
-    pub aws_bucket_name: String,
+    pub database_settings: DatabaseSettings,
+    // pub aws_endpoint_url: String,
+    // pub aws_region: String,
+    // pub aws_bucket_name: String,
     pub auth_settings: AuthSettings,
     pub app_settings: ApplicationSettings,
     pub redis_url: String,

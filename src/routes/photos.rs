@@ -16,7 +16,7 @@ use tracing::info;
 
 pub fn photo_router() -> Router<AppState> {
     Router::new()
-        .route("/photos", get(get_photos).post(upload_photo))
+        .route("/photos", get(get_photos))
         .route(
             "/photos/:id",
             get(get_photo).delete(delete_photo).put(put_photo),
@@ -273,106 +273,106 @@ pub async fn store_photo_details(
     Ok(())
 }
 
-#[tracing::instrument(name = "Save file", skip(app, multipart))]
-pub async fn upload_photo(
-    Path(file_name): Path<String>,
-    State(app): State<AppState>,
-    user: User,
-    mut multipart: Multipart,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
-    tracing::info!("Uploading file for user: {:?}", user);
-    let mut checksum: Option<String> = None;
+// #[tracing::instrument(name = "Save file", skip(app, multipart))]
+// pub async fn upload_photo(
+//     Path(file_name): Path<String>,
+//     State(app): State<AppState>,
+//     user: User,
+//     mut multipart: Multipart,
+// ) -> Result<impl IntoResponse, (StatusCode, String)> {
+//     tracing::info!("Uploading file for user: {:?}", user);
+//     let mut checksum: Option<String> = None;
 
-    let mut title: Option<String> = None;
-    let mut filename: Option<String> = None;
-    let mut location_taken: Option<String> = None;
-    let mut date_taken: Option<String> = None;
+//     let mut title: Option<String> = None;
+//     let mut filename: Option<String> = None;
+//     let mut location_taken: Option<String> = None;
+//     let mut date_taken: Option<String> = None;
 
-    while let Some(mut field) = multipart.next_field().await.unwrap() {
-        let content_type = field.content_type();
-        let name = field.name().unwrap();
-        match name {
-            "file" => {
-                filename = Some(field.file_name().unwrap().to_string());
+//     while let Some(mut field) = multipart.next_field().await.unwrap() {
+//         let content_type = field.content_type();
+//         let name = field.name().unwrap();
+//         match name {
+//             "file" => {
+//                 filename = Some(field.file_name().unwrap().to_string());
 
-                let mut buffer = Vec::new();
+//                 let mut buffer = Vec::new();
 
-                while let Some(chunk) = field
-                    .chunk()
-                    .await
-                    .map_err(|err| (StatusCode::BAD_REQUEST, err.to_string()))?
-                {
-                    info!("received {} bytes", chunk.len());
-                    buffer.extend_from_slice(&chunk);
-                }
+//                 while let Some(chunk) = field
+//                     .chunk()
+//                     .await
+//                     .map_err(|err| (StatusCode::BAD_REQUEST, err.to_string()))?
+//                 {
+//                     info!("received {} bytes", chunk.len());
+//                     buffer.extend_from_slice(&chunk);
+//                 }
 
-                tracing::info!("Uploading photo {:?}", &filename);
+//                 tracing::info!("Uploading photo {:?}", &filename);
 
-                let buffer_len = &buffer.len();
-                let result = app.upload_photo(buffer, &file_name).await.unwrap();
-                tracing::info!("Uploaded file: {:?} with size: {}", &filename, buffer_len);
-                checksum = result.checksum_crc32;
-            }
-            "title" => {
-                title = Some(field.text().await.unwrap());
-                tracing::info!("Uploaded title: {:?}", &title);
-            }
-            "location_taken" => {
-                location_taken = Some(field.text().await.unwrap());
-                tracing::info!("Uploaded location_taken: {:?}", &location_taken);
-            }
-            "date_taken" => {
-                date_taken = Some(field.text().await.unwrap());
-                tracing::info!("Uploaded date_taken: {:?}", &date_taken);
-            }
-            _ => {
-                tracing::info!(
-                    "Skipping field: {:?} with content type: {:?}",
-                    name,
-                    content_type
-                );
-            }
-        }
-    }
+//                 let buffer_len = &buffer.len();
+//                 let result = app.upload_photo(buffer, &file_name).await.unwrap();
+//                 tracing::info!("Uploaded file: {:?} with size: {}", &filename, buffer_len);
+//                 checksum = result.checksum_crc32;
+//             }
+//             "title" => {
+//                 title = Some(field.text().await.unwrap());
+//                 tracing::info!("Uploaded title: {:?}", &title);
+//             }
+//             "location_taken" => {
+//                 location_taken = Some(field.text().await.unwrap());
+//                 tracing::info!("Uploaded location_taken: {:?}", &location_taken);
+//             }
+//             "date_taken" => {
+//                 date_taken = Some(field.text().await.unwrap());
+//                 tracing::info!("Uploaded date_taken: {:?}", &date_taken);
+//             }
+//             _ => {
+//                 tracing::info!(
+//                     "Skipping field: {:?} with content type: {:?}",
+//                     name,
+//                     content_type
+//                 );
+//             }
+//         }
+//     }
 
-    let photo_create_request_builder = PhotoCreateRequestBuilder::new()
-        .title(title.unwrap())
-        .filename(filename.unwrap())
-        .location_taken(location_taken.unwrap())
-        .date_taken(date_taken.unwrap());
+//     let photo_create_request_builder = PhotoCreateRequestBuilder::new()
+//         .title(title.unwrap())
+//         .filename(filename.unwrap())
+//         .location_taken(location_taken.unwrap())
+//         .date_taken(date_taken.unwrap());
 
-    match checksum {
-        Some(checksum_crc32) => {
-            let photo_create_request = photo_create_request_builder.build();
-            match photo_create_request {
-                Ok(photo_create_request) => {
-                    store_photo_details(app.repo.clone(), user, photo_create_request)
-                        .await
-                        .unwrap();
-                    Ok((StatusCode::CREATED, Json(json!({"key": checksum_crc32}))))
-                }
-                Err(e) => {
-                    tracing::error!("Failed to upload file {}, {:?}", file_name, e);
-                    Err((
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        "Failed to upload file".into(),
-                    ))
-                }
-            }
-        }
-        None => {
-            tracing::error!("Failed to upload file {}", file_name);
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Failed to upload file".into(),
-            ))
-        }
-    }
-}
+//     match checksum {
+//         Some(checksum_crc32) => {
+//             let photo_create_request = photo_create_request_builder.build();
+//             match photo_create_request {
+//                 Ok(photo_create_request) => {
+//                     store_photo_details(app.repo.clone(), user, photo_create_request)
+//                         .await
+//                         .unwrap();
+//                     Ok((StatusCode::CREATED, Json(json!({"key": checksum_crc32}))))
+//                 }
+//                 Err(e) => {
+//                     tracing::error!("Failed to upload file {}, {:?}", file_name, e);
+//                     Err((
+//                         StatusCode::INTERNAL_SERVER_ERROR,
+//                         "Failed to upload file".into(),
+//                     ))
+//                 }
+//             }
+//         }
+//         None => {
+//             tracing::error!("Failed to upload file {}", file_name);
+//             Err((
+//                 StatusCode::INTERNAL_SERVER_ERROR,
+//                 "Failed to upload file".into(),
+//             ))
+//         }
+//     }
+// }
 
-pub async fn add_photo_cloudflare_resource(
-    State(_photo_repo): State<PhotoRepository>,
-    Path(_photo_id): Path<i32>,
-) {
-    todo!()
-}
+// pub async fn add_photo_cloudflare_resource(
+//     State(_photo_repo): State<PhotoRepository>,
+//     Path(_photo_id): Path<i32>,
+// ) {
+//     todo!()
+// }

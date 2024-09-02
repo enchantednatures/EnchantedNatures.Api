@@ -1,6 +1,9 @@
 use anyhow::{Context, Result};
 
 use async_session::Session;
+use axum_extra::typed_header::TypedHeaderRejectionReason;
+use axum_extra::{headers, TypedHeader};
+use hyper::HeaderMap;
 use oauth2::{
     basic::BasicClient, AuthUrl, ClientId, ClientSecret, CsrfToken, RedirectUrl, Scope, TokenUrl,
 };
@@ -9,7 +12,6 @@ use oauth2::{IntrospectionUrl, RevocationUrl};
 use crate::configuration::AuthSettings;
 use crate::sessions::SessionManager;
 use axum::extract::{Query, State};
-use axum::headers::HeaderMap;
 use axum::http::header::SET_COOKIE;
 use axum::response::{IntoResponse, Redirect, Response};
 
@@ -17,8 +19,8 @@ use axum::http::header;
 use axum::http::request::Parts;
 use axum::{
     async_trait,
-    extract::{rejection::TypedHeaderRejectionReason, FromRef, FromRequestParts, TypedHeader},
-    headers, RequestPartsExt,
+    extract::{FromRef, FromRequestParts},
+    RequestPartsExt,
 };
 use serde::Deserialize;
 

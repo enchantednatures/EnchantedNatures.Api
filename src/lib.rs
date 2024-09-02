@@ -9,7 +9,8 @@ pub mod routes;
 pub mod sessions;
 use anyhow::Result;
 pub use app::app;
-use sqlx::postgres::PgPoolOptions;
+use configuration::DatabaseSettings;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgSslMode};
 use sqlx::PgPool;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
@@ -25,17 +26,18 @@ pub fn setup_logging() {
     tracing::subscriber::set_global_default(subscriber).unwrap();
 }
 
-pub async fn connect_database(database_url: &str) -> PgPool {
+pub async fn connect_database(settings: DatabaseSettings) -> PgPool {
+    let options = settings.into();
     PgPoolOptions::new()
         .max_connections(5)
-        .connect(database_url)
+        .connect_with(options)
         .await
         .expect("can't connect to database")
 }
 
-pub fn check_env() -> Result<()> {
-    let _access_key_id = std::env::var("AWS_ACCESS_KEY_ID").expect("AWS_ACCESS_KEY_ID must be set");
-    let _aws_secret_key =
-        std::env::var("AWS_SECRET_ACCESS_KEY").expect("AWS_SECRET_ACCESS_KEY must be set");
-    Ok(())
-}
+// pub fn check_env() -> Result<()> {
+//     let _access_key_id = std::env::var("AWS_ACCESS_KEY_ID").expect("AWS_ACCESS_KEY_ID must be set");
+//     let _aws_secret_key =
+//         std::env::var("AWS_SECRET_ACCESS_KEY").expect("AWS_SECRET_ACCESS_KEY must be set");
+//     Ok(())
+// }

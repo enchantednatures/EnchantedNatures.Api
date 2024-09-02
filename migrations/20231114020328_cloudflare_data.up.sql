@@ -1,4 +1,3 @@
-
 CREATE TEMPORARY TABLE cloudflare_data(
     filename varchar(255) not null,
     resource_id   uuid not null
