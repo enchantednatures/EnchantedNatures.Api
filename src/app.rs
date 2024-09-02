@@ -2,7 +2,7 @@
 
 use tower_http::trace::TraceLayer;
 
-use utoipa_swagger_ui::{SwaggerUi};
+use utoipa_swagger_ui::SwaggerUi;
 
 use axum::error_handling::HandleErrorLayer;
 use axum::extract::MatchedPath;

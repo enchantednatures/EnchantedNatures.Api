@@ -17,7 +17,7 @@ export const options = {
 };
 
 export default function (data) {
-  let get_all_photos = http.get("http://localhost:6969/api/v0/photos/1");
+  let get_all_photos = http.get("https://api.enchantednatures.com/api/v0/photos/1");
   check(get_all_photos, {
     "get photo status": (r) => r.status === 200,
   });
