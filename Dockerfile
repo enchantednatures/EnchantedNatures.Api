@@ -1,39 +1,36 @@
-# Use the official Rust image as the base
-FROM rust:1.81.0 as build
+FROM rust:1-slim-bullseye as build
 
+RUN apt-get update && apt-get install -y build-essential curl openssl ca-certificates pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 
-# Create a new empty shell project
+WORKDIR /usr/app
 
-WORKDIR /enchantednatures
-RUN USER=root cargo new --bin api
-# WORKDIR /enchantednatures/api
+RUN USER=root cargo init api
 
-# Copy your project's Cargo.toml and Cargo.lock
+WORKDIR /usr/app/api
+
 COPY ./Cargo.toml ./Cargo.toml
-COPY ./api/Cargo.toml ./api/Cargo.toml
 
 # Cache dependencies
 RUN cargo build --release
-RUN rm api/src/*.rs
+RUN rm src/*.rs
 
 # Copy your source code
 
-COPY ./.sqlx ./.sqlx
-COPY ./api/src ./api/src
-COPY ./api/migrations ./api/migrations
-
+COPY . . 
 # Build the release binary
 RUN rm ./target/release/deps/api*
 ENV SQLX_OFFLINE true
 ENV RUST_LOG=info,axum::rejection=trace 
 
-RUN cargo install --path api
-# Start a new stage for the runtime image
-FROM debian:bullseye-slim as runtime
+RUN cargo install --path .
+
+
+FROM debian:bullseye-slim AS runtime
 
 # Install necessary runtime libraries for PostgreSQL
+
 RUN apt-get update && \
-    apt-get install -y libpq-dev ca-certificates && \
+    apt-get install -y libpq-dev libssl1.1 openssl ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -49,4 +46,3 @@ COPY ./config ./config
 ENV ENVIRONMENT production
 ENV RUST_LOG=info,axum::rejection=trace 
 CMD ["api"]
-

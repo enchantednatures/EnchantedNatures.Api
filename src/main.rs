@@ -16,7 +16,7 @@ use tower_http::trace::TraceLayer;
 
 use utoipa_swagger_ui::{Config, SwaggerUi};
 
-#[tokio::main(worker_threads = 16)]
+#[tokio::main]
 async fn main() {
     setup_logging();
     // check_env().expect("Environment Variable must be set");
