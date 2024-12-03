@@ -31,7 +31,7 @@ tower-http = { version = "0.5", features = [
 tracing = "0.1"
 tracing-bunyan-formatter = "0.3.9"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-utoipa-swagger-ui = { version = "7", features = ["axum"] }
+utoipa-swagger-ui = { version = "8", features = ["axum"] }
 oauth2 = "4.4"
 reqwest = { version = "0.12", features = ["json"] }
 redis = { version = "0.26", features = ["tokio-comp"] }
