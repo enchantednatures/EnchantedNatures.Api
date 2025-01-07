@@ -39,7 +39,7 @@ config = { version = "0.14", default-features = false, features = ["yaml"] }
 axum-extra = { version = "0.9", features = [ "typed-header"] }
 
 [dependencies.axum]
-version = "0.7"
+version = "0.8"
 features = ["json", "multipart", "tracing"]
 
 [dependencies.sqlx]
